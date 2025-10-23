@@ -294,7 +294,7 @@ a:focus {
 .site-footer {
 	background: #1f1f1f;
 	color: var(--cgt-white);
-	padding: 3rem 0 1.5rem;
+	padding: 2.5rem 0 1.25rem;
 }
 
 .footer-grid {
@@ -334,7 +334,7 @@ a:focus {
 }
 
 .footer-title {
-	margin-top: 0;
+	margin: 0 0 0.5rem;
 	font-size: 1.1rem;
 }
 
@@ -354,7 +354,7 @@ a:focus {
 
 .footer-bottom {
 	text-align: center;
-	margin-top: 2rem;
+	margin-top: 1.5rem;
 	font-size: 0.85rem;
 	color: rgba(255, 255, 255, 0.8);
 }
@@ -362,8 +362,8 @@ a:focus {
 .page-header,
 .archive-header {
 	display: grid;
-	gap: 0.75rem;
-	margin-bottom: 2rem;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
 }
 
 .header-actions {
@@ -376,7 +376,7 @@ a:focus {
 .home-hero {
 	background: var(--cgt-red);
 	color: var(--cgt-white);
-	padding: 3.25rem 0 4rem;
+	padding: 2.5rem 0 3rem;
 }
 
 .home-hero__inner {
@@ -408,7 +408,7 @@ a:focus {
 	display: flex;
 	gap: 1rem;
 	flex-wrap: wrap;
-	margin-top: 1.5rem;
+	margin-top: 1rem;
 }
 
 .home-hero__meta {
@@ -426,7 +426,7 @@ a:focus {
 }
 
 .home-section {
-	padding: 3rem 0;
+	padding: 2rem 0;
 }
 
 .home-section--shade {
@@ -435,8 +435,8 @@ a:focus {
 
 .home-section__header {
 	display: grid;
-	gap: 10px;
-	margin-bottom: 1.6rem;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
 }
 
 .section-subtitle-smaller,
@@ -573,7 +573,7 @@ a:focus {
 }
 
 .home-section__footer {
-	margin-top: 2rem;
+	margin-top: 1.5rem;
 }
 
 .home-section__footer--actions {
@@ -661,21 +661,20 @@ a:focus {
 
 .home-nav {
 	background: rgba(229, 231, 235, 0.4);
-	padding: 2.5rem 0;
+	padding: 2rem 0;
 }
 
 .tract-branches-info {
 	background: rgba(229, 231, 235, 0.3);
-	padding: 1.8rem;
+	padding: 1.5rem;
 	border-radius: var(--radius);
-	margin-bottom: 2rem;
+	margin-bottom: 1.5rem;
 	box-shadow: var(--shadow);
 }
 
 .tract-branches-info h2 {
-	margin-top: 0;
+	margin: 0 0 0.5rem;
 	font-size: 1.6rem;
-	margin-bottom: 0.75rem;
 }
 
 .tract-branches-grid {
@@ -765,13 +764,13 @@ a:focus {
 	display: grid;
 	gap: var(--gap);
 	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-	margin-block: 2rem;
+	margin-block: 1.5rem;
 }
 
 .single-header {
 	display: grid;
-	gap: 1rem;
-	margin-bottom: 2rem;
+	gap: 0.5rem;
+	margin-bottom: 1.5rem;
 }
 
 .single-content {
@@ -780,9 +779,9 @@ a:focus {
 }
 
 .single-footer {
-	margin-top: 2rem;
+	margin-top: 1.5rem;
 	display: grid;
-	gap: 1rem;
+	gap: 0.75rem;
 }
 
 .question-list {
@@ -815,7 +814,7 @@ a:focus {
 	display: flex;
 	gap: 0.5rem;
 	flex-wrap: wrap;
-	margin-top: 2rem;
+	margin-top: 1.5rem;
 }
 
 .pagination a,
@@ -850,7 +849,7 @@ a:focus {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1rem;
-	margin-top: 1.5rem;
+	margin-top: 1rem;
 }
 
 .home-contact {
@@ -892,7 +891,7 @@ a:focus {
 
 .home-section--cta {
 	background: rgba(208, 0, 0, 0.05);
-	padding: 3.5rem 0;
+	padding: 2.5rem 0;
 }
 
 .home-cta__aside .placeholder {
@@ -901,7 +900,7 @@ a:focus {
 
 .home-section--publish {
 	background: var(--cgt-white);
-	padding: 3rem 0;
+	padding: 2rem 0;
 }
 
 .home-submit {
@@ -1017,17 +1016,17 @@ a:focus {
 
 .contact-page--stacked .contact-sections {
 	display: grid;
-	gap: 2.5rem;
-	padding: 3rem 0 4rem;
+	gap: 2rem;
+	padding: 2rem 0 3rem;
 }
 
 .contact-page--stacked .contact-block {
 	background: var(--cgt-white);
 	border-radius: var(--radius);
-	padding: 2.5rem;
+	padding: 2rem;
 	box-shadow: var(--shadow);
 	display: grid;
-	gap: 1rem;
+	gap: 0.75rem;
 }
 
 .contact-page--stacked .contact-block h2 {
@@ -1126,9 +1125,9 @@ a:focus {
 }
 
 .member-dashboard__header {
-	padding: 2.5rem 0 1.5rem;
+	padding: 2rem 0 1rem;
 	display: grid;
-	gap: 0.75rem;
+	gap: 0.5rem;
 }
 
 .member-dashboard__header h1 {
@@ -1170,7 +1169,7 @@ a:focus {
 }
 
 .member-panel h2 {
-	margin: 0 0 6px;
+	margin: 0 0 0.5rem;
 	font-size: 1.6rem;
 	line-height: 1.3;
 }
@@ -1318,11 +1317,11 @@ a:focus {
 }
 
 .member-notice {
-	margin: 2rem 0 3rem;
+	margin: 1.5rem 0 2rem;
 }
 
 .archive-actualites .page-header {
-	padding: 3rem 0 1.5rem;
+	padding: 2rem 0 1rem;
 	text-align: center;
 }
 
@@ -1385,11 +1384,11 @@ a:focus {
 }
 
 .library-page {
-	padding: 3rem 0;
+	padding: 2rem 0;
 }
 
 .library-page .page-header {
-	margin-bottom: 2.5rem;
+	margin-bottom: 1.5rem;
 }
 
 .library-filters {
@@ -1470,11 +1469,11 @@ a:focus {
 }
 
 .legal-page {
-	padding: 3rem 0;
+	padding: 2rem 0;
 }
 
 .legal-page .page-header {
-	margin-bottom: 2.5rem;
+	margin-bottom: 1.5rem;
 	text-align: left;
 }
 
@@ -1491,13 +1490,13 @@ a:focus {
 }
 
 .legal-content h2 {
-	margin: 0 0 8px;
+	margin: 0 0 0.5rem;
 	font-size: 1.35rem;
 }
 
 .legal-content h3 {
 	font-size: 1.05rem;
-	margin: 0.75rem 0 0.35rem;
+	margin: 0.5rem 0 0.25rem;
 }
 
 .legal-content ul {
@@ -1511,7 +1510,7 @@ a:focus {
 }
 
 .event-page {
-	padding: 3rem 0;
+	padding: 2rem 0;
 }
 
 .event-card {
@@ -1678,7 +1677,7 @@ a:focus {
 
 .page-hero {
 	background: rgba(208, 0, 0, 0.05);
-	padding: 3rem 0 2rem;
+	padding: 2rem 0 1.5rem;
 	border-bottom: 1px solid rgba(17, 17, 17, 0.08);
 }
 
@@ -1694,9 +1693,9 @@ a:focus {
 }
 
 .page-content {
-	padding: 2.5rem 0 3rem;
+	padding: 1.5rem 0 2rem;
 	display: grid;
-	gap: 1.5rem;
+	gap: 1rem;
 }
 
 .site-main {
@@ -1860,7 +1859,7 @@ button:focus {
 }
 
 .federation-section {
-	padding: 3.2rem 0;
+	padding: 2rem 0;
 }
 
 .federation-section--story {
@@ -1891,7 +1890,7 @@ button:focus {
 .federation-section--actions h2,
 .federation-section--story h2,
 .federation-section--cta h2 {
-	margin: 0 0 0.75rem;
+	margin: 0 0 0.5rem;
 	font-size: clamp(1.6rem, 4vw, 2rem);
 }
 
