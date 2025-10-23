@@ -1,0 +1,770 @@
+/**
+ * Page Proposer un Article - Design UX/UI Moderne
+ * Multi-step Form avec validation et animations
+ */
+
+/* ================================
+   VARIABLES
+   ================================ */
+:root {
+    --cgt-red: #d00000;
+    --cgt-red-dark: #b00000;
+    --cgt-red-light: #ff0000;
+    --color-white: #ffffff;
+    --color-black: #111111;
+    --color-gray: #e5e7eb;
+    --color-gray-dark: #6b7280;
+    --color-gray-light: #f3f4f6;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --radius: 16px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+    --transition: 0.3s ease;
+}
+
+/* ================================
+   CONTAINER PRINCIPAL
+   ================================ */
+.submit-article-page {
+    min-height: calc(100vh - 200px);
+    padding: 2rem 0 3rem;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e5e7eb 100%);
+}
+
+.submit-article-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ================================
+   HEADER
+   ================================ */
+.submit-article-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.submit-article-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-black);
+    margin: 0 0 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.submit-article-header h1 .icon {
+    font-size: 2.5rem;
+}
+
+.submit-article-header p {
+    font-size: 1.125rem;
+    color: var(--color-gray-dark);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ================================
+   BARRE DE PROGRESSION
+   ================================ */
+.progress-bar-container {
+    background: var(--color-white);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--color-gray);
+    z-index: 0;
+}
+
+.progress-line {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    height: 3px;
+    background: var(--cgt-red);
+    transition: width 0.5s ease;
+    z-index: 1;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+
+.progress-step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-white);
+    border: 3px solid var(--color-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-gray-dark);
+    transition: all var(--transition);
+}
+
+.progress-step.active .progress-step-circle {
+    background: var(--cgt-red);
+    border-color: var(--cgt-red);
+    color: var(--color-white);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(208, 0, 0, 0.3);
+}
+
+.progress-step.completed .progress-step-circle {
+    background: var(--color-success);
+    border-color: var(--color-success);
+    color: var(--color-white);
+}
+
+.progress-step-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-gray-dark);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.progress-step.active .progress-step-label {
+    color: var(--cgt-red);
+}
+
+.progress-step.completed .progress-step-label {
+    color: var(--color-success);
+}
+
+/* ================================
+   FORMULAIRE PAR ÉTAPES
+   ================================ */
+.cgt-submit-article {
+    background: var(--color-white);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    box-shadow: var(--shadow);
+}
+
+.form-step {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.form-step.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--cgt-red);
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(208, 0, 0, 0.1);
+    color: var(--cgt-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.step-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-black);
+    margin: 0;
+}
+
+.step-description {
+    color: var(--color-gray-dark);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* ================================
+   CHAMPS DE FORMULAIRE
+   ================================ */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--color-black);
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+}
+
+.form-group label .required {
+    color: var(--cgt-red);
+    margin-left: 0.25rem;
+}
+
+.form-group label .hint {
+    font-weight: 400;
+    color: var(--color-gray-dark);
+    font-size: 0.875rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--color-gray);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all var(--transition);
+    background: var(--color-white);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--cgt-red);
+    box-shadow: 0 0 0 3px rgba(208, 0, 0, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--color-gray-dark);
+}
+
+.form-control.error {
+    border-color: var(--color-error);
+}
+
+.form-control.success {
+    border-color: var(--color-success);
+}
+
+textarea.form-control {
+    min-height: 200px;
+    resize: vertical;
+}
+
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+/* Messages d'erreur inline */
+.form-error-message {
+    color: var(--color-error);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.form-group.has-error .form-error-message {
+    display: block;
+}
+
+.form-success-message {
+    color: var(--color-success);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.form-group.has-success .form-success-message {
+    display: block;
+}
+
+/* ================================
+   UPLOAD DE FICHIERS
+   ================================ */
+.file-upload-container {
+    border: 2px dashed var(--color-gray);
+    border-radius: var(--radius-sm);
+    padding: 2rem;
+    text-align: center;
+    transition: all var(--transition);
+    cursor: pointer;
+    background: var(--color-gray-light);
+}
+
+.file-upload-container:hover {
+    border-color: var(--cgt-red);
+    background: rgba(208, 0, 0, 0.02);
+}
+
+.file-upload-container.drag-over {
+    border-color: var(--cgt-red);
+    background: rgba(208, 0, 0, 0.05);
+}
+
+.file-upload-icon {
+    font-size: 3rem;
+    color: var(--color-gray-dark);
+    margin-bottom: 1rem;
+}
+
+.file-upload-text {
+    font-size: 1rem;
+    color: var(--color-black);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.file-upload-hint {
+    font-size: 0.875rem;
+    color: var(--color-gray-dark);
+}
+
+.file-upload-container input[type="file"] {
+    display: none;
+}
+
+.file-preview {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--color-white);
+    border: 2px solid var(--color-success);
+    border-radius: var(--radius-sm);
+    align-items: center;
+    gap: 1rem;
+}
+
+.file-preview.show {
+    display: flex;
+}
+
+.file-preview-icon {
+    font-size: 2rem;
+    color: var(--color-success);
+}
+
+.file-preview-info {
+    flex: 1;
+}
+
+.file-preview-name {
+    font-weight: 600;
+    color: var(--color-black);
+    margin-bottom: 0.25rem;
+}
+
+.file-preview-size {
+    font-size: 0.875rem;
+    color: var(--color-gray-dark);
+}
+
+.file-preview-remove {
+    background: var(--color-error);
+    color: var(--color-white);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all var(--transition);
+}
+
+.file-preview-remove:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+}
+
+/* Image preview */
+.image-preview {
+    display: none;
+    margin-top: 1rem;
+}
+
+.image-preview.show {
+    display: block;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+}
+
+/* ================================
+   CARACTÈRES RESTANTS
+   ================================ */
+.char-counter {
+    text-align: right;
+    font-size: 0.875rem;
+    color: var(--color-gray-dark);
+    margin-top: 0.5rem;
+}
+
+.char-counter.warning {
+    color: var(--color-warning);
+}
+
+.char-counter.error {
+    color: var(--color-error);
+}
+
+/* ================================
+   CHECKBOX CGV
+   ================================ */
+.form-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: var(--color-gray-light);
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--color-gray);
+    transition: all var(--transition);
+}
+
+.form-checkbox:hover {
+    border-color: var(--cgt-red);
+}
+
+.form-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: var(--cgt-red);
+    flex-shrink: 0;
+}
+
+.form-checkbox label {
+    margin: 0;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.form-checkbox .required {
+    color: var(--cgt-red);
+}
+
+/* ================================
+   BOUTONS DE NAVIGATION
+   ================================ */
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--color-gray);
+    gap: 1rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition);
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.btn svg {
+    flex-shrink: 0;
+}
+
+.btn-primary {
+    background: var(--cgt-red);
+    color: var(--color-white);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--cgt-red-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(208, 0, 0, 0.3);
+}
+
+.btn-secondary {
+    background: var(--color-gray);
+    color: var(--color-black);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--color-gray-dark);
+    color: var(--color-white);
+    transform: translateY(-2px);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-back {
+    background: transparent;
+    color: var(--color-gray-dark);
+    padding: 0.5rem 1rem;
+}
+
+.btn-back:hover {
+    color: var(--color-black);
+    transform: none;
+}
+
+/* ================================
+   MESSAGES DE NOTIFICATION
+   ================================ */
+.notice {
+    padding: 1.25rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.notice.success {
+    background: #dcfce7;
+    border: 2px solid var(--color-success);
+    color: #166534;
+}
+
+.notice.error {
+    background: #fee2e2;
+    border: 2px solid var(--color-error);
+    color: #991b1b;
+}
+
+.notice.warning {
+    background: #fef3c7;
+    border: 2px solid var(--color-warning);
+    color: #78350f;
+}
+
+.notice.info {
+    background: #e0f2fe;
+    border: 2px solid #0ea5e9;
+    color: #0c4a6e;
+}
+
+.notice ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.notice li {
+    margin-bottom: 0.5rem;
+}
+
+/* ================================
+   GRILLE RESPONSIVE
+   ================================ */
+.form-row {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+    .form-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-row.col-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+.bounce {
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.shake {
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-10px);
+    }
+    75% {
+        transform: translateX(10px);
+    }
+}
+
+/* ================================
+   RESPONSIVE MOBILE
+   ================================ */
+@media (max-width: 768px) {
+    .submit-article-page {
+        padding: 1.5rem 0 2rem;
+    }
+
+    .submit-article-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+    }
+
+    .progress-bar-container {
+        padding: 1.5rem;
+    }
+
+    .progress-step-label {
+        font-size: 0.75rem;
+    }
+
+    .progress-step-circle {
+        width: 35px;
+        height: 35px;
+        font-size: 0.875rem;
+    }
+
+    .cgt-submit-article {
+        padding: 1.75rem;
+    }
+
+    .step-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .step-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .form-navigation {
+        flex-direction: column-reverse;
+        gap: 0.75rem;
+    }
+
+    .form-navigation .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .submit-article-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .progress-step-label {
+        display: none;
+    }
+
+    .progress-steps {
+        padding: 0 1rem;
+    }
+}
+
+/* ================================
+   HELPER CLASSES
+   ================================ */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 {
+    margin-top: 0.5rem;
+}
+
+.mt-2 {
+    margin-top: 1rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+    margin-bottom: 1rem;
+}
+
+.hidden {
+    display: none;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
