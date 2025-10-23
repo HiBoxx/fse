@@ -215,18 +215,29 @@ function cgt_shortcode_questions() {
 			if ( empty( $question ) ) {
 				$message = __( 'Merci de détailler votre question.', 'cgt' );
 			} else {
+				$current_user = wp_get_current_user();
+				$title        = $subject ? $subject : wp_trim_words( wp_strip_all_tags( $question ), 8, '…' );
+
 				$post_id = wp_insert_post(
 					array(
-						'post_type'   => 'cgt_question',
-						'post_status' => 'pending',
-						'post_title'  => $subject ? $subject : wp_trim_words( wp_strip_all_tags( $question ), 8, '…' ),
-						'post_content'=> $question,
-						'post_author' => get_current_user_id(),
-					)
+						'post_type'    => 'cgt_contact',
+						'post_status'  => 'private',
+						'post_title'   => $title,
+						'post_content' => $question,
+						'meta_input'   => array(
+							'cgt_submission_name'    => $current_user->display_name,
+							'cgt_submission_email'   => $current_user->user_email,
+							'cgt_submission_subject' => $subject,
+							'cgt_submission_message' => $question,
+							'cgt_contact_type'       => 'question',
+							'cgt_contact_user'       => get_current_user_id(),
+						),
+					),
+					true
 				);
 
-				if ( $post_id && 0 !== $post_id ) {
-					$message = __( 'Merci ! Votre question est en attente de modération.', 'cgt' );
+				if ( $post_id && ! is_wp_error( $post_id ) ) {
+					$message = __( 'Merci ! Votre question a bien été envoyée.', 'cgt' );
 					wp_mail(
 						get_option( 'admin_email' ),
 						sprintf( '[CGT] %s', __( 'Nouvelle question adhérent', 'cgt' ) ),
@@ -729,19 +740,24 @@ function cgt_contact_form_shortcode() {
 			if ( empty( $errors ) ) {
 				$post_id = wp_insert_post(
 					array(
-						'post_type'    => 'cgt_question',
-						'post_title'   => sprintf( '%1$s – %2$s', $subject, $name ),
-						'post_content' => $content . '\n\n' . sprintf( 'Téléphone : %s', $phone ? $phone : __( 'non fourni', 'cgt' ) ),
-						'post_status'  => 'pending',
-					)
+						'post_type'    => 'cgt_contact',
+						'post_title'   => $name ? $name : $subject,
+						'post_content' => $content,
+						'post_status'  => 'private',
+						'meta_input'   => array(
+							'cgt_submission_name'    => $name,
+							'cgt_submission_email'   => $email,
+							'cgt_submission_phone'   => $phone,
+							'cgt_submission_subject' => $subject,
+							'cgt_submission_message' => $content,
+							'cgt_contact_type'       => 'contact',
+							'cgt_contact_user'       => get_current_user_id(),
+						),
+					),
+					true
 				);
 
 				if ( $post_id && ! is_wp_error( $post_id ) ) {
-					update_post_meta( $post_id, 'cgt_submission_name', $name );
-					update_post_meta( $post_id, 'cgt_submission_email', $email );
-					update_post_meta( $post_id, 'cgt_submission_phone', $phone );
-					update_post_meta( $post_id, 'cgt_submission_subject', $subject );
-
 					wp_mail(
 						get_option( 'admin_email' ),
 						sprintf( '[CGT] %s', $subject ),

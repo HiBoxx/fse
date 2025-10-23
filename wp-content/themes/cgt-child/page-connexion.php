@@ -87,22 +87,22 @@ if ( $requested_redirect ) {
 				</div>
 				<p class="bloc-description"><?php esc_html_e( 'Indiquez votre identifiant ou votre adresse email pour recevoir un lien de réinitialisation.', 'cgt' ); ?></p>
 
-				<?php foreach ( $lost_messages as $message ) : ?>
-					<div class="login-<?php echo esc_attr( $message['type'] ); ?>"><?php echo esc_html( $message['text'] ); ?></div>
-				<?php endforeach; ?>
+					<?php foreach ( $lost_messages as $message ) : ?>
+						<div class="login-<?php echo esc_attr( $message['type'] ); ?>"><?php echo esc_html( $message['text'] ); ?></div>
+					<?php endforeach; ?>
 
-				<?php if ( 'confirm' !== $checkemail_state ) : ?>
-				<form name="lostpasswordform" id="lostpasswordform" action="<?php echo esc_url( site_url( 'wp-login.php?action=lostpassword', 'login_post' ) ); ?>" method="post">
-					<div class="form-group">
-						<label for="user_login_lost"><?php esc_html_e( 'Identifiant ou email', 'cgt' ); ?></label>
-						<input type="text" name="user_login" id="user_login_lost" class="form-control form-control--offset" required>
-					</div>
-					<?php wp_nonce_field( 'lost_password', 'lost_password_nonce' ); ?>
-					<?php if ( $requested_redirect ) : ?>
-						<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $requested_redirect ); ?>">
-					<?php endif; ?>
-					<button type="submit" class="btn btn-primary btn-block"><?php esc_html_e( 'Envoyer le lien de réinitialisation', 'cgt' ); ?></button>
-				</form>
+					<?php if ( 'confirm' !== $checkemail_state ) : ?>
+					<form name="lostpasswordform" id="lostpasswordform" action="<?php echo esc_url( site_url( 'wp-login.php?action=lostpassword', 'login_post' ) ); ?>" method="post">
+						<div class="form-group">
+							<label for="user_login_lost"><?php esc_html_e( 'Identifiant ou email', 'cgt' ); ?></label>
+							<input type="text" name="user_login" id="user_login_lost" class="form-control form-control--offset" required>
+						</div>
+						<?php wp_nonce_field( 'lost_password', '_wpnonce' ); ?>
+						<?php if ( $requested_redirect ) : ?>
+							<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $requested_redirect ); ?>">
+						<?php endif; ?>
+						<button type="submit" class="btn btn-primary btn-block"><?php esc_html_e( 'Envoyer le lien de réinitialisation', 'cgt' ); ?></button>
+					</form>
 				<?php endif; ?>
 
 				<div class="login-links">

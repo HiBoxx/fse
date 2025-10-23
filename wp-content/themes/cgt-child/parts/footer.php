@@ -9,6 +9,9 @@
 <footer class="site-footer">
 	<div class="container footer-grid">
 		<div class="footer-brand">
+			<a class="footer-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+				<img src="http://fse.local/wp-content/uploads/2025/10/logo2.png" alt="<?php esc_attr_e( 'FSETUD – Retour à l’accueil', 'cgt' ); ?>">
+			</a>
 			<p class="footer-slogan"><?php esc_html_e( 'Soutenons les salarié·es des sociétés d’études, du conseil et de l’ingénierie.', 'cgt' ); ?></p>
 		</div>
 		<div class="footer-links">
@@ -22,9 +25,8 @@
 		<div class="footer-social">
 			<h2 class="footer-title"><?php esc_html_e( 'Réseaux sociaux', 'cgt' ); ?></h2>
 			<ul class="footer-list footer-list--compact">
-				<li><a href="#"><?php esc_html_e( 'Facebook', 'cgt' ); ?></a></li>
-				<li><a href="#"><?php esc_html_e( 'Twitter', 'cgt' ); ?></a></li>
-				<li><a href="#"><?php esc_html_e( 'YouTube', 'cgt' ); ?></a></li>
+				<li><a href="https://www.instagram.com/fsetudcgt/" target="_blank" rel="noopener"><?php esc_html_e( 'Instagram', 'cgt' ); ?></a></li>
+				<li><a href="https://www.youtube.com/@fsetudcgt5057" target="_blank" rel="noopener"><?php esc_html_e( 'YouTube', 'cgt' ); ?></a></li>
 			</ul>
 		</div>
 	</div>

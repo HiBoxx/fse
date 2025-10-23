@@ -44,16 +44,19 @@ $recent_communiques = new WP_Query(
 
 $agenda_events = new WP_Query(
 	array(
-		'post_type'      => 'post',
-		'post_status'    => 'publish',
-		'posts_per_page' => 4,
+		'post_type'      => 'cgt_agenda',
+		'post_status'    => array( 'private', 'publish' ),
+		'posts_per_page' => 6,
 		'no_found_rows'  => true,
-		'tax_query'      => array(
+		'meta_key'       => 'cgt_event_date',
+		'orderby'        => 'meta_value',
+		'order'          => 'ASC',
+		'meta_query'     => array(
 			array(
-				'taxonomy' => 'thematique',
-				'field'    => 'slug',
-				'terms'    => array( 'agenda', 'evenements' ),
-				'operator' => 'IN',
+				'key'     => 'cgt_event_date',
+				'value'   => gmdate( 'Y-m-d H:i:s' ),
+				'compare' => '>=',
+				'type'    => 'DATETIME',
 			),
 		),
 	)
@@ -235,25 +238,31 @@ $bulletins_link = ( $bulletins_term && ! is_wp_error( $bulletins_term ) ) ? get_
 $agenda_term = get_term_by( 'slug', 'agenda', 'thematique' );
 $agenda_link = ( $agenda_term && ! is_wp_error( $agenda_term ) ) ? get_term_link( $agenda_term ) : '#';
 
-$faq_query = new WP_Query(
+$member_questions = new WP_Query(
 	array(
-		'post_type'      => 'post',
-		'post_status'    => 'publish',
-		'posts_per_page' => 5,
+		'post_type'      => 'cgt_contact',
+		'post_status'    => array( 'private', 'publish' ),
+		'posts_per_page' => 10,
+		'orderby'        => 'date',
+		'order'          => 'DESC',
 		'no_found_rows'  => true,
-		'category_name'  => 'faq',
+		'meta_query'     => array(
+			array(
+				'key'   => 'cgt_contact_type',
+				'value' => 'question',
+			),
+			array(
+				'key'     => 'cgt_contact_user',
+				'value'   => get_current_user_id(),
+				'type'    => 'NUMERIC',
+				'compare' => '=',
+			),
+		),
 	)
 );
 
-$member_questions = new WP_Query(
-	array(
-		'post_type'      => 'cgt_question',
-		'post_status'    => array( 'pending', 'publish' ),
-		'author'         => get_current_user_id(),
-		'posts_per_page' => 5,
-		'no_found_rows'  => true,
-	)
-);
+$article_submission_link = home_url( '/publier-article' );
+$tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_link );
 ?>
 
 <main id="primary" class="site-main member-dashboard">
@@ -311,8 +320,25 @@ $member_questions = new WP_Query(
 					<ul class="member-agenda">
 						<?php while ( $agenda_events->have_posts() ) : $agenda_events->the_post(); ?>
 							<li>
-								<span class="member-agenda__date"><?php echo esc_html( get_the_date( 'd M Y' ) ); ?></span>
+								<?php
+								$event_date = get_post_meta( get_the_ID(), 'cgt_event_date', true );
+								$event_addr = get_post_meta( get_the_ID(), 'cgt_event_address', true );
+								$event_doc  = get_post_meta( get_the_ID(), 'cgt_event_document', true );
+								?>
+								<span class="member-agenda__date">
+									<?php echo esc_html( $event_date ? wp_date( 'd M Y', strtotime( $event_date ) ) : get_the_date( 'd M Y' ) ); ?>
+								</span>
 								<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+								<?php if ( $event_addr ) : ?>
+									<span class="member-agenda__meta"><?php echo esc_html( $event_addr ); ?></span>
+								<?php endif; ?>
+								<?php if ( $event_doc ) : ?>
+									<span class="member-agenda__meta">
+										<a href="<?php echo esc_url( wp_get_attachment_url( $event_doc ) ); ?>" target="_blank" rel="noopener">
+											<?php esc_html_e( 'Télécharger le document', 'cgt' ); ?>
+										</a>
+									</span>
+								<?php endif; ?>
 							</li>
 						<?php endwhile; wp_reset_postdata(); ?>
 					</ul>
@@ -322,11 +348,15 @@ $member_questions = new WP_Query(
 			</div>
 		</section>
 
-		<section class="member-section container">
-			<div class="member-panel member-panel--branches">
-				<h2><?php esc_html_e( 'Articles adhérents par branche', 'cgt' ); ?></h2>
-				<?php if ( ! empty( $branch_sections ) ) : ?>
-					<div class="member-branch-grid">
+	<section class="member-section container" id="section-articles-adherents">
+		<div class="member-panel member-panel--branches">
+			<h2><?php esc_html_e( 'Articles adhérents par branche', 'cgt' ); ?></h2>
+			<div class="member-panel__actions">
+				<a class="btn btn-compact" href="<?php echo esc_url( $article_submission_link ); ?>"><?php esc_html_e( 'Proposer un article adhérent', 'cgt' ); ?></a>
+				<a class="btn btn-compact btn-outline" href="<?php echo esc_url( $tract_submission_link ); ?>"><?php esc_html_e( 'Soumettre un tract réservé aux adhérent·es', 'cgt' ); ?></a>
+			</div>
+			<?php if ( ! empty( $branch_sections ) ) : ?>
+				<div class="member-branch-grid">
 						<?php foreach ( $branch_sections as $section ) : ?>
 							<div class="member-branch-panel">
 								<h3><?php echo esc_html( $section['term']->name ); ?></h3>
@@ -404,18 +434,55 @@ $member_questions = new WP_Query(
 
 			<div class="member-panel member-panel--faq">
 				<h2><?php esc_html_e( 'Questions fréquentes', 'cgt' ); ?></h2>
-				<?php if ( $faq_query->have_posts() ) : ?>
-					<div class="member-faq">
-						<?php while ( $faq_query->have_posts() ) : $faq_query->the_post(); ?>
-							<details>
-								<summary><?php the_title(); ?></summary>
-								<div class="member-faq__content"><?php the_excerpt(); ?></div>
-							</details>
-						<?php endwhile; wp_reset_postdata(); ?>
-					</div>
-				<?php else : ?>
-					<p><?php esc_html_e( 'Ajoutez vos questions fréquentes dans la catégorie “FAQ” pour les rendre accessibles ici.', 'cgt' ); ?></p>
-				<?php endif; ?>
+				<div class="member-faq">
+					<?php
+					$faq_items = array(
+						array(
+							'question' => __( 'Quels sont mes droits en cas de licenciement ?', 'cgt' ),
+							'answer'   => __( 'En cas de licenciement, l’employeur doit respecter une procédure (convocation, entretien, notification, préavis). Selon l’ancienneté, des indemnités légales ou conventionnelles sont dues. Vérifiez votre convention collective et contactez la fédération pour un accompagnement personnalisé.', 'cgt' ),
+						),
+						array(
+							'question' => __( 'Comment contester un licenciement ?', 'cgt' ),
+							'answer'   => __( 'Vous disposez de 12 mois pour saisir le conseil de prud’hommes après la notification. Il est recommandé de réunir tous les justificatifs (contrat, échanges, bulletins de salaire) et de solliciter la CGT pour préparer le dossier et, si nécessaire, bénéficier d’un appui juridique.', 'cgt' ),
+						),
+						array(
+							'question' => __( 'Que prévoit la loi sur les heures supplémentaires ?', 'cgt' ),
+							'answer'   => __( 'Les heures au-delà de 35h doivent être rémunérées avec une majoration (généralement +25 % puis +50 %). La convention collective peut prévoir des taux plus favorables. Elles doivent être demandées ou validées par l’employeur et apparaître sur le bulletin de salaire.', 'cgt' ),
+						),
+						array(
+							'question' => __( 'Puis-je refuser une modification de mon contrat ?', 'cgt' ),
+							'answer'   => __( 'Toute modification d’un élément essentiel du contrat (salaire, horaires, lieu de travail) nécessite votre accord écrit. En cas de refus, l’employeur peut tenter un licenciement mais devra justifier d’une cause réelle et sérieuse. Contactez la fédération avant de répondre.', 'cgt' ),
+						),
+						array(
+							'question' => __( 'Comment faire respecter un accord collectif ?', 'cgt' ),
+							'answer'   => __( 'Les accords collectifs s’imposent à l’employeur. Si vous constatez un non-respect (salaires, classifications, congés), signalez-le à vos représentants CGT ou à la fédération. Ils pourront organiser un rappel à l’employeur ou saisir l’inspection du travail.', 'cgt' ),
+						),
+						array(
+							'question' => __( 'Quelles démarches pour obtenir des formations ?', 'cgt' ),
+							'answer'   => __( 'Vous pouvez mobiliser le Compte Personnel de Formation (CPF), le plan de développement des compétences de l’entreprise ou demander un congé de formation économique, sociale et syndicale. L’employeur doit répondre à votre demande dans des délais précis.', 'cgt' ),
+						),
+						array(
+							'question' => __( 'Que faire en cas de harcèlement ?', 'cgt' ),
+							'answer'   => __( 'Conservez toutes les preuves (mails, témoignages). Alertez vos représentants CGT et la fédération. L’employeur a l’obligation d’enquêter et de protéger les salarié·es. Vous pouvez aussi saisir l’inspection du travail et, si besoin, le conseil de prud’hommes.', 'cgt' ),
+						),
+						array(
+							'question' => __( 'Comment utiliser mon droit de grève ?', 'cgt' ),
+							'answer'   => __( 'La grève doit être collective et concerner des revendications professionnelles. Informez-vous auprès de la CGT pour organiser le mouvement dans le cadre légal. L’employeur ne peut sanctionner qu’en cas de faute lourde, mais la retenue de salaire est possible pour les heures non travaillées.', 'cgt' ),
+						),
+					);
+
+					foreach ( $faq_items as $faq ) :
+						?>
+						<details>
+							<summary><?php echo esc_html( $faq['question'] ); ?></summary>
+							<div class="member-faq__content">
+								<p><?php echo esc_html( $faq['answer'] ); ?></p>
+							</div>
+						</details>
+						<?php
+					endforeach;
+					?>
+				</div>
 			</div>
 		</section>
 
@@ -424,12 +491,39 @@ $member_questions = new WP_Query(
 				<h2><?php esc_html_e( 'Mes questions en cours', 'cgt' ); ?></h2>
 				<?php if ( $member_questions->have_posts() ) : ?>
 					<ul class="question-list">
-						<?php while ( $member_questions->have_posts() ) : $member_questions->the_post(); ?>
-							<li>
-								<strong><?php the_title(); ?></strong>
-								<span class="question-status"><?php echo esc_html( get_post_status_object( get_post_status() )->label ); ?></span>
+						<?php
+						while ( $member_questions->have_posts() ) :
+							$member_questions->the_post();
+							$post_id   = get_the_ID();
+							$subject   = get_post_meta( $post_id, 'cgt_submission_subject', true );
+							$response  = get_post_meta( $post_id, 'cgt_contact_response', true );
+							$status    = get_post_status_object( get_post_status( $post_id ) );
+							?>
+							<li class="question-list__item">
+								<div class="question-list__header">
+									<strong><?php echo $subject ? esc_html( $subject ) : esc_html( get_the_title() ); ?></strong>
+									<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time>
+								</div>
+								<?php if ( $response ) : ?>
+									<div class="question-response">
+										<span class="question-response__label"><?php esc_html_e( 'Réponse', 'cgt' ); ?></span>
+										<div class="question-response__content">
+											<?php echo wp_kses_post( wpautop( $response ) ); ?>
+										</div>
+									</div>
+								<?php else : ?>
+									<p class="question-status question-status--pending">
+										<?php esc_html_e( 'En attente de réponse.', 'cgt' ); ?>
+										<?php if ( $status && isset( $status->label ) ) : ?>
+											<span>(<?php echo esc_html( $status->label ); ?>)</span>
+										<?php endif; ?>
+									</p>
+								<?php endif; ?>
 							</li>
-						<?php endwhile; wp_reset_postdata(); ?>
+							<?php
+						endwhile;
+						wp_reset_postdata();
+						?>
 					</ul>
 				<?php else : ?>
 					<p><?php esc_html_e( 'Vous n’avez pas encore posé de question.', 'cgt' ); ?></p>

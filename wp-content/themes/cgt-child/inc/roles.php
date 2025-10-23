@@ -26,15 +26,17 @@ function cgt_register_adherent_role() {
 	if ( $role ) {
 		$role->add_cap( 'read_private_cgt' );
 		$role->add_cap( 'read_private_articles_adherents' );
+		$role->add_cap( 'read_private_cgt_agendas' );
 	}
 
 	// Grant capability to editors & admins.
 	foreach ( array( 'administrator', 'editor' ) as $role_key ) {
 		$role_object = get_role( $role_key );
-		if ( $role_object ) {
-			$role_object->add_cap( 'read_private_cgt' );
-			$role_object->add_cap( 'read_private_articles_adherents' );
-		}
+	if ( $role_object ) {
+		$role_object->add_cap( 'read_private_cgt' );
+		$role_object->add_cap( 'read_private_articles_adherents' );
+		$role_object->add_cap( 'read_private_cgt_agendas' );
+	}
 	}
 }
 

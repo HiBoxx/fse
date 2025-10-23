@@ -106,6 +106,12 @@ a:focus {
 	gap: 0.3rem;
 }
 
+.card-summary {
+	font-size: 0.85rem;
+	line-height: 1.45;
+	color: rgba(17, 17, 17, 0.7);
+}
+
 .card-cta {
 	font-weight: 600;
 	font-size: 0.9rem;
@@ -163,6 +169,17 @@ a:focus {
 	height: auto;
 	border-radius: var(--radius);
 	display: block;
+	object-fit: contain;
+}
+
+.site-logo--image {
+	max-width: 200px;
+	margin-top: -10px;
+}
+
+.site-logo--image img {
+	width: 100%;
+	max-height: 80px;
 	object-fit: contain;
 }
 
@@ -289,6 +306,16 @@ a:focus {
 	margin: 0;
 	font-size: 0.95rem;
 	color: rgba(255, 255, 255, 0.85);
+}
+
+.footer-logo {
+	display: inline-flex;
+	margin-bottom: 0.75rem;
+}
+
+.footer-logo img {
+	max-height: 72px;
+	width: auto;
 }
 
 .footer-list--compact {
@@ -1154,6 +1181,17 @@ a:focus {
 	color: rgba(17, 17, 17, 0.75);
 }
 
+.member-panel__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-bottom: 0.5rem;
+}
+
+.member-panel__actions .btn {
+	margin: 0;
+}
+
 .member-list,
 .member-branch-panel ul {
 	list-style: none;
@@ -1187,6 +1225,11 @@ a:focus {
 	font-size: 0.85rem;
 	color: rgba(17, 17, 17, 0.6);
 	text-transform: uppercase;
+}
+
+.member-agenda__meta {
+	font-size: 0.85rem;
+	color: rgba(17, 17, 17, 0.6);
 }
 
 .member-branch-grid {
@@ -1264,6 +1307,7 @@ a:focus {
 
 .member-faq summary {
 	font-weight: 600;
+	font-size: 1rem;
 	cursor: pointer;
 }
 
@@ -1274,6 +1318,222 @@ a:focus {
 
 .member-notice {
 	margin: 2rem 0 3rem;
+}
+
+.archive-actualites .page-header {
+	padding: 3rem 0 1.5rem;
+	text-align: center;
+}
+
+.archive-actualites .page-subtitle {
+	margin: 0;
+	color: rgba(17, 17, 17, 0.7);
+	font-size: 1rem;
+}
+
+.archive-filters {
+	padding: 0 0 2rem;
+}
+
+.archive-filters__form {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 1rem;
+	align-items: end;
+}
+
+.archive-filter label {
+	display: block;
+	font-size: 0.85rem;
+	font-weight: 600;
+	margin-bottom: 0.35rem;
+}
+
+.archive-filter input[type="search"],
+.archive-filter select {
+	width: 100%;
+	padding: 0.6rem 0.75rem;
+	border-radius: 10px;
+	border: 1px solid rgba(17, 17, 17, 0.18);
+	background: #fff;
+	font-size: 0.95rem;
+}
+
+.archive-filter--actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.btn-outline {
+	background: transparent;
+	color: var(--cgt-red);
+	border: 1px solid var(--cgt-red);
+}
+
+.archive-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 1.5rem;
+}
+
+.archive-empty {
+	padding: 2rem;
+	background: rgba(229, 231, 235, 0.5);
+	border-radius: var(--radius);
+	text-align: center;
+}
+
+.library-page {
+	padding: 3rem 0;
+}
+
+.library-page .page-header {
+	margin-bottom: 2.5rem;
+}
+
+.library-filters {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 1rem;
+	margin-bottom: 2rem;
+	align-items: end;
+}
+
+.library-filter label {
+	display: block;
+	font-size: 0.85rem;
+	font-weight: 600;
+	margin-bottom: 0.35rem;
+}
+
+.library-filter select {
+	width: 100%;
+	padding: 0.6rem 0.75rem;
+	border-radius: 10px;
+	border: 1px solid rgba(17, 17, 17, 0.18);
+	background: #fff;
+}
+
+.library-filter--actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.library-results {
+	display: grid;
+	gap: 1.5rem;
+}
+
+.library-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.85rem;
+}
+
+.library-list__item a {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	padding: 1rem;
+	border-radius: var(--radius);
+	border: 1px solid rgba(17, 17, 17, 0.08);
+	background: rgba(255, 255, 255, 0.9);
+	text-decoration: none;
+	color: inherit;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.library-list__item a:hover,
+.library-list__item a:focus {
+	border-color: rgba(208, 0, 0, 0.4);
+	box-shadow: 0 6px 18px rgba(208, 0, 0, 0.12);
+}
+
+.library-list__title {
+	font-weight: 600;
+	font-size: 1.05rem;
+}
+
+.library-list__meta {
+	font-size: 0.85rem;
+	color: rgba(17, 17, 17, 0.65);
+}
+
+.library-empty {
+	padding: 1.5rem;
+	background: rgba(229, 231, 235, 0.45);
+	border-radius: var(--radius);
+	text-align: center;
+}
+
+.legal-page {
+	padding: 3rem 0;
+}
+
+.legal-page .page-header {
+	margin-bottom: 2.5rem;
+	text-align: left;
+}
+
+.legal-content {
+	display: grid;
+	gap: 1.75rem;
+}
+
+.legal-content section {
+	background: rgba(229, 231, 235, 0.35);
+	padding: 1.5rem;
+	border-radius: var(--radius);
+	border: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+.legal-content h2 {
+	margin-top: 0;
+	font-size: 1.35rem;
+}
+
+.legal-content h3 {
+	font-size: 1.05rem;
+	margin-top: 1rem;
+}
+
+.legal-content ul {
+	margin: 0.75rem 0 0 1.2rem;
+}
+
+.legal-content li {
+	margin-bottom: 0.35rem;
+}
+
+.event-page {
+	padding: 3rem 0;
+}
+
+.event-card {
+	background: var(--cgt-white);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	padding: 2rem;
+	display: grid;
+	gap: 1.5rem;
+}
+
+.event-header .event-title {
+	margin: 0;
+	font-size: clamp(2rem, 4vw, 2.6rem);
+}
+
+.event-date {
+	margin: 0.25rem 0 0;
+	color: rgba(17, 17, 17, 0.6);
+	font-weight: 600;
+	letter-spacing: 0.05em;
+}
+
+.event-section h2 {
+	margin-top: 0;
 }
 .drawer-search input[type="search"] {
 	padding: 0.6rem 0.8rem;
@@ -1514,15 +1774,46 @@ button:focus {
 }
 
 .cookie-banner {
-	position: fixed;
-	bottom: 1rem;
-	right: 1rem;
-	background: var(--cgt-black);
-	color: var(--cgt-white);
-	padding: 1rem;
+ position: fixed;
+ bottom: 1rem;
+ right: 1rem;
+ background: var(--cgt-black);
+ color: var(--cgt-white);
+ padding: 1rem;
+ border-radius: var(--radius);
+ max-width: 320px;
+ box-shadow: var(--shadow);
+}
+
+.cookie-content {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.cookie-text {
+	margin: 0;
+	line-height: 1.5;
+	font-size: 0.95rem;
+}
+
+.cookie-text--highlight {
+	background: rgba(255, 255, 255, 0.08);
+	padding: 0.75rem;
 	border-radius: var(--radius);
-	max-width: 320px;
-	box-shadow: var(--shadow);
+}
+
+.cookie-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.btn-link.cookie-more {
+	background: transparent;
+	color: var(--cgt-white);
+	padding: 0.3rem 0.55rem;
+	text-decoration: underline;
+	font-size: 0.85rem;
 }
 
 .sr-only {

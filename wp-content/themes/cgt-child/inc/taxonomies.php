@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
  * Register custom taxonomies.
  */
 function cgt_register_taxonomies() {
-	$post_types = array( 'communiques_de_presse', 'dossiers_de_presse', 'tracts', 'articles_adherents', 'branch' );
+	$post_types = array( 'post', 'communiques_de_presse', 'dossiers_de_presse', 'tracts', 'articles_adherents', 'branch' );
 
 	register_taxonomy(
 		'branche',
@@ -54,7 +54,8 @@ function cgt_register_taxonomies() {
 			'label'             => __( 'Zones internationales', 'cgt' ),
 			'hierarchical'      => true,
 			'show_in_rest'      => true,
-			'show_admin_column' => true,
+			'show_admin_column' => false,
+			'show_ui'           => false,
 			'rewrite'           => array(
 				'slug'       => 'international',
 				'with_front' => false,

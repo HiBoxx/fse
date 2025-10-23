@@ -320,3 +320,250 @@ function cgt_adhesion_column_content( $column, $post_id ) {
             break;
     }
 }
+
+/**
+ * Register adhésion admin submenu dashboard.
+ */
+add_action( 'admin_menu', 'cgt_register_adhesion_admin_page' );
+
+function cgt_register_adhesion_admin_page() {
+	add_submenu_page(
+		'edit.php?post_type=cgt_adhesion',
+		__( 'Tableau des adhésions', 'cgt' ),
+		__( 'Tableau des adhésions', 'cgt' ),
+		'edit_posts',
+		'cgt-adhesions-dashboard',
+		'cgt_render_adhesion_admin_page'
+	);
+}
+
+/**
+ * Renders the adhésion dashboard page.
+ */
+function cgt_render_adhesion_admin_page() {
+	if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'Vous n’avez pas les droits suffisants pour accéder à cette page.', 'cgt' ) );
+	}
+
+	$args  = array(
+		'post_type'      => 'cgt_adhesion',
+		'post_status'    => array( 'pending', 'publish', 'draft' ),
+		'posts_per_page' => 50,
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+	);
+	$query = new WP_Query( $args );
+	?>
+	<div class="wrap">
+		<h1><?php esc_html_e( 'Tableau des adhésions', 'cgt' ); ?></h1>
+		<p><?php esc_html_e( 'Téléchargez les fiches adhérents au format PDF ou contactez-les directement.', 'cgt' ); ?></p>
+		<table class="widefat fixed striped">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'Nom', 'cgt' ); ?></th>
+					<th><?php esc_html_e( 'Prénom', 'cgt' ); ?></th>
+					<th><?php esc_html_e( 'Téléphone', 'cgt' ); ?></th>
+					<th><?php esc_html_e( 'Email', 'cgt' ); ?></th>
+					<th><?php esc_html_e( 'Entreprise', 'cgt' ); ?></th>
+					<th><?php esc_html_e( 'PDF', 'cgt' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php if ( $query->have_posts() ) : ?>
+				<?php
+				while ( $query->have_posts() ) :
+					$query->the_post();
+					$post_id   = get_the_ID();
+					$nom       = get_post_meta( $post_id, '_adhesion_nom', true );
+					$prenom    = get_post_meta( $post_id, '_adhesion_prenom', true );
+					$tel       = get_post_meta( $post_id, '_adhesion_tel', true );
+					$email     = get_post_meta( $post_id, '_adhesion_email', true );
+					$entreprise = get_post_meta( $post_id, '_adhesion_entreprise_nom', true );
+					$download_url = wp_nonce_url(
+						admin_url( 'admin-post.php?action=cgt_download_adhesion_pdf&post_id=' . $post_id ),
+						'cgt_download_pdf_' . $post_id
+					);
+					?>
+					<tr>
+						<td><?php echo esc_html( $nom ); ?></td>
+						<td><?php echo esc_html( $prenom ); ?></td>
+						<td><?php echo esc_html( $tel ); ?></td>
+						<td><a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a></td>
+						<td><?php echo esc_html( $entreprise ); ?></td>
+						<td><a class="button" href="<?php echo esc_url( $download_url ); ?>"><?php esc_html_e( 'Télécharger le PDF', 'cgt' ); ?></a></td>
+					</tr>
+				<?php endwhile; ?>
+			<?php else : ?>
+				<tr>
+					<td colspan="6"><?php esc_html_e( 'Aucune adhésion enregistrée pour le moment.', 'cgt' ); ?></td>
+				</tr>
+			<?php endif; ?>
+			</tbody>
+		</table>
+	</div>
+	<?php
+	wp_reset_postdata();
+}
+
+/**
+ * Handle PDF download.
+ */
+add_action( 'admin_post_cgt_download_adhesion_pdf', 'cgt_download_adhesion_pdf' );
+
+function cgt_download_adhesion_pdf() {
+	if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
+	}
+
+	$adhesion_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
+	if ( ! $adhesion_id || 'cgt_adhesion' !== get_post_type( $adhesion_id ) ) {
+		wp_die( esc_html__( 'Adhésion introuvable.', 'cgt' ) );
+	}
+
+	check_admin_referer( 'cgt_download_pdf_' . $adhesion_id );
+
+	$details = cgt_get_adhesion_details( $adhesion_id );
+	$pdf     = cgt_generate_adhesion_pdf( get_the_title( $adhesion_id ), $details );
+
+	$filename = sanitize_title( get_the_title( $adhesion_id ) ) . '.pdf';
+	header( 'Content-Type: application/pdf' );
+	header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+	header( 'Content-Length: ' . strlen( $pdf ) );
+	set_time_limit( 0 );
+	echo $pdf;
+	exit;
+}
+
+/**
+ * Retrieve adhesion details from meta.
+ *
+ * @param int $post_id Post ID.
+ *
+ * @return array
+ */
+function cgt_get_adhesion_details( $post_id ) {
+	$fields = array(
+		'nom',
+		'prenom',
+		'sexe',
+		'date_naissance',
+		'nationalite',
+		'adresse',
+		'code_postal',
+		'ville',
+		'tel',
+		'email',
+		'statut',
+		'categorie',
+		'entreprise_nom',
+		'entreprise_siret',
+		'appartient_groupe',
+		'entreprise_adresse',
+		'entreprise_code_postal',
+		'entreprise_ville',
+		'entreprise_tel',
+		'entreprise_email',
+		'secteur',
+		'code_ape_naf',
+		'convention_collective',
+		'effectif',
+		'union_locale',
+		'union_departementale',
+	);
+
+	$data = array();
+	foreach ( $fields as $field ) {
+		$data[ $field ] = get_post_meta( $post_id, '_adhesion_' . $field, true );
+	}
+
+	$data['date_soumission'] = get_post_meta( $post_id, '_adhesion_date_soumission', true );
+
+	return $data;
+}
+
+/**
+ * Escape text for PDF.
+ */
+function cgt_pdf_escape_text( $text ) {
+	$text = str_replace( array( '\\', '(', ')' ), array( '\\\\', '\\(', '\\)' ), $text );
+	$text = preg_replace( '/\r?\n/', '\\n', $text );
+	return $text;
+}
+
+/**
+ * Generate PDF string for adhesion data.
+ *
+ * @param string $title  Title.
+ * @param array  $data   Data array.
+ *
+ * @return string
+ */
+function cgt_generate_adhesion_pdf( $title, $data ) {
+	$lines = array(
+		sprintf( 'Nom : %s', $data['nom'] ?? '' ),
+		sprintf( 'Prénom : %s', $data['prenom'] ?? '' ),
+		sprintf( 'Sexe : %s', $data['sexe'] ?? '' ),
+		sprintf( 'Date de naissance : %s', $data['date_naissance'] ?? '' ),
+		sprintf( 'Nationalité : %s', $data['nationalite'] ?? '' ),
+		sprintf( 'Adresse : %s %s %s', $data['adresse'] ?? '', $data['code_postal'] ?? '', $data['ville'] ?? '' ),
+		sprintf( 'Téléphone : %s', $data['tel'] ?? '' ),
+		sprintf( 'Email : %s', $data['email'] ?? '' ),
+		sprintf( 'Statut : %s', $data['statut'] ?? '' ),
+		sprintf( 'Catégorie : %s', $data['categorie'] ?? '' ),
+		'',
+		'--- Entreprise ---',
+		sprintf( 'Nom : %s', $data['entreprise_nom'] ?? '' ),
+		sprintf( 'SIRET : %s', $data['entreprise_siret'] ?? '' ),
+		sprintf( 'Groupe : %s', $data['appartient_groupe'] ?? '' ),
+		sprintf( 'Adresse : %s %s %s', $data['entreprise_adresse'] ?? '', $data['entreprise_code_postal'] ?? '', $data['entreprise_ville'] ?? '' ),
+		sprintf( 'Téléphone : %s', $data['entreprise_tel'] ?? '' ),
+		sprintf( 'Email : %s', $data['entreprise_email'] ?? '' ),
+		sprintf( 'Secteur : %s', $data['secteur'] ?? '' ),
+		sprintf( 'Code APE/NAF : %s', $data['code_ape_naf'] ?? '' ),
+		sprintf( 'Convention collective : %s', $data['convention_collective'] ?? '' ),
+		sprintf( 'Effectif : %s', $data['effectif'] ?? '' ),
+		sprintf( 'Union Locale : %s', $data['union_locale'] ?? '' ),
+		sprintf( 'Union Départementale : %s', $data['union_departementale'] ?? '' ),
+		'',
+		sprintf( 'Soumis le : %s', $data['date_soumission'] ?? current_time( 'mysql' ) ),
+	);
+
+	$escaped_lines = array_map( 'cgt_pdf_escape_text', $lines );
+	$pdf_stream   = 'BT /F1 12 Tf 18 TL 60 780 Td ';
+	$first        = true;
+	foreach ( $escaped_lines as $line ) {
+		if ( ! $first ) {
+			$pdf_stream .= 'T* ';
+		}
+		$pdf_stream .= '(' . $line . ') Tj ';
+		$first = false;
+	}
+	$pdf_stream .= 'ET';
+
+	$stream_length = strlen( $pdf_stream );
+	$objects       = array(
+		'<< /Type /Catalog /Pages 2 0 R >>',
+		'<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+		'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+		"<< /Length $stream_length >>\nstream\n$pdf_stream\nendstream",
+		'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+	);
+
+	$pdf    = "%PDF-1.4\n";
+	$offset = array( 0 );
+	foreach ( $objects as $index => $object ) {
+		$offset[ $index + 1 ] = strlen( $pdf );
+		$pdf                 .= ( $index + 1 ) . " 0 obj\n" . $object . "\nendobj\n";
+	}
+
+	$xref_pos = strlen( $pdf );
+	$pdf     .= "xref\n0 " . ( count( $objects ) + 1 ) . "\n";
+	$pdf     .= "0000000000 65535 f \n";
+	for ( $i = 1; $i <= count( $objects ); $i++ ) {
+		$pdf .= sprintf( '%010d 00000 n ', $offset[ $i ] ) . "\n";
+	}
+
+	$pdf .= "trailer\n<< /Size " . ( count( $objects ) + 1 ) . " /Root 1 0 R >>\nstartxref\n" . $xref_pos . "\n%%EOF";
+
+	return $pdf;
+}

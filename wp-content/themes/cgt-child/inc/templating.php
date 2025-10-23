@@ -165,6 +165,11 @@ function cgt_setup_pages_and_menus() {
 			'post_title'        => __( 'Espace Presse', 'cgt' ),
 			'_wp_page_template' => 'templates/page-espace-presse.php',
 		),
+		'actualites'          => array(
+			'post_title'        => __( 'Actualités', 'cgt' ),
+			'_wp_page_template' => 'templates/page-actualites.php',
+			'post_status'       => 'publish',
+		),
 		'espace-adherent'     => array(
 			'post_title'        => __( 'Espace Adhérent', 'cgt' ),
 			'_wp_page_template' => 'templates/page-espace-adherent.php',
@@ -181,6 +186,7 @@ function cgt_setup_pages_and_menus() {
 		'mediatheque'         => array(
 			'post_title'   => __( 'Médiathèque', 'cgt' ),
 			'post_content' => '<div class="placeholder" aria-hidden="true"></div><p>' . esc_html__( 'Logos, photos officielles et éléments de charte graphique.', 'cgt' ) . '</p>',
+			'_wp_page_template' => 'templates/page-bibliotheque.php',
 		),
 		'contacts-presse'     => array(
 			'post_title'   => __( 'Contacts presse', 'cgt' ),
@@ -191,11 +197,17 @@ function cgt_setup_pages_and_menus() {
 			'_wp_page_template' => 'templates/page-contact.php',
 		),
 		'mentions-legales'    => array(
-			'post_title'   => __( 'Mentions légales', 'cgt' ),
+			'post_title'        => __( 'Mentions légales', 'cgt' ),
+			'_wp_page_template' => 'templates/page-mentions-legales.php',
 		),
 		'politique-de-confidentialite' => array(
-			'post_title'   => __( 'Politique de confidentialité', 'cgt' ),
+			'post_title'        => __( 'Politique de confidentialité', 'cgt' ),
+			'_wp_page_template' => 'templates/page-politique-confidentialite.php',
 		),
+	'categories' => array(
+		'post_title'   => __( 'Catégories', 'cgt' ),
+		'post_content' => '<!-- Liste des catégories internes pour l’éditeur -->',
+	),
 	);
 
 	$page_ids = array();
@@ -343,6 +355,36 @@ function cgt_setup_pages_and_menus() {
 }
 
 /**
+ * Garantit l'existence de la page Actualités même si la configuration initiale n'a pas été rejouée.
+ */
+function cgt_ensure_actualites_page_exists() {
+	$page = get_page_by_path( 'actualites', OBJECT, 'page' );
+
+	if ( ! $page ) {
+		$page_id = wp_insert_post(
+			array(
+				'post_type'      => 'page',
+				'post_title'     => __( 'Actualités', 'cgt' ),
+				'post_name'      => 'actualites',
+				'post_status'    => 'publish',
+				'comment_status' => 'closed',
+			)
+		);
+
+		if ( is_wp_error( $page_id ) ) {
+			return;
+		}
+
+		$page = get_post( $page_id );
+	}
+
+	if ( $page && 'templates/page-actualites.php' !== get_page_template_slug( $page->ID ) ) {
+		update_post_meta( $page->ID, '_wp_page_template', 'templates/page-actualites.php' );
+	}
+}
+add_action( 'init', 'cgt_ensure_actualites_page_exists', 15 );
+
+/**
  * Ensure critical pages (connexion, etc.) exist even après activation.
  */
 function cgt_ensure_login_page_exists() {
@@ -356,6 +398,45 @@ function cgt_ensure_login_page_exists() {
 	}
 }
 add_action( 'init', 'cgt_ensure_login_page_exists', 20 );
+
+/**
+ * Force usage of dedicated templates for legal pages even si les réglages ont été modifiés.
+ *
+ * @param string $template Template path.
+ * @return string
+ */
+function cgt_force_legal_templates( $template ) {
+	if ( is_page( 'mentions-legales' ) ) {
+		$legal_template = get_stylesheet_directory() . '/templates/page-mentions-legales.php';
+		if ( file_exists( $legal_template ) ) {
+			return $legal_template;
+		}
+	}
+
+	if ( is_page( 'politique-de-confidentialite' ) ) {
+		$privacy_template = get_stylesheet_directory() . '/templates/page-politique-confidentialite.php';
+		if ( file_exists( $privacy_template ) ) {
+			return $privacy_template;
+		}
+	}
+
+	if ( is_page( 'mediatheque' ) ) {
+		$library_template = get_stylesheet_directory() . '/templates/page-bibliotheque.php';
+		if ( file_exists( $library_template ) ) {
+			return $library_template;
+		}
+	}
+
+	if ( 'cgt_agenda' === get_post_type() ) {
+		$event_template = get_stylesheet_directory() . '/templates/page-evenement.php';
+		if ( file_exists( $event_template ) ) {
+			return $event_template;
+		}
+	}
+
+	return $template;
+}
+add_filter( 'template_include', 'cgt_force_legal_templates', 20 );
 
 /**
  * Seed demo content demanded by specs.

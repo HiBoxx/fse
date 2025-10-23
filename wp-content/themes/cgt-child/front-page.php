@@ -36,6 +36,11 @@ $branches = get_terms(
 		'number'     => 6,
 	)
 );
+
+$actualites_page = get_page_by_path( 'actualites', OBJECT, 'page' );
+$actualites_link = $actualites_page ? get_permalink( $actualites_page ) : get_post_type_archive_link( 'post' );
+$mediatheque_page = get_page_by_path( 'mediatheque', OBJECT, 'page' );
+$mediatheque_link = $mediatheque_page ? get_permalink( $mediatheque_page ) : home_url( '/mediatheque' );
 ?>
 
 <main id="primary" class="site-main">
@@ -74,10 +79,10 @@ $branches = get_terms(
 					</a>
 				</li>
 				<li>
-					<a href="<?php echo esc_url( get_post_type_archive_link( 'communiques_de_presse' ) ); ?>" class="home-nav__card">
+					<a href="<?php echo esc_url( $actualites_link ); ?>" class="home-nav__card">
 						<span class="home-nav__icon" aria-hidden="true">🗞️</span>
 						<span>
-							<strong><?php esc_html_e( 'Communiqués', 'cgt' ); ?></strong>
+							<strong><?php esc_html_e( 'Articles', 'cgt' ); ?></strong>
 							<small><?php esc_html_e( 'Prises de position publiques', 'cgt' ); ?></small>
 						</span>
 					</a>
@@ -92,10 +97,10 @@ $branches = get_terms(
 					</a>
 				</li>
 				<li>
-					<a href="<?php echo esc_url( home_url( '/espace-presse' ) ); ?>" class="home-nav__card">
-						<span class="home-nav__icon" aria-hidden="true">🎙️</span>
+					<a href="<?php echo esc_url( $mediatheque_link ); ?>" class="home-nav__card">
+						<span class="home-nav__icon" aria-hidden="true">📚</span>
 						<span>
-							<strong><?php esc_html_e( 'Espace presse', 'cgt' ); ?></strong>
+							<strong><?php esc_html_e( 'Bibliothèque', 'cgt' ); ?></strong>
 							<small><?php esc_html_e( 'Ressources presse', 'cgt' ); ?></small>
 						</span>
 					</a>
@@ -105,24 +110,24 @@ $branches = get_terms(
 	</section>
 
 	<?php
-	$communiques_tabs = array(
-		'actualites'         => array(
-			'label' => __( 'Actualités', 'cgt' ),
-			'term'  => 'communication',
-		),
-		'bulletins'          => array(
-			'label' => __( 'Bulletins', 'cgt' ),
-			'term'  => 'bulletins',
-		),
-		'tract-entreprise'   => array(
-			'label' => __( 'Tracts d’entreprise', 'cgt' ),
-			'term'  => 'tract-entreprise',
-		),
-		'presse'             => array(
-			'label' => __( 'Presse', 'cgt' ),
-			'term'  => 'presse',
-		),
-	);
+$communiques_tabs = array(
+	'actualites'       => array(
+		'label' => __( 'Actualités', 'cgt' ),
+		'term'  => 'actualites',
+	),
+	'bulletins'        => array(
+		'label' => __( 'Bulletins', 'cgt' ),
+		'term'  => 'bulletins',
+	),
+	'tracts'           => array(
+		'label' => __( 'Tracts d’entreprise', 'cgt' ),
+		'term'  => 'tracts-de-la-federation',
+	),
+	'presse'           => array(
+		'label' => __( 'Presse', 'cgt' ),
+		'term'  => 'presse',
+	),
+);
 	?>
 	<section class="home-section">
 		<div class="container">
@@ -159,16 +164,20 @@ $branches = get_terms(
 				$first_panel = true;
 				foreach ( $communiques_tabs as $slug => $tab ) :
 					$query_args = array(
-						'post_type'      => 'communiques_de_presse',
+						'post_type'      => 'post',
 						'posts_per_page' => 4,
 						'tax_query'      => array(
 							array(
-								'taxonomy' => 'thematique',
+								'taxonomy' => 'category',
 								'field'    => 'slug',
 								'terms'    => $tab['term'],
 							),
 						),
 					);
+
+					if ( empty( $tab['term'] ) ) {
+						unset( $query_args['tax_query'] );
+					}
 
 					$tab_query = new WP_Query( $query_args );
 					?>
@@ -189,7 +198,28 @@ $branches = get_terms(
 							?>
 						</div>
 					<?php else : ?>
-						<p><?php esc_html_e( 'Aucun communiqué pour cette catégorie pour le moment.', 'cgt' ); ?></p>
+						<?php
+						$fallback_query = new WP_Query(
+							array(
+								'post_type'      => 'post',
+								'posts_per_page' => 4,
+							)
+						);
+						if ( $fallback_query->have_posts() ) :
+							?>
+							<div class="home-communique-panel-grid home-communique-panel-grid--fallback">
+								<?php
+								while ( $fallback_query->have_posts() ) :
+									$fallback_query->the_post();
+									get_template_part( 'parts/card', null, array( 'context' => 'communique' ) );
+								endwhile;
+								wp_reset_postdata();
+								?>
+							</div>
+						<?php else : ?>
+							<p><?php esc_html_e( 'Aucun article publié pour le moment.', 'cgt' ); ?></p>
+						<?php endif; ?>
+						<?php wp_reset_postdata(); ?>
 					<?php endif; ?>
 					<?php wp_reset_postdata(); ?>
 				</div>
@@ -200,7 +230,7 @@ $branches = get_terms(
 			</div>
 
 			<p class="home-section__footer">
-				<a class="btn btn-compact" href="<?php echo esc_url( get_post_type_archive_link( 'communiques_de_presse' ) ); ?>">
+				<a class="btn btn-compact" href="<?php echo esc_url( $actualites_link ); ?>">
 					<?php esc_html_e( 'Voir tous les articles', 'cgt' ); ?>
 				</a>
 			</p>

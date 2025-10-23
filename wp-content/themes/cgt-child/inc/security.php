@@ -42,8 +42,26 @@ function cgt_output_cookie_banner() {
 
 	?>
 	<div class="cookie-banner" role="dialog" aria-live="polite" aria-label="<?php esc_attr_e( 'Bannière cookies', 'cgt' ); ?>">
-		<p><?php esc_html_e( 'Ce site utilise des cookies techniques pour assurer son bon fonctionnement. Continuer implique votre accord.', 'cgt' ); ?></p>
-		<button class="btn btn-light" type="button"><?php esc_html_e( "J'ai compris", 'cgt' ); ?></button>
+		<div class="cookie-content">
+			<p class="cookie-text">
+				<?php esc_html_e( 'Notre site utilise uniquement des cookies internes nécessaires à son bon fonctionnement.', 'cgt' ); ?>
+				<br>
+				<?php esc_html_e( 'Aucune donnée personnelle n’est vendue ou transmise à des entreprises publicitaires.', 'cgt' ); ?>
+			</p>
+			<p class="cookie-text cookie-text--highlight">
+				<?php esc_html_e( '🔒 La Fédération s’engage à respecter le Règlement Général sur la Protection des Données (RGPD) et le Référentiel Général d’Amélioration de l’Accessibilité (RGAA).', 'cgt' ); ?>
+				<br>
+				<?php esc_html_e( 'Le site est entièrement accessible, notamment grâce à son assistant vocal pour les personnes en situation de handicap.', 'cgt' ); ?>
+			</p>
+			<p class="cookie-text">
+				<?php esc_html_e( 'Vous pouvez gérer vos préférences à tout moment.', 'cgt' ); ?>
+			</p>
+			<div class="cookie-actions">
+				<button class="btn btn-light cookie-accept" type="button"><?php esc_html_e( 'Accepter', 'cgt' ); ?></button>
+				<button class="btn btn-outline cookie-decline" type="button"><?php esc_html_e( 'Refuser', 'cgt' ); ?></button>
+				<a class="btn btn-link cookie-more" href="<?php echo esc_url( home_url( '/mentions-legales' ) ); ?>"><?php esc_html_e( 'En savoir plus', 'cgt' ); ?></a>
+			</div>
+		</div>
 	</div>
 	<?php
 }

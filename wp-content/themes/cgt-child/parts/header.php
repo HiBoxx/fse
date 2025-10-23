@@ -5,15 +5,16 @@
  * @package CGT_Child
  */
 
-$logo_url = 'https://www.fsetud.cgt.fr/wp-content/uploads/2025/07/cropped-cropped-cropped-logo_cgt.png';
+$logo_url = 'http://fse.local/wp-content/uploads/2025/10/logo2.png';
 $posts_page_id   = (int) get_option( 'page_for_posts' );
 $posts_page_link = $posts_page_id ? get_permalink( $posts_page_id ) : home_url( '/actualites' );
 ?>
 
 <header class="header-bar" role="banner">
 	<div class="container header-inner">
-		<a class="site-logo site-logo--text" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-			<span class="site-logo__text">FSETUD</span>
+		<a class="site-logo site-logo--image" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
+			<img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php esc_attr_e( 'FSETUD – Fédération CGT des Sociétés d’Études', 'cgt' ); ?>">
+			<span class="sr-only"><?php esc_html_e( 'Retour à la page d’accueil', 'cgt' ); ?></span>
 		</a>
 		<div class="header-nav">
 			<?php get_template_part( 'parts/nav-primary' ); ?>

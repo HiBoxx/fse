@@ -135,11 +135,19 @@
 
 		const cookieBanner = document.querySelector( '.cookie-banner' );
 		if ( cookieBanner ) {
-			const closeButton = cookieBanner.querySelector( 'button' );
-			if ( closeButton ) {
-				closeButton.addEventListener( 'click', () => {
-					cookieBanner.remove();
-				} );
+			const acceptButton = cookieBanner.querySelector( '.cookie-accept' );
+			const declineButton = cookieBanner.querySelector( '.cookie-decline' );
+
+			const dismissBanner = () => {
+				cookieBanner.remove();
+			};
+
+			if ( acceptButton ) {
+				acceptButton.addEventListener( 'click', dismissBanner );
+			}
+
+			if ( declineButton ) {
+				declineButton.addEventListener( 'click', dismissBanner );
 			}
 		}
 	} );
