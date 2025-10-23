@@ -171,7 +171,7 @@ $member_questions = new WP_Query(
 				<?php else : ?>
 					<p><?php esc_html_e( 'Aucune actualité récente pour vos secteurs.', 'cgt' ); ?></p>
 				<?php endif; ?>
-				<a class="btn btn-compact" href="<?php echo esc_url( get_post_type_archive_link( 'communiques_de_presse' ) ); ?>"><?php esc_html_e( 'Voir toutes les actualités', 'cgt' ); ?></a>
+				<a class="btn btn-compact" href="<?php echo esc_url( get_post_type_archive_link( 'communiques_de_presse' ) ); ?>"><?php esc_html_e( 'Voir plus', 'cgt' ); ?></a>
 			</div>
 
 			<div class="member-panel member-panel--agenda">
@@ -269,3 +269,6 @@ $member_questions = new WP_Query(
 		</section>
 	<?php endif; ?>
 </main>
+
+<?php
+get_footer();
