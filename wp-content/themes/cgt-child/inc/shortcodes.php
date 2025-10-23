@@ -407,81 +407,255 @@ function cgt_shortcode_submit_article() {
 
 	ob_start();
 
-	if ( ! empty( $message ) ) {
-		echo '<p class="notice">' . esc_html( $message ) . '</p>';
-	}
-
-	if ( ! empty( $errors ) ) {
-		echo '<ul class="notice">';
-		foreach ( $errors as $error ) {
-			echo '<li>' . esc_html( $error ) . '</li>';
-		}
-		echo '</ul>';
-	}
 	?>
-	<form class="cgt-submit-article" method="post" enctype="multipart/form-data">
-		<?php echo cgt_render_honeypot( 'cgt_hp_article' ); ?>
-		<h2><?php esc_html_e( 'Proposer un article', 'cgt' ); ?></h2>
-		<p class="form-intro"><?php esc_html_e( 'Page de publication Fédéral : Cette page est réservée à la publication de bulletins, tracts ou communications syndicales. Merci de ne partager que des informations utiles.', 'cgt' ); ?></p>
+	<div class="submit-article-page">
+		<div class="submit-article-container">
+			<!-- Header -->
+			<header class="submit-article-header">
+				<h1>
+					<span class="icon">✍️</span>
+					<?php esc_html_e( 'Proposer un article', 'cgt' ); ?>
+				</h1>
+				<p><?php esc_html_e( 'Partagez vos bulletins, tracts ou communications syndicales en quelques étapes simples.', 'cgt' ); ?></p>
+			</header>
 
-		<label>
-			<?php esc_html_e( 'Titre de l’article *', 'cgt' ); ?>
-			<input type="text" name="cgt_article_title" value="<?php echo isset( $title ) ? esc_attr( $title ) : ''; ?>" required placeholder="<?php esc_attr_e( 'Titre clair et accrocheur', 'cgt' ); ?>">
-		</label>
+			<?php if ( ! empty( $message ) ) : ?>
+				<div class="notice success">
+					<span style="font-size: 1.5rem;">✓</span>
+					<p><?php echo esc_html( $message ); ?></p>
+				</div>
+			<?php endif; ?>
 
-		<label>
-			<?php esc_html_e( 'Contenu *', 'cgt' ); ?>
-			<textarea name="cgt_article_content" rows="8" required placeholder="<?php esc_attr_e( 'Rédigez l\'article.', 'cgt' ); ?>"><?php echo isset( $content ) ? esc_textarea( $content ) : ''; ?></textarea>
-		</label>
+			<?php if ( ! empty( $errors ) ) : ?>
+				<div class="notice error">
+					<span style="font-size: 1.5rem;">⚠</span>
+					<div>
+						<strong><?php esc_html_e( 'Erreurs détectées :', 'cgt' ); ?></strong>
+						<ul>
+							<?php foreach ( $errors as $error ) : ?>
+								<li><?php echo esc_html( $error ); ?></li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+				</div>
+			<?php endif; ?>
 
-		<label>
-			<?php esc_html_e( 'Catégorie', 'cgt' ); ?>
-			<select name="cgt_article_category">
-				<option value=""><?php esc_html_e( '— Choisir —', 'cgt' ); ?></option>
-				<?php foreach ( $categories as $cat ) : ?>
-					<option value="<?php echo esc_attr( $cat->term_id ); ?>" <?php selected( isset( $category ) ? $category : '', $cat->term_id ); ?>><?php echo esc_html( $cat->name ); ?></option>
-				<?php endforeach; ?>
-			</select>
-		</label>
+			<!-- Progress Bar -->
+			<div class="progress-bar-container">
+				<div class="progress-steps">
+					<div class="progress-line" style="width: 0%"></div>
+					<div class="progress-step active" data-step="1">
+						<div class="progress-step-circle">1</div>
+						<span class="progress-step-label"><?php esc_html_e( 'Informations', 'cgt' ); ?></span>
+					</div>
+					<div class="progress-step" data-step="2">
+						<div class="progress-step-circle">2</div>
+						<span class="progress-step-label"><?php esc_html_e( 'Contenu', 'cgt' ); ?></span>
+					</div>
+					<div class="progress-step" data-step="3">
+						<div class="progress-step-circle">3</div>
+						<span class="progress-step-label"><?php esc_html_e( 'Médias', 'cgt' ); ?></span>
+					</div>
+					<div class="progress-step" data-step="4">
+						<div class="progress-step-circle">4</div>
+						<span class="progress-step-label"><?php esc_html_e( 'Coordonnées', 'cgt' ); ?></span>
+					</div>
+				</div>
+			</div>
 
-		<label>
-			<?php esc_html_e( 'Mots-clés', 'cgt' ); ?>
-			<input type="text" name="cgt_article_keywords" value="<?php echo isset( $keywords ) ? esc_attr( $keywords ) : ''; ?>" placeholder="<?php esc_attr_e( 'Ex: politique, économie', 'cgt' ); ?>">
-		</label>
+			<!-- Form -->
+			<form class="cgt-submit-article" method="post" enctype="multipart/form-data" id="article-form">
+				<?php echo cgt_render_honeypot( 'cgt_hp_article' ); ?>
+				<?php wp_nonce_field( 'cgt_submit_article', 'cgt_submit_article_nonce' ); ?>
 
-		<label>
-			<?php esc_html_e( 'Image à la une (JPG/PNG, max 5 Mo)', 'cgt' ); ?>
-			<input type="file" name="cgt_article_featured" accept="image/jpeg,image/png">
-		</label>
+				<!-- ÉTAPE 1: Informations de base -->
+				<div class="form-step active" data-step="1">
+					<div class="step-header">
+						<div class="step-icon">📝</div>
+						<h2><?php esc_html_e( 'Informations de l\'article', 'cgt' ); ?></h2>
+					</div>
+					<p class="step-description"><?php esc_html_e( 'Commencez par nous donner les informations essentielles sur votre article.', 'cgt' ); ?></p>
 
-		<label>
-			<?php esc_html_e( 'Fichier PDF (max 15 Mo)', 'cgt' ); ?>
-			<input type="file" name="cgt_article_pdf" accept="application/pdf">
-		</label>
+					<div class="form-group">
+						<label>
+							<?php esc_html_e( 'Titre de l\'article', 'cgt' ); ?> <span class="required">*</span>
+							<span class="hint"><?php esc_html_e( 'Un titre clair et accrocheur pour votre article', 'cgt' ); ?></span>
+						</label>
+						<input type="text" name="cgt_article_title" id="article-title" class="form-control" value="<?php echo isset( $title ) ? esc_attr( $title ) : ''; ?>" required placeholder="<?php esc_attr_e( 'Ex: Accord salarial 2024 signé', 'cgt' ); ?>">
+						<div class="char-counter" data-field="article-title" data-max="200"></div>
+						<span class="form-error-message"><?php esc_html_e( 'Le titre est requis', 'cgt' ); ?></span>
+					</div>
 
-		<label>
-			<?php esc_html_e( 'Votre nom *', 'cgt' ); ?>
-			<input type="text" name="cgt_article_author_name" value="<?php echo isset( $name ) ? esc_attr( $name ) : ''; ?>" required>
-		</label>
+					<div class="form-row">
+						<div class="form-group">
+							<label>
+								<?php esc_html_e( 'Catégorie', 'cgt' ); ?>
+								<span class="hint"><?php esc_html_e( 'Sélectionnez la catégorie la plus pertinente', 'cgt' ); ?></span>
+							</label>
+							<select name="cgt_article_category" id="article-category" class="form-control">
+								<option value=""><?php esc_html_e( '— Choisir une catégorie —', 'cgt' ); ?></option>
+								<?php foreach ( $categories as $cat ) : ?>
+									<option value="<?php echo esc_attr( $cat->term_id ); ?>" <?php selected( isset( $category ) ? $category : '', $cat->term_id ); ?>><?php echo esc_html( $cat->name ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
 
-		<label>
-			<?php esc_html_e( 'Votre email *', 'cgt' ); ?>
-			<input type="email" name="cgt_article_author_email" value="<?php echo isset( $email ) ? esc_attr( $email ) : ''; ?>" required>
-		</label>
+						<div class="form-group">
+							<label>
+								<?php esc_html_e( 'Mots-clés', 'cgt' ); ?>
+								<span class="hint"><?php esc_html_e( 'Séparés par des virgules', 'cgt' ); ?></span>
+							</label>
+							<input type="text" name="cgt_article_keywords" id="article-keywords" class="form-control" value="<?php echo isset( $keywords ) ? esc_attr( $keywords ) : ''; ?>" placeholder="<?php esc_attr_e( 'Ex: salaire, négociation, accord', 'cgt' ); ?>">
+						</div>
+					</div>
 
-		<label>
-			<?php esc_html_e( 'Sources', 'cgt' ); ?>
-			<textarea name="cgt_article_sources" rows="3" placeholder="<?php esc_attr_e( 'Indiquez vos références ou sources éventuelles.', 'cgt' ); ?>"><?php echo isset( $sources ) ? esc_textarea( $sources ) : ''; ?></textarea>
-		</label>
+					<div class="form-navigation">
+						<div></div>
+						<button type="button" class="btn btn-primary" data-next-step="2">
+							<?php esc_html_e( 'Suivant', 'cgt' ); ?> →
+						</button>
+					</div>
+				</div>
 
-		<label class="accept-cgv">
-			<input type="checkbox" name="cgt_article_accept_cgv" value="1" <?php checked( ! empty( $accept_cgv ) ); ?> required>
-			<span><?php esc_html_e( 'J’accepte les CGV. Le traitement se fait manuellement pour publier votre article. Celui-ci ne sera pas publié automatiquement. Pour toute question, contactez fsetud@cgt.fr.', 'cgt' ); ?></span>
-		</label>
+				<!-- ÉTAPE 2: Contenu -->
+				<div class="form-step" data-step="2">
+					<div class="step-header">
+						<div class="step-icon">📄</div>
+						<h2><?php esc_html_e( 'Contenu de l\'article', 'cgt' ); ?></h2>
+					</div>
+					<p class="step-description"><?php esc_html_e( 'Rédigez le contenu principal de votre article.', 'cgt' ); ?></p>
 
-		<?php wp_nonce_field( 'cgt_submit_article', 'cgt_submit_article_nonce' ); ?>
-		<button class="btn" type="submit"><?php esc_html_e( 'Soumettre l’article', 'cgt' ); ?></button>
-	</form>
+					<div class="form-group">
+						<label>
+							<?php esc_html_e( 'Contenu', 'cgt' ); ?> <span class="required">*</span>
+							<span class="hint"><?php esc_html_e( 'Rédigez votre article de manière claire et structurée', 'cgt' ); ?></span>
+						</label>
+						<textarea name="cgt_article_content" id="article-content" class="form-control" required placeholder="<?php esc_attr_e( 'Rédigez votre article...', 'cgt' ); ?>"><?php echo isset( $content ) ? esc_textarea( $content ) : ''; ?></textarea>
+						<div class="char-counter" data-field="article-content" data-max="10000"></div>
+						<span class="form-error-message"><?php esc_html_e( 'Le contenu est requis', 'cgt' ); ?></span>
+					</div>
+
+					<div class="form-group">
+						<label>
+							<?php esc_html_e( 'Sources et références', 'cgt' ); ?>
+							<span class="hint"><?php esc_html_e( 'Indiquez vos sources ou références si nécessaire', 'cgt' ); ?></span>
+						</label>
+						<textarea name="cgt_article_sources" id="article-sources" class="form-control" rows="4" placeholder="<?php esc_attr_e( 'Ex: Accord d\'entreprise du 15/01/2024, article INSEE...', 'cgt' ); ?>"><?php echo isset( $sources ) ? esc_textarea( $sources ) : ''; ?></textarea>
+					</div>
+
+					<div class="form-navigation">
+						<button type="button" class="btn btn-back" data-prev-step="1">
+							← <?php esc_html_e( 'Retour', 'cgt' ); ?>
+						</button>
+						<button type="button" class="btn btn-primary" data-next-step="3">
+							<?php esc_html_e( 'Suivant', 'cgt' ); ?> →
+						</button>
+					</div>
+				</div>
+
+				<!-- ÉTAPE 3: Médias -->
+				<div class="form-step" data-step="3">
+					<div class="step-header">
+						<div class="step-icon">🖼️</div>
+						<h2><?php esc_html_e( 'Fichiers et médias', 'cgt' ); ?></h2>
+					</div>
+					<p class="step-description"><?php esc_html_e( 'Ajoutez une image à la une ou un fichier PDF à votre article (facultatif).', 'cgt' ); ?></p>
+
+					<div class="form-group">
+						<label><?php esc_html_e( 'Image à la une', 'cgt' ); ?></label>
+						<div class="file-upload-container" id="image-upload-zone" data-field="cgt_article_featured">
+							<div class="file-upload-icon">📷</div>
+							<div class="file-upload-text"><?php esc_html_e( 'Cliquez ou glissez une image ici', 'cgt' ); ?></div>
+							<div class="file-upload-hint"><?php esc_html_e( 'JPG, PNG ou WebP - Max 5 Mo', 'cgt' ); ?></div>
+							<input type="file" name="cgt_article_featured" id="cgt_article_featured" accept="image/jpeg,image/png,image/webp">
+						</div>
+						<div class="image-preview" id="image-preview"></div>
+						<div class="file-preview" id="image-file-preview">
+							<span class="file-preview-icon">✓</span>
+							<div class="file-preview-info">
+								<div class="file-preview-name"></div>
+								<div class="file-preview-size"></div>
+							</div>
+							<button type="button" class="file-preview-remove" data-file="image"><?php esc_html_e( 'Supprimer', 'cgt' ); ?></button>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label><?php esc_html_e( 'Fichier PDF', 'cgt' ); ?></label>
+						<div class="file-upload-container" id="pdf-upload-zone" data-field="cgt_article_pdf">
+							<div class="file-upload-icon">📄</div>
+							<div class="file-upload-text"><?php esc_html_e( 'Cliquez ou glissez un PDF ici', 'cgt' ); ?></div>
+							<div class="file-upload-hint"><?php esc_html_e( 'PDF uniquement - Max 15 Mo', 'cgt' ); ?></div>
+							<input type="file" name="cgt_article_pdf" id="cgt_article_pdf" accept="application/pdf">
+						</div>
+						<div class="file-preview" id="pdf-file-preview">
+							<span class="file-preview-icon">✓</span>
+							<div class="file-preview-info">
+								<div class="file-preview-name"></div>
+								<div class="file-preview-size"></div>
+							</div>
+							<button type="button" class="file-preview-remove" data-file="pdf"><?php esc_html_e( 'Supprimer', 'cgt' ); ?></button>
+						</div>
+					</div>
+
+					<div class="form-navigation">
+						<button type="button" class="btn btn-back" data-prev-step="2">
+							← <?php esc_html_e( 'Retour', 'cgt' ); ?>
+						</button>
+						<button type="button" class="btn btn-primary" data-next-step="4">
+							<?php esc_html_e( 'Suivant', 'cgt' ); ?> →
+						</button>
+					</div>
+				</div>
+
+				<!-- ÉTAPE 4: Coordonnées -->
+				<div class="form-step" data-step="4">
+					<div class="step-header">
+						<div class="step-icon">👤</div>
+						<h2><?php esc_html_e( 'Vos coordonnées', 'cgt' ); ?></h2>
+					</div>
+					<p class="step-description"><?php esc_html_e( 'Pour finir, indiquez-nous vos coordonnées pour que nous puissions vous recontacter.', 'cgt' ); ?></p>
+
+					<div class="form-row">
+						<div class="form-group">
+							<label>
+								<?php esc_html_e( 'Votre nom', 'cgt' ); ?> <span class="required">*</span>
+							</label>
+							<input type="text" name="cgt_article_author_name" id="author-name" class="form-control" value="<?php echo isset( $name ) ? esc_attr( $name ) : ''; ?>" required placeholder="<?php esc_attr_e( 'Prénom Nom', 'cgt' ); ?>">
+							<span class="form-error-message"><?php esc_html_e( 'Le nom est requis', 'cgt' ); ?></span>
+						</div>
+
+						<div class="form-group">
+							<label>
+								<?php esc_html_e( 'Votre email', 'cgt' ); ?> <span class="required">*</span>
+							</label>
+							<input type="email" name="cgt_article_author_email" id="author-email" class="form-control" value="<?php echo isset( $email ) ? esc_attr( $email ) : ''; ?>" required placeholder="<?php esc_attr_e( 'votre.email@exemple.fr', 'cgt' ); ?>">
+							<span class="form-error-message"><?php esc_html_e( 'Un email valide est requis', 'cgt' ); ?></span>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="form-checkbox">
+							<input type="checkbox" name="cgt_article_accept_cgv" id="accept-cgv" value="1" <?php checked( ! empty( $accept_cgv ) ); ?> required>
+							<label for="accept-cgv">
+								<?php esc_html_e( 'J\'accepte que mon article soit traité manuellement par l\'équipe fédérale. Celui-ci ne sera pas publié automatiquement. Pour toute question, contactez', 'cgt' ); ?> <a href="mailto:fsetud@cgt.fr" style="color: var(--cgt-red); font-weight: 600;">fsetud@cgt.fr</a> <span class="required">*</span>
+							</label>
+						</div>
+						<span class="form-error-message"><?php esc_html_e( 'Vous devez accepter les conditions', 'cgt' ); ?></span>
+					</div>
+
+					<div class="form-navigation">
+						<button type="button" class="btn btn-back" data-prev-step="3">
+							← <?php esc_html_e( 'Retour', 'cgt' ); ?>
+						</button>
+						<button type="submit" class="btn btn-primary">
+							<?php esc_html_e( 'Soumettre l\'article', 'cgt' ); ?> ✓
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
 	<?php
 
 	return ob_get_clean();
