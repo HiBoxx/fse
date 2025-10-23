@@ -116,6 +116,25 @@ add_action(
 				true
 			);
 		}
+
+		// Charger les styles et scripts de la page Proposer un article
+		global $post;
+		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'cgt_submit_article' ) ) {
+			wp_enqueue_style(
+				'cgt-submit-article',
+				get_stylesheet_directory_uri() . '/assets/css/submit-article.css',
+				array( 'cgt-child' ),
+				CGT_CHILD_VERSION
+			);
+
+			wp_enqueue_script(
+				'cgt-submit-article',
+				get_stylesheet_directory_uri() . '/assets/js/submit-article.js',
+				array(),
+				CGT_CHILD_VERSION,
+				true
+			);
+		}
 	}
 );
 
