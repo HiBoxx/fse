@@ -24,10 +24,6 @@ $cgt_inc_files = array(
 	'security.php',
 	'adhesion.php',
 	'rate-limiting.php',
-	'optimizations.php', // Optimisations performance, sécurité et accessibilité
-	'brevo.php',
-	'admin-dashboard.php',
-	'agenda.php',
 );
 
 foreach ( $cgt_inc_files as $cgt_inc_file ) {
@@ -92,14 +88,6 @@ add_action(
 			CGT_CHILD_VERSION
 		);
 
-		// Charger les améliorations CSS (typographie, accessibilité, responsive)
-		wp_enqueue_style(
-			'cgt-improvements',
-			get_stylesheet_directory_uri() . '/assets/css/cgt-improvements.css',
-			array( 'cgt-child' ),
-			CGT_CHILD_VERSION
-		);
-
 		wp_enqueue_script(
 			'cgt',
 			get_stylesheet_directory_uri() . '/assets/js/cgt.js',
@@ -120,25 +108,6 @@ add_action(
 			wp_enqueue_script(
 				'cgt-connexion',
 				get_stylesheet_directory_uri() . '/assets/js/connexion.js',
-				array(),
-				CGT_CHILD_VERSION,
-				true
-			);
-		}
-
-		// Charger les styles et scripts pour le formulaire de proposition d'article
-		global $post;
-		if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'cgt_submit_article' ) ) {
-			wp_enqueue_style(
-				'cgt-article-submission',
-				get_stylesheet_directory_uri() . '/assets/css/article-submission.css',
-				array( 'cgt-child' ),
-				CGT_CHILD_VERSION
-			);
-
-			wp_enqueue_script(
-				'cgt-article-submission',
-				get_stylesheet_directory_uri() . '/assets/js/article-submission.js',
 				array(),
 				CGT_CHILD_VERSION,
 				true
@@ -399,42 +368,3 @@ function cgt_login_redirect( $redirect_to, $requested_redirect_to, $user ) {
 	return home_url( '/espace-adherent' );
 }
 add_filter( 'login_redirect', 'cgt_login_redirect', 10, 3 );
-
-/**
- * Disable comments globally (front + back office).
- */
-add_action( 'init', 'cgt_disable_comments_support', 20 );
-function cgt_disable_comments_support() {
-	foreach ( get_post_types() as $post_type ) {
-		if ( post_type_supports( $post_type, 'comments' ) ) {
-			remove_post_type_support( $post_type, 'comments' );
-			remove_post_type_support( $post_type, 'trackbacks' );
-		}
-	}
-}
-
-add_filter( 'comments_open', '__return_false', 20, 2 );
-add_filter( 'pings_open', '__return_false', 20, 2 );
-add_filter( 'comments_array', '__return_empty_array', 20, 2 );
-
-add_action( 'admin_menu', 'cgt_disable_comments_admin_menu' );
-function cgt_disable_comments_admin_menu() {
-	remove_menu_page( 'edit-comments.php' );
-}
-
-add_action( 'admin_init', 'cgt_disable_comments_admin_redirect' );
-function cgt_disable_comments_admin_redirect() {
-	global $pagenow;
-	if ( 'edit-comments.php' === $pagenow ) {
-		wp_safe_redirect( admin_url() );
-		exit;
-	}
-}
-
-add_action( 'wp_before_admin_bar_render', 'cgt_remove_comments_admin_bar' );
-function cgt_remove_comments_admin_bar() {
-	if ( is_admin_bar_showing() ) {
-		global $wp_admin_bar;
-		$wp_admin_bar->remove_menu( 'comments' );
-	}
-}
