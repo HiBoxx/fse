@@ -84,15 +84,44 @@ function cgt_filter_private_content( $query ) {
 add_action( 'pre_get_posts', 'cgt_filter_private_content' );
 
 /**
- * Restrict access to private tracts directly.
+ * Restrict access to private tracts and member-only content directly.
  */
 function cgt_redirect_private_single() {
+	// Vérifier les tracts privés
 	if ( is_singular( 'tracts' ) ) {
 		$visibility = get_post_meta( get_queried_object_id(), 'cgt_visibilite', true );
 		if ( 'prive' === $visibility && ! cgt_user_can_read_private() ) {
-			wp_safe_redirect( wp_login_url( get_permalink() ) );
-			exit;
+			// Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+			if ( ! is_user_logged_in() ) {
+				wp_safe_redirect( wp_login_url( get_permalink() ) );
+				exit;
+			}
+
+			// Si l'utilisateur est connecté mais n'a pas les droits, afficher 403
+			wp_die(
+				'<h1>Accès refusé</h1><p>Ce contenu est réservé aux adhérents de la CGT. Veuillez vous connecter avec un compte adhérent valide.</p>',
+				'Accès refusé',
+				array( 'response' => 403 )
+			);
+		}
+	}
+
+	// Vérifier les articles réservés aux membres
+	if ( is_singular( 'articles_adherents' ) ) {
+		if ( ! cgt_user_can_read_private() ) {
+			// Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+			if ( ! is_user_logged_in() ) {
+				wp_safe_redirect( wp_login_url( get_permalink() ) );
+				exit;
+			}
+
+			// Si l'utilisateur est connecté mais n'a pas les droits, afficher 403
+			wp_die(
+				'<h1>Accès refusé</h1><p>Ce contenu est réservé aux adhérents de la CGT. Veuillez vous connecter avec un compte adhérent valide.</p>',
+				'Accès refusé',
+				array( 'response' => 403 )
+			);
 		}
 	}
 }
-add_action( 'template_redirect', 'cgt_redirect_private_single' );
+add_action( 'template_redirect', 'cgt_redirect_private_single', 1 );

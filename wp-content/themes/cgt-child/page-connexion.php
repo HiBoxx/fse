@@ -220,7 +220,8 @@ if ( $requested_redirect ) {
                     <div class="cotisation-text">
                         <strong>Cotisations en ligne</strong>
                         <p>Les cotisations en ligne seront disponibles prochainement. Pour l'instant, veuillez contacter :</p>
-                        <a href="mailto:admfsetud@cgt.fr" class="email-link">admfsetud@cgt.fr</a>
+                        <?php $cgt_email = defined( 'CGT_ADMIN_EMAIL' ) ? CGT_ADMIN_EMAIL : 'admfsetud@cgt.fr'; ?>
+                        <a href="mailto:<?php echo esc_attr( $cgt_email ); ?>" class="email-link"><?php echo esc_html( $cgt_email ); ?></a>
                     </div>
                 </div>
 
@@ -265,6 +266,7 @@ if ( $requested_redirect ) {
                     <form id="adhesion-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data">
                         <?php wp_nonce_field('cgt_adhesion_nonce', 'adhesion_nonce'); ?>
                         <input type="hidden" name="action" value="cgt_adhesion_submit">
+                        <?php echo cgt_render_honeypot( 'cgt_hp_adhesion' ); ?>
 
                         <!-- SECTION 1: INFORMATIONS SYNDIQUÉ-E -->
                         <div class="form-section">
