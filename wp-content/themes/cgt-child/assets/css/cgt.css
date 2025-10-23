@@ -1137,6 +1137,10 @@ a:focus {
 	gap: 1rem;
 }
 
+.member-panel .btn {
+	justify-self: flex-start;
+}
+
 .member-panel h2 {
 	margin: 0;
 	font-size: 1.6rem;
@@ -1202,6 +1206,54 @@ a:focus {
 .member-branch-panel h3 {
 	margin: 0;
 	font-size: 1.1rem;
+}
+
+.member-library-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-bottom: 1.5rem;
+}
+
+.member-library-controls select,
+.member-library-controls input[type="search"] {
+	padding: 0.65rem 0.85rem;
+	border-radius: var(--radius);
+	border: 1px solid rgba(17, 17, 17, 0.18);
+	font: inherit;
+}
+
+.member-library-grid {
+	display: grid;
+	gap: var(--gap);
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.member-library-card {
+	background: rgba(229, 231, 235, 0.45);
+	border-radius: var(--radius);
+	padding: 1.4rem;
+	display: grid;
+	gap: 0.6rem;
+}
+
+.member-library-card time {
+	font-size: 0.85rem;
+	color: rgba(17, 17, 17, 0.6);
+}
+
+.member-library-card h3 {
+	margin: 0;
+	font-size: 1.1rem;
+}
+
+.member-library-card h3 a {
+	color: var(--cgt-black);
+}
+
+.member-library-card p {
+	margin: 0;
+	font-size: 0.95rem;
 }
 
 .member-faq details {

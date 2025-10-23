@@ -136,3 +136,163 @@ add_action(
  * Run activation tasks when theme is switched.
  */
 add_action( 'after_switch_theme', 'cgt_after_switch_theme' );
+
+/**
+ * Helper to retrieve the custom login page URL.
+ *
+ * @return string
+ */
+function cgt_get_login_page_url() {
+	static $cached_url = null;
+
+	if ( null !== $cached_url ) {
+		return $cached_url;
+	}
+
+	$login_page = get_page_by_path( 'connexion' );
+	if ( $login_page && 'publish' === get_post_status( $login_page ) ) {
+		$cached_url = get_permalink( $login_page );
+		return $cached_url;
+	}
+
+	$by_template = get_posts(
+		array(
+			'post_type'      => 'page',
+			'post_status'    => 'publish',
+			'posts_per_page' => 1,
+			'no_found_rows'  => true,
+			'fields'         => 'ids',
+			'meta_key'       => '_wp_page_template',
+			'meta_value'     => 'page-connexion.php',
+		)
+	);
+
+	if ( ! empty( $by_template ) ) {
+		$cached_url = get_permalink( $by_template[0] );
+		return $cached_url;
+	}
+
+	$cached_url = '';
+	return $cached_url;
+}
+
+/**
+ * Redirect default wp-login.php access to the custom login page.
+ */
+function cgt_redirect_default_login() {
+	$requested = $_SERVER['REQUEST_URI'] ?? '';
+	if ( false === strpos( $requested, 'wp-login.php' ) ) {
+		return;
+	}
+
+	$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
+	if ( in_array(
+		$action,
+		array( 'logout', 'lostpassword', 'retrievepassword', 'rp', 'resetpass', 'confirm_admin_email', 'postpass' ),
+		true
+	) ) {
+		return;
+	}
+
+	$login_page = cgt_get_login_page_url();
+	if ( $login_page ) {
+		$args = array();
+		if ( ! empty( $_GET['redirect_to'] ) ) {
+			$args['redirect_to'] = rawurlencode( wp_unslash( $_GET['redirect_to'] ) );
+		}
+		if ( ! empty( $_GET['reauth'] ) ) {
+			$args['reauth'] = '1';
+		}
+		if ( $action ) {
+			$args['action'] = $action;
+		}
+		if ( ! empty( $_GET['loggedout'] ) ) {
+			$args['loggedout'] = 'true';
+		}
+
+		if ( $args ) {
+			$login_page = add_query_arg( $args, $login_page );
+		}
+
+		wp_safe_redirect( $login_page );
+		exit;
+	}
+}
+add_action( 'login_init', 'cgt_redirect_default_login', 1 );
+
+/**
+ * Filters login related URLs to point to the custom page.
+ *
+ * @param string $url     The URL to filter.
+ * @param string $redirect Redirect destination.
+ * @param bool   $force_reauth Whether re-authentication is being forced.
+ *
+ * @return string
+ */
+function cgt_filter_login_url( $url, $redirect, $force_reauth ) {
+	$login_page = cgt_get_login_page_url();
+	if ( ! $login_page ) {
+		return $url;
+	}
+
+	$args = array();
+	if ( ! empty( $redirect ) ) {
+		$args['redirect_to'] = rawurlencode( $redirect );
+	}
+	if ( $force_reauth ) {
+		$args['reauth'] = '1';
+	}
+
+	return $args ? add_query_arg( $args, $login_page ) : $login_page;
+}
+add_filter( 'login_url', 'cgt_filter_login_url', 10, 3 );
+
+/**
+ * Ensure logout url continues to use default behaviour but with redirect back to custom login page.
+ *
+ * @param string $logout_url Logout URL.
+ * @param string $redirect   Redirect destination.
+ *
+ * @return string
+ */
+function cgt_filter_logout_url( $logout_url, $redirect ) {
+ $login_page = cgt_get_login_page_url();
+ if ( ! $login_page ) {
+  return $logout_url;
+ }
+
+ return add_query_arg(
+  'redirect_to',
+  rawurlencode( $login_page ),
+  $logout_url
+ );
+}
+add_filter( 'logout_url', 'cgt_filter_logout_url', 10, 2 );
+
+/**
+ * Filter register and lost password URLs to the custom page.
+ */
+function cgt_filter_register_url( $register_url ) {
+	$login_page = cgt_get_login_page_url();
+	if ( ! $login_page ) {
+		return $register_url;
+	}
+
+	return add_query_arg( 'action', 'register', $login_page );
+}
+add_filter( 'register_url', 'cgt_filter_register_url' );
+
+function cgt_filter_lostpassword_url( $lostpassword_url, $redirect ) {
+	$login_page = cgt_get_login_page_url();
+	if ( ! $login_page ) {
+		return $lostpassword_url;
+	}
+
+	$args = array( 'action' => 'lostpassword' );
+	if ( ! empty( $redirect ) ) {
+		$args['redirect_to'] = rawurlencode( $redirect );
+	}
+
+	return add_query_arg( $args, $login_page );
+}
+add_filter( 'lostpassword_url', 'cgt_filter_lostpassword_url', 10, 2 );

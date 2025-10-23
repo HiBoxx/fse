@@ -182,7 +182,7 @@ get_header();
                                 Informations syndiqué-e
                             </h3>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-6">
                                     <label for="nom">Nom <span class="required">*</span></label>
                                     <input type="text" name="nom" id="nom" class="form-control" required>
@@ -193,7 +193,7 @@ get_header();
                                 </div>
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-4">
                                     <label for="sexe">Sexe <span class="required">*</span></label>
                                     <select name="sexe" id="sexe" class="form-control" required>
@@ -222,7 +222,7 @@ get_header();
                                 <input type="text" name="adresse" id="adresse" class="form-control" required>
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-4">
                                     <label for="code_postal">Code postal <span class="required">*</span></label>
                                     <input type="text" name="code_postal" id="code_postal" class="form-control" required pattern="[0-9]{5}">
@@ -233,7 +233,7 @@ get_header();
                                 </div>
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-6">
                                     <label for="tel">Téléphone <span class="required">*</span></label>
                                     <input type="tel" name="tel" id="tel" class="form-control" required pattern="[0-9]{10}">
@@ -244,7 +244,7 @@ get_header();
                                 </div>
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-6">
                                     <label for="statut">Statut <span class="required">*</span></label>
                                     <select name="statut" id="statut" class="form-control" required>
@@ -279,7 +279,7 @@ get_header();
                                 Informations sur l'entreprise
                             </h3>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-8">
                                     <label for="entreprise_nom">Nom de l'entreprise <span class="required">*</span></label>
                                     <input type="text" name="entreprise_nom" id="entreprise_nom" class="form-control" required>
@@ -300,7 +300,7 @@ get_header();
                                 <input type="text" name="entreprise_adresse" id="entreprise_adresse" class="form-control">
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-4">
                                     <label for="entreprise_code_postal">Code postal</label>
                                     <input type="text" name="entreprise_code_postal" id="entreprise_code_postal" class="form-control" pattern="[0-9]{5}">
@@ -311,7 +311,7 @@ get_header();
                                 </div>
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-6">
                                     <label for="entreprise_tel">Téléphone</label>
                                     <input type="tel" name="entreprise_tel" id="entreprise_tel" class="form-control">
@@ -322,7 +322,7 @@ get_header();
                                 </div>
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-6">
                                     <label for="secteur">Secteur</label>
                                     <input type="text" name="secteur" id="secteur" class="form-control">
@@ -343,7 +343,7 @@ get_header();
                                 <input type="text" name="effectif" id="effectif" class="form-control" placeholder="Nombre d'employés">
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row form-row--gapped">
                                 <div class="form-group col-6">
                                     <label for="union_locale">Union Locale</label>
                                     <input type="text" name="union_locale" id="union_locale" class="form-control">

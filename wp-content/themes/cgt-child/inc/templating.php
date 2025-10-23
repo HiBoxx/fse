@@ -130,6 +130,11 @@ function cgt_setup_pages_and_menus() {
 			'post_title'        => __( 'Espace Adhérent', 'cgt' ),
 			'_wp_page_template' => 'templates/page-espace-adherent.php',
 		),
+		'connexion'           => array(
+			'post_title'        => __( 'Connexion', 'cgt' ),
+			'_wp_page_template' => 'page-connexion.php',
+			'post_content'      => '<!-- Connexion et formulaire d’adhésion -->',
+		),
 		'publier-article'     => array(
 			'post_title'   => __( 'Proposer un article', 'cgt' ),
 			'post_content' => '[cgt_submit_article]',
@@ -297,6 +302,21 @@ function cgt_setup_pages_and_menus() {
 		)
 	);
 }
+
+/**
+ * Ensure critical pages (connexion, etc.) exist even après activation.
+ */
+function cgt_ensure_login_page_exists() {
+	if ( function_exists( 'cgt_get_login_page_url' ) && cgt_get_login_page_url() ) {
+		return;
+	}
+
+	// Vérifie uniquement si la page connexion est absente.
+	if ( ! get_page_by_path( 'connexion', OBJECT, 'page' ) ) {
+		cgt_setup_pages_and_menus();
+	}
+}
+add_action( 'init', 'cgt_ensure_login_page_exists', 20 );
 
 /**
  * Seed demo content demanded by specs.
