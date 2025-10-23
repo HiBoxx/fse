@@ -23,6 +23,7 @@ $cgt_inc_files = array(
 	'templating.php',
 	'security.php',
 	'adhesion.php',
+	'rate-limiting.php',
 );
 
 foreach ( $cgt_inc_files as $cgt_inc_file ) {

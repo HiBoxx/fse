@@ -19,6 +19,17 @@ function cgt_adhesion_submit_handler() {
         wp_die( 'Erreur de sécurité. Veuillez réessayer.' );
     }
 
+    // Vérification du honeypot (anti-spam)
+    if ( ! cgt_check_honeypot( 'cgt_hp_adhesion' ) ) {
+        cgt_log_spam_attempt( 'adhesion', $_POST );
+        wp_die( 'Erreur de validation. Veuillez réessayer.' );
+    }
+
+    // Vérification du rate limiting (3 soumissions max par heure)
+    if ( ! cgt_check_rate_limit( 'adhesion', 3, 3600 ) ) {
+        wp_die( 'Vous avez atteint la limite de soumissions. Veuillez réessayer plus tard.' );
+    }
+
     // Récupération et sanitization des données
     $data = array(
         // Informations personnelles
@@ -208,7 +219,7 @@ function cgt_send_adhesion_notification( $post_id, $data ) {
     wp_mail( $admin_email, $subject, $message, $headers );
 
     // Envoyer aussi à l'email de contact CGT si différent
-    $cgt_email = 'admfsetud@cgt.fr';
+    $cgt_email = defined( 'CGT_ADMIN_EMAIL' ) ? CGT_ADMIN_EMAIL : 'admfsetud@cgt.fr';
     if ( $cgt_email !== $admin_email ) {
         wp_mail( $cgt_email, $subject, $message, $headers );
     }
@@ -229,7 +240,8 @@ function cgt_send_adhesion_confirmation( $data ) {
     $message .= "- Email : {$data['email']}\n";
     $message .= "- Entreprise : {$data['entreprise_nom']}\n\n";
     $message .= "Un responsable vous contactera prochainement pour finaliser votre adhésion et vous informer sur les modalités de cotisation.\n\n";
-    $message .= "Pour toute question, vous pouvez nous contacter à : admfsetud@cgt.fr\n\n";
+    $cgt_contact_email = defined( 'CGT_ADMIN_EMAIL' ) ? CGT_ADMIN_EMAIL : 'admfsetud@cgt.fr';
+    $message .= "Pour toute question, vous pouvez nous contacter à : {$cgt_contact_email}\n\n";
     $message .= "Cordialement,\n";
     $message .= "L'équipe CGT";
 

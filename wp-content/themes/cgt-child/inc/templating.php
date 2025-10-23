@@ -87,13 +87,52 @@ function cgt_create_demo_adherent_user() {
 		return;
 	}
 
-	$user_id = wp_create_user( 'demo_adherent', 'Demo@123456', 'demo_adherent@example.com' );
+	// Génération d'un mot de passe aléatoire sécurisé
+	$random_password = wp_generate_password( 16, true, true );
+
+	$user_id = wp_create_user( 'demo_adherent', $random_password, 'demo_adherent@example.com' );
 	if ( is_wp_error( $user_id ) ) {
 		return;
 	}
 
 	$user = new WP_User( $user_id );
 	$user->set_role( 'adherent' );
+
+	// Stocker le mot de passe temporairement pour l'admin (sera supprimé après consultation)
+	update_option( 'cgt_demo_password_temp', $random_password );
+
+	// Ajouter une notification admin
+	add_action( 'admin_notices', 'cgt_demo_user_created_notice' );
+}
+
+/**
+ * Afficher une notice admin avec le mot de passe demo
+ */
+function cgt_demo_user_created_notice() {
+	$temp_password = get_option( 'cgt_demo_password_temp' );
+	if ( ! $temp_password ) {
+		return;
+	}
+
+	echo '<div class="notice notice-warning is-dismissible">';
+	echo '<p><strong>Utilisateur demo créé :</strong></p>';
+	echo '<p>Nom d\'utilisateur : <code>demo_adherent</code></p>';
+	echo '<p>Mot de passe : <code>' . esc_html( $temp_password ) . '</code></p>';
+	echo '<p><em>Copiez ce mot de passe maintenant. Pour des raisons de sécurité, il ne sera plus affiché.</em></p>';
+	echo '<p><a href="' . esc_url( admin_url( 'options-general.php?cgt_clear_demo_password=1' ) ) . '" class="button">J\'ai copié le mot de passe</a></p>';
+	echo '</div>';
+}
+
+/**
+ * Supprimer le mot de passe temporaire après consultation
+ */
+add_action( 'admin_init', 'cgt_clear_demo_password' );
+function cgt_clear_demo_password() {
+	if ( isset( $_GET['cgt_clear_demo_password'] ) && current_user_can( 'manage_options' ) ) {
+		delete_option( 'cgt_demo_password_temp' );
+		wp_safe_redirect( admin_url() );
+		exit;
+	}
 }
 
 /**

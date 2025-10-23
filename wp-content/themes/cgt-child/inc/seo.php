@@ -76,24 +76,49 @@ add_filter( 'query_vars', 'cgt_sitemap_query_vars' );
 
 /**
  * Output a lightweight sitemap when requested.
+ * Supports pagination with 500 URLs per page.
  */
 function cgt_maybe_output_sitemap() {
 	if ( ! get_query_var( 'cgt_sitemap' ) ) {
 		return;
 	}
 
+	// Limite Google : 50,000 URLs par sitemap, on utilise 500 pour la performance
+	$posts_per_sitemap = 500;
+	$page = isset( $_GET['page'] ) ? max( 1, absint( $_GET['page'] ) ) : 1;
+	$offset = ( $page - 1 ) * $posts_per_sitemap;
+
+	// Compter le total de posts pour savoir s'il faut paginer
+	$total_posts = wp_count_posts();
+	$total_public_posts = 0;
+	$post_types = array( 'page', 'post', 'communiques_de_presse', 'dossiers_de_presse', 'tracts', 'branch' );
+
+	foreach ( $post_types as $type ) {
+		$counts = wp_count_posts( $type );
+		if ( isset( $counts->publish ) ) {
+			$total_public_posts += $counts->publish;
+		}
+	}
+
+	// Récupérer les posts pour cette page
 	$posts = get_posts(
 		array(
-			'post_type'      => array( 'page', 'post', 'communiques_de_presse', 'dossiers_de_presse', 'tracts', 'branch' ),
+			'post_type'      => $post_types,
 			'post_status'    => 'publish',
-			'numberposts'    => 200,
+			'numberposts'    => $posts_per_sitemap,
+			'offset'         => $offset,
 			'orderby'        => 'modified',
 			'order'          => 'DESC',
 			'meta_query'     => array(
+				'relation' => 'OR',
 				array(
 					'key'     => 'cgt_visibilite',
 					'value'   => 'prive',
 					'compare' => '!=',
+				),
+				array(
+					'key'     => 'cgt_visibilite',
+					'compare' => 'NOT EXISTS',
 				),
 			),
 		)
@@ -101,15 +126,52 @@ function cgt_maybe_output_sitemap() {
 
 	header( 'Content-Type: application/xml; charset=' . get_option( 'blog_charset' ) );
 	echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) ) . "\"?>\n";
-	echo "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
-	foreach ( $posts as $post ) {
-		printf(
-			"<url>\n<loc>%s</loc>\n<lastmod>%s</lastmod>\n</url>\n",
-			esc_url( get_permalink( $post ) ),
-			esc_html( gmdate( 'Y-m-d\TH:i:s\Z', strtotime( $post->post_modified_gmt ) ) )
-		);
+
+	// Si c'est la première page et qu'il y a plus de 500 posts, créer un index de sitemaps
+	if ( 1 === $page && $total_public_posts > $posts_per_sitemap ) {
+		echo '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+		$total_pages = ceil( $total_public_posts / $posts_per_sitemap );
+		for ( $i = 1; $i <= $total_pages; $i++ ) {
+			$sitemap_url = home_url( '/cgt-sitemap.xml?page=' . $i );
+			printf(
+				"<sitemap>\n<loc>%s</loc>\n<lastmod>%s</lastmod>\n</sitemap>\n",
+				esc_url( $sitemap_url ),
+				esc_html( gmdate( 'Y-m-d\TH:i:s\Z' ) )
+			);
+		}
+		echo '</sitemapindex>';
+	} else {
+		// Sitemap classique avec les URLs
+		echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+		// Ajouter la homepage en priorité
+		if ( 1 === $page ) {
+			printf(
+				"<url>\n<loc>%s</loc>\n<lastmod>%s</lastmod>\n<priority>1.0</priority>\n</url>\n",
+				esc_url( home_url( '/' ) ),
+				esc_html( gmdate( 'Y-m-d\TH:i:s\Z' ) )
+			);
+		}
+
+		// Ajouter les posts
+		foreach ( $posts as $post ) {
+			// Définir la priorité selon le type de contenu
+			$priority = 0.5;
+			if ( 'page' === $post->post_type ) {
+				$priority = 0.8;
+			} elseif ( in_array( $post->post_type, array( 'post', 'communiques_de_presse' ), true ) ) {
+				$priority = 0.7;
+			}
+
+			printf(
+				"<url>\n<loc>%s</loc>\n<lastmod>%s</lastmod>\n<priority>%.1f</priority>\n</url>\n",
+				esc_url( get_permalink( $post ) ),
+				esc_html( gmdate( 'Y-m-d\TH:i:s\Z', strtotime( $post->post_modified_gmt ) ) ),
+				$priority
+			);
+		}
+		echo '</urlset>';
 	}
-	echo "</urlset>";
 	exit;
 }
 add_action( 'template_redirect', 'cgt_maybe_output_sitemap' );

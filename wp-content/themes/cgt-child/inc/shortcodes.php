@@ -8,6 +8,33 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Obtenir le type MIME réel d'un fichier (sécurisé)
+ *
+ * @param string $file_path Chemin vers le fichier temporaire.
+ * @return string|false Type MIME ou false en cas d'erreur.
+ */
+function cgt_get_file_mime_type( $file_path ) {
+	// Utiliser finfo pour une détection fiable du type MIME
+	if ( function_exists( 'finfo_open' ) ) {
+		$finfo = finfo_open( FILEINFO_MIME_TYPE );
+		if ( $finfo ) {
+			$mime_type = finfo_file( $finfo, $file_path );
+			finfo_close( $finfo );
+			return $mime_type;
+		}
+	}
+
+	// Fallback avec mime_content_type si finfo n'est pas disponible
+	if ( function_exists( 'mime_content_type' ) ) {
+		return mime_content_type( $file_path );
+	}
+
+	// Dernier recours : utiliser wp_check_filetype
+	$filetype = wp_check_filetype( $file_path );
+	return $filetype['type'] ?? false;
+}
+
+/**
  * Render the tracts shortcode.
  *
  * @return string
@@ -176,6 +203,11 @@ function cgt_shortcode_questions() {
 			$message = __( 'Vous devez être connecté pour poser une question.', 'cgt' );
 		} elseif ( ! wp_verify_nonce( sanitize_key( $_POST['cgt_question_nonce'] ), 'cgt_question' ) ) {
 			$message = __( 'Jeton de sécurité invalide.', 'cgt' );
+		} elseif ( ! cgt_check_honeypot( 'cgt_hp_question' ) ) {
+			cgt_log_spam_attempt( 'question', $_POST );
+			$message = __( 'Erreur de validation.', 'cgt' );
+		} elseif ( ! cgt_check_rate_limit( 'question', 5, 3600 ) ) {
+			$message = __( 'Vous avez atteint la limite de questions. Veuillez réessayer plus tard.', 'cgt' );
 		} else {
 			$question = isset( $_POST['cgt_question'] ) ? wp_kses_post( wp_unslash( $_POST['cgt_question'] ) ) : '';
 			$subject  = isset( $_POST['cgt_question_subject'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_question_subject'] ) ) : '';
@@ -237,6 +269,7 @@ function cgt_shortcode_questions() {
 	}
 	?>
 	<form class="question-form" method="post">
+		<?php echo cgt_render_honeypot( 'cgt_hp_question' ); ?>
 		<label>
 			<?php esc_html_e( 'Sujet (optionnel)', 'cgt' ); ?>
 			<input type="text" name="cgt_question_subject" maxlength="120">
@@ -266,6 +299,11 @@ function cgt_shortcode_submit_article() {
 	if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['cgt_submit_article_nonce'] ) ) {
 		if ( ! wp_verify_nonce( sanitize_key( $_POST['cgt_submit_article_nonce'] ), 'cgt_submit_article' ) ) {
 			$errors[] = __( 'Jeton de sécurité invalide. Merci de recharger la page.', 'cgt' );
+		} elseif ( ! cgt_check_honeypot( 'cgt_hp_article' ) ) {
+			cgt_log_spam_attempt( 'article', $_POST );
+			$errors[] = __( 'Erreur de validation.', 'cgt' );
+		} elseif ( ! cgt_check_rate_limit( 'article', 3, 3600 ) ) {
+			$errors[] = __( 'Vous avez atteint la limite de soumissions. Veuillez réessayer plus tard.', 'cgt' );
 		} else {
 			$title      = isset( $_POST['cgt_article_title'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_title'] ) ) : '';
 			$content    = isset( $_POST['cgt_article_content'] ) ? wp_kses_post( wp_unslash( $_POST['cgt_article_content'] ) ) : '';
@@ -310,21 +348,54 @@ function cgt_shortcode_submit_article() {
 					update_post_meta( $post_id, 'cgt_submission_email', $email );
 					update_post_meta( $post_id, 'cgt_submission_sources', $sources );
 
+					// Upload de l'image avec validation MIME
 					if ( ! empty( $_FILES['cgt_article_featured']['name'] ) ) {
-						$attachment_id = media_handle_upload( 'cgt_article_featured', $post_id );
-						if ( ! is_wp_error( $attachment_id ) ) {
-							set_post_thumbnail( $post_id, $attachment_id );
+						// Validation MIME pour les images
+						$allowed_image_types = array( 'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp' );
+						$file_mime_type = cgt_get_file_mime_type( $_FILES['cgt_article_featured']['tmp_name'] );
+
+						if ( in_array( $file_mime_type, $allowed_image_types, true ) ) {
+							// Validation de la taille (5 MB max)
+							if ( $_FILES['cgt_article_featured']['size'] <= 5 * 1024 * 1024 ) {
+								$attachment_id = media_handle_upload( 'cgt_article_featured', $post_id );
+								if ( ! is_wp_error( $attachment_id ) ) {
+									set_post_thumbnail( $post_id, $attachment_id );
+								} else {
+									$errors[] = __( 'Erreur lors du téléchargement de l\'image.', 'cgt' );
+								}
+							} else {
+								$errors[] = __( 'L\'image est trop volumineuse (max 5 MB).', 'cgt' );
+							}
+						} else {
+							$errors[] = __( 'Format d\'image non autorisé. Utilisez JPG, PNG, GIF ou WebP.', 'cgt' );
 						}
 					}
 
+					// Upload du PDF avec validation MIME
 					if ( ! empty( $_FILES['cgt_article_pdf']['name'] ) ) {
-						$pdf_id = media_handle_upload( 'cgt_article_pdf', $post_id );
-						if ( ! is_wp_error( $pdf_id ) ) {
-							update_post_meta( $post_id, 'cgt_submission_pdf', $pdf_id );
+						// Validation MIME pour les PDF
+						$file_mime_type = cgt_get_file_mime_type( $_FILES['cgt_article_pdf']['tmp_name'] );
+
+						if ( 'application/pdf' === $file_mime_type ) {
+							// Validation de la taille (15 MB max)
+							if ( $_FILES['cgt_article_pdf']['size'] <= 15 * 1024 * 1024 ) {
+								$pdf_id = media_handle_upload( 'cgt_article_pdf', $post_id );
+								if ( ! is_wp_error( $pdf_id ) ) {
+									update_post_meta( $post_id, 'cgt_submission_pdf', $pdf_id );
+								} else {
+									$errors[] = __( 'Erreur lors du téléchargement du PDF.', 'cgt' );
+								}
+							} else {
+								$errors[] = __( 'Le PDF est trop volumineux (max 15 MB).', 'cgt' );
+							}
+						} else {
+							$errors[] = __( 'Seuls les fichiers PDF sont autorisés.', 'cgt' );
 						}
 					}
 
-					$message = __( 'Merci ! Votre article a été soumis et se trouve en attente de validation.', 'cgt' );
+					if ( empty( $errors ) ) {
+						$message = __( 'Merci ! Votre article a été soumis et se trouve en attente de validation.', 'cgt' );
+					}
 				} else {
 					$errors[] = __( 'Une erreur est survenue lors de la soumission. Merci de réessayer.', 'cgt' );
 				}
@@ -349,6 +420,7 @@ function cgt_shortcode_submit_article() {
 	}
 	?>
 	<form class="cgt-submit-article" method="post" enctype="multipart/form-data">
+		<?php echo cgt_render_honeypot( 'cgt_hp_article' ); ?>
 		<h2><?php esc_html_e( 'Proposer un article', 'cgt' ); ?></h2>
 		<p class="form-intro"><?php esc_html_e( 'Page de publication Fédéral : Cette page est réservée à la publication de bulletins, tracts ou communications syndicales. Merci de ne partager que des informations utiles.', 'cgt' ); ?></p>
 
@@ -428,6 +500,11 @@ function cgt_contact_form_shortcode() {
 	if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['cgt_contact_nonce'] ) ) {
 		if ( ! wp_verify_nonce( sanitize_key( $_POST['cgt_contact_nonce'] ), 'cgt_contact_form' ) ) {
 			$errors[] = __( 'Jeton de sécurité invalide. Merci de recharger la page.', 'cgt' );
+		} elseif ( ! cgt_check_honeypot( 'cgt_hp_contact' ) ) {
+			cgt_log_spam_attempt( 'contact', $_POST );
+			$errors[] = __( 'Erreur de validation.', 'cgt' );
+		} elseif ( ! cgt_check_rate_limit( 'contact', 5, 3600 ) ) {
+			$errors[] = __( 'Vous avez atteint la limite de messages. Veuillez réessayer plus tard.', 'cgt' );
 		} else {
 			$name    = isset( $_POST['cgt_contact_name'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_contact_name'] ) ) : '';
 			$email   = isset( $_POST['cgt_contact_email'] ) ? sanitize_email( wp_unslash( $_POST['cgt_contact_email'] ) ) : '';
@@ -495,6 +572,7 @@ function cgt_contact_form_shortcode() {
 	}
 	?>
 	<form class="cgt-contact-form" method="post">
+		<?php echo cgt_render_honeypot( 'cgt_hp_contact' ); ?>
 		<label>
 			<span class="sr-only"><?php esc_html_e( 'Nom et prénom *', 'cgt' ); ?></span>
 			<input type="text" name="cgt_contact_name" value="<?php echo isset( $name ) ? esc_attr( $name ) : ''; ?>" required placeholder="<?php esc_attr_e( 'Nom et prénom *', 'cgt' ); ?>">

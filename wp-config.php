@@ -20,17 +20,22 @@
  */
 
 // ** Database settings - You can get this info from your web host ** //
+/**
+ * SECURITY: For production, use environment variables instead of hardcoded values
+ * Example: define( 'DB_NAME', getenv('DB_NAME') ?: 'local' );
+ */
+
 /** The name of the database for WordPress */
-define( 'DB_NAME', 'local' );
+define( 'DB_NAME', getenv('DB_NAME') ?: 'local' );
 
 /** Database username */
-define( 'DB_USER', 'root' );
+define( 'DB_USER', getenv('DB_USER') ?: 'root' );
 
 /** Database password */
-define( 'DB_PASSWORD', 'root' );
+define( 'DB_PASSWORD', getenv('DB_PASSWORD') ?: 'root' );
 
 /** Database hostname */
-define( 'DB_HOST', 'localhost' );
+define( 'DB_HOST', getenv('DB_HOST') ?: 'localhost' );
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8' );
@@ -72,6 +77,22 @@ $table_prefix = 'wp_';
 
 
 /* Add any custom values between this line and the "stop editing" line. */
+
+/**
+ * Custom CGT Configuration
+ */
+// Email pour les notifications d'adhésion (peut être surchargé par variable d'environnement)
+define( 'CGT_ADMIN_EMAIL', getenv('CGT_ADMIN_EMAIL') ?: 'admfsetud@cgt.fr' );
+
+// Sécurité: Désactiver l'éditeur de fichiers dans l'admin
+define( 'DISALLOW_FILE_EDIT', true );
+
+// Sécurité: Limiter les révisions de posts
+define( 'WP_POST_REVISIONS', 5 );
+
+// Performance: Activer la compression
+define( 'COMPRESS_CSS', true );
+define( 'COMPRESS_SCRIPTS', true );
 
 
 
