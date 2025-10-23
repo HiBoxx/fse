@@ -173,7 +173,7 @@ function cgt_render_private_article_admin_page() {
 add_action( 'admin_post_cgt_create_private_adherent_article', 'cgt_create_private_adherent_article' );
 
 function cgt_create_private_adherent_article() {
-	if ( ! current_user_can( 'edit_posts' ) ) {
+	if ( ! current_user_can( 'edit_others_posts' ) ) {
 		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
 	}
 
@@ -224,7 +224,7 @@ add_action( 'admin_post_cgt_create_private_tract', 'cgt_create_private_tract' );
  * Create a blank private tract for adherents.
  */
 function cgt_create_private_tract() {
-	if ( ! current_user_can( 'edit_posts' ) ) {
+	if ( ! current_user_can( 'edit_others_posts' ) ) {
 		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
 	}
 
