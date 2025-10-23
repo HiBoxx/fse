@@ -22,6 +22,7 @@ $cgt_inc_files = array(
 	'seo.php',
 	'templating.php',
 	'security.php',
+	'adhesion.php',
 );
 
 foreach ( $cgt_inc_files as $cgt_inc_file ) {
@@ -93,6 +94,24 @@ add_action(
 			CGT_CHILD_VERSION,
 			true
 		);
+
+		// Charger les styles et scripts de la page de connexion
+		if ( is_page_template( 'page-connexion.php' ) ) {
+			wp_enqueue_style(
+				'cgt-connexion',
+				get_stylesheet_directory_uri() . '/assets/css/connexion.css',
+				array( 'cgt-child' ),
+				CGT_CHILD_VERSION
+			);
+
+			wp_enqueue_script(
+				'cgt-connexion',
+				get_stylesheet_directory_uri() . '/assets/js/connexion.js',
+				array(),
+				CGT_CHILD_VERSION,
+				true
+			);
+		}
 	}
 );
 
