@@ -24,6 +24,7 @@ $cgt_inc_files = array(
 	'security.php',
 	'adhesion.php',
 	'rate-limiting.php',
+	'optimizations.php', // Optimisations performance, sécurité et accessibilité
 	'brevo.php',
 	'admin-dashboard.php',
 	'agenda.php',
@@ -88,6 +89,14 @@ add_action(
 			'cgt-child',
 			get_stylesheet_directory_uri() . '/assets/css/cgt.css',
 			array( 'cgt-parent' ),
+			CGT_CHILD_VERSION
+		);
+
+		// Charger les améliorations CSS (typographie, accessibilité, responsive)
+		wp_enqueue_style(
+			'cgt-improvements',
+			get_stylesheet_directory_uri() . '/assets/css/cgt-improvements.css',
+			array( 'cgt-child' ),
 			CGT_CHILD_VERSION
 		);
 
