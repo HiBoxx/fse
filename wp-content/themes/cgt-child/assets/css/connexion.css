@@ -127,7 +127,7 @@
 }
 
 .form-control {
-    width: 100%;
+    width: 90%;
     padding: 0.875rem 1rem;
     border: 2px solid var(--color-gray);
     border-radius: var(--radius-sm);
@@ -238,6 +238,26 @@
     border-radius: var(--radius-sm);
     margin-bottom: 1.5rem;
     font-size: 0.9375rem;
+}
+
+.login-success {
+	background: #dcfce7;
+	border: 2px solid #16a34a;
+	color: #166534;
+	padding: 1rem;
+	border-radius: var(--radius-sm);
+	margin-bottom: 1.5rem;
+	font-size: 0.9375rem;
+}
+
+.login-info {
+	background: #e0f2fe;
+	border: 2px solid #0ea5e9;
+	color: #0c4a6e;
+	padding: 1rem;
+	border-radius: var(--radius-sm);
+	margin-bottom: 1.5rem;
+	font-size: 0.9375rem;
 }
 
 .adhesion-success {
@@ -509,15 +529,23 @@
 .form-row {
     display: grid;
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    
+
 }
 
 .form-row.form-row--gapped {
-	gap: 1.5rem;
+	column-gap: 1.6rem;
+	row-gap: 1.2rem;
+}
+
+.form-control.form-control--offset {
+	padding-left: 1.1rem;
+	padding-right: 1.1rem;
 }
 
 .form-row .form-group {
     margin-bottom: 0;
+    padding-right:31px!important;
 }
 
 .col-4 {

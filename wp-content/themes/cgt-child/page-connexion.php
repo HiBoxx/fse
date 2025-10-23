@@ -5,6 +5,66 @@
  */
 
 get_header();
+
+$login_page_url   = get_permalink();
+$current_action   = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : 'login';
+$login_state      = isset( $_GET['login'] ) ? sanitize_key( wp_unslash( $_GET['login'] ) ) : '';
+$logged_out       = isset( $_GET['loggedout'] ) && 'true' === sanitize_key( wp_unslash( $_GET['loggedout'] ) );
+$checkemail_state = isset( $_GET['checkemail'] ) ? sanitize_key( wp_unslash( $_GET['checkemail'] ) ) : '';
+$requested_redirect = isset( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
+
+$login_messages = array();
+if ( 'failed' === $login_state ) {
+	$login_messages[] = array(
+		'type' => 'error',
+		'text' => __( 'Identifiants invalides. Vérifiez votre email et votre mot de passe.', 'cgt' ),
+	);
+}
+
+if ( 'empty' === $login_state ) {
+	$login_messages[] = array(
+		'type' => 'error',
+		'text' => __( 'Merci de renseigner votre identifiant et votre mot de passe.', 'cgt' ),
+	);
+}
+
+if ( $logged_out ) {
+	$login_messages[] = array(
+		'type' => 'success',
+		'text' => __( 'Vous êtes bien déconnecté·e.', 'cgt' ),
+	);
+}
+
+if ( 'confirm' === $checkemail_state && 'lostpassword' !== $current_action ) {
+	$login_messages[] = array(
+		'type' => 'info',
+		'text' => __( 'Un lien de réinitialisation vient de vous être envoyé par email.', 'cgt' ),
+	);
+}
+
+$lost_messages = array();
+if ( 'confirm' === $checkemail_state ) {
+	$lost_messages[] = array(
+		'type' => 'success',
+		'text' => __( 'Un lien de réinitialisation vient de vous être envoyé par email.', 'cgt' ),
+	);
+}
+
+if ( 'invalidkey' === $checkemail_state ) {
+	$lost_messages[] = array(
+		'type' => 'error',
+		'text' => __( 'Le lien de réinitialisation est invalide ou a expiré.', 'cgt' ),
+	);
+}
+
+$back_to_login_url = remove_query_arg(
+	array( 'action', 'checkemail', 'login', 'loggedout', 'reauth' ),
+	$login_page_url
+);
+
+if ( $requested_redirect ) {
+	$back_to_login_url = add_query_arg( 'redirect_to', rawurlencode( $requested_redirect ), $back_to_login_url );
+}
 ?>
 
 <main class="connexion-page">
@@ -14,29 +74,58 @@ get_header();
             <p>Connectez-vous à votre espace ou devenez adhérent</p>
         </div>
 
-        <div class="connexion-grid">
-            <!-- BLOC 1: CONNEXION -->
-            <div class="connexion-bloc connexion-login">
-                <div class="bloc-header">
-                    <svg class="bloc-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                        <polyline points="10 17 15 12 10 7"></polyline>
-                        <line x1="15" y1="12" x2="3" y2="12"></line>
+		<div class="connexion-grid">
+			<?php if ( 'lostpassword' === $current_action ) : ?>
+			<div class="connexion-bloc connexion-login connexion-lostpassword">
+				<div class="bloc-header">
+					<svg class="bloc-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<circle cx="12" cy="12" r="10"></circle>
+						<path d="M12 8v4"></path>
+						<path d="M11.95 16h.1"></path>
+					</svg>
+					<h2><?php esc_html_e( 'Mot de passe oublié', 'cgt' ); ?></h2>
+				</div>
+				<p class="bloc-description"><?php esc_html_e( 'Indiquez votre identifiant ou votre adresse email pour recevoir un lien de réinitialisation.', 'cgt' ); ?></p>
+
+				<?php foreach ( $lost_messages as $message ) : ?>
+					<div class="login-<?php echo esc_attr( $message['type'] ); ?>"><?php echo esc_html( $message['text'] ); ?></div>
+				<?php endforeach; ?>
+
+				<?php if ( 'confirm' !== $checkemail_state ) : ?>
+				<form name="lostpasswordform" id="lostpasswordform" action="<?php echo esc_url( site_url( 'wp-login.php?action=lostpassword', 'login_post' ) ); ?>" method="post">
+					<div class="form-group">
+						<label for="user_login_lost"><?php esc_html_e( 'Identifiant ou email', 'cgt' ); ?></label>
+						<input type="text" name="user_login" id="user_login_lost" class="form-control form-control--offset" required>
+					</div>
+					<?php wp_nonce_field( 'lost_password', 'lost_password_nonce' ); ?>
+					<?php if ( $requested_redirect ) : ?>
+						<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $requested_redirect ); ?>">
+					<?php endif; ?>
+					<button type="submit" class="btn btn-primary btn-block"><?php esc_html_e( 'Envoyer le lien de réinitialisation', 'cgt' ); ?></button>
+				</form>
+				<?php endif; ?>
+
+				<div class="login-links">
+					<a href="<?php echo esc_url( $back_to_login_url ); ?>" class="lost-password">&larr; <?php esc_html_e( 'Retour à la connexion', 'cgt' ); ?></a>
+				</div>
+			</div>
+			<?php else : ?>
+			<!-- BLOC 1: CONNEXION -->
+			<div class="connexion-bloc connexion-login">
+				<div class="bloc-header">
+					<svg class="bloc-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+						<polyline points="10 17 15 12 10 7"></polyline>
+						<line x1="15" y1="12" x2="3" y2="12"></line>
                     </svg>
                     <h2>Se connecter</h2>
                 </div>
 
                 <p class="bloc-description">Accédez à votre espace personnel</p>
 
-                <?php
-                // Afficher les erreurs de connexion si présentes
-                if (isset($_GET['login']) && $_GET['login'] === 'failed') {
-                    echo '<div class="login-error">Identifiants invalides. Veuillez réessayer.</div>';
-                }
-                if (isset($_GET['login']) && $_GET['login'] === 'empty') {
-                    echo '<div class="login-error">Veuillez remplir tous les champs.</div>';
-                }
-                ?>
+				<?php foreach ( $login_messages as $message ) : ?>
+					<div class="login-<?php echo esc_attr( $message['type'] ); ?>"><?php echo esc_html( $message['text'] ); ?></div>
+				<?php endforeach; ?>
 
                 <form name="loginform" id="loginform" action="<?php echo esc_url(site_url('wp-login.php', 'login_post')); ?>" method="post">
                     <div class="form-group">
@@ -63,11 +152,11 @@ get_header();
                     </button>
                 </form>
 
-                <div class="login-links">
-                    <a href="<?php echo esc_url(wp_lostpassword_url()); ?>" class="lost-password">
-                        Mot de passe oublié ?
-                    </a>
-                </div>
+				<div class="login-links">
+					<a href="<?php echo esc_url( add_query_arg( 'action', 'lostpassword', $login_page_url ) ); ?>" class="lost-password">
+						<?php esc_html_e( 'Mot de passe oublié ?', 'cgt' ); ?>
+					</a>
+				</div>
 
                 <div class="access-types">
                     <div class="access-type">
@@ -81,8 +170,10 @@ get_header();
                 </div>
             </div>
 
-            <!-- BLOC 2: ADHÉSION -->
-            <div class="connexion-bloc connexion-adhesion">
+			<?php endif; ?>
+
+			<!-- BLOC 2: ADHÉSION -->
+			<div class="connexion-bloc connexion-adhesion">
                 <div class="bloc-header">
                     <svg class="bloc-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -189,7 +280,7 @@ get_header();
                                 </div>
                                 <div class="form-group col-6">
                                     <label for="prenom">Prénom <span class="required">*</span></label>
-                                    <input type="text" name="prenom" id="prenom" class="form-control" required>
+                                    <input type="text" name="prenom" id="prenom" class="form-control form-control--offset" required>
                                 </div>
                             </div>
 
@@ -209,7 +300,7 @@ get_header();
                                 </div>
                                 <div class="form-group col-4">
                                     <label for="nationalite">Nationalité <span class="required">*</span></label>
-                                    <select name="nationalite" id="nationalite" class="form-control" required>
+                                    <select name="nationalite" id="nationalite" class="form-control form-control--offset" required>
                                         <option value="">Sélectionner</option>
                                         <option value="Française">Française</option>
                                         <option value="Autre">Autre</option>
@@ -229,7 +320,7 @@ get_header();
                                 </div>
                                 <div class="form-group col-8">
                                     <label for="ville">Ville <span class="required">*</span></label>
-                                    <input type="text" name="ville" id="ville" class="form-control" required>
+                                    <input type="text" name="ville" id="ville" class="form-control form-control--offset" required>
                                 </div>
                             </div>
 
@@ -240,7 +331,7 @@ get_header();
                                 </div>
                                 <div class="form-group col-6">
                                     <label for="email">Email <span class="required">*</span></label>
-                                    <input type="email" name="email" id="email" class="form-control" required>
+                                    <input type="email" name="email" id="email" class="form-control form-control--offset" required>
                                 </div>
                             </div>
 

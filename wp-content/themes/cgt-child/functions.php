@@ -185,6 +185,10 @@ function cgt_redirect_default_login() {
 		return;
 	}
 
+	if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
+		return;
+	}
+
 	$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
 	if ( in_array(
 		$action,
@@ -208,6 +212,9 @@ function cgt_redirect_default_login() {
 		}
 		if ( ! empty( $_GET['loggedout'] ) ) {
 			$args['loggedout'] = 'true';
+		}
+		if ( ! empty( $_GET['checkemail'] ) ) {
+			$args['checkemail'] = sanitize_key( wp_unslash( $_GET['checkemail'] ) );
 		}
 
 		if ( $args ) {
@@ -296,3 +303,67 @@ function cgt_filter_lostpassword_url( $lostpassword_url, $redirect ) {
 	return add_query_arg( $args, $login_page );
 }
 add_filter( 'lostpassword_url', 'cgt_filter_lostpassword_url', 10, 2 );
+
+/**
+ * Redirect failed login attempts to the custom page with an error flag.
+ *
+ * @param string $username Entered username.
+ */
+function cgt_handle_login_failed( $username ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	$login_page = cgt_get_login_page_url();
+	if ( ! $login_page ) {
+		return;
+	}
+
+	$login_page = add_query_arg( 'login', 'failed', $login_page );
+	wp_safe_redirect( $login_page );
+	exit;
+}
+add_action( 'wp_login_failed', 'cgt_handle_login_failed' );
+
+/**
+ * Handle empty credentials by redirecting back with a flag.
+ *
+ * @param null|WP_User|WP_Error $user     User.
+ * @param string                $username Entered username.
+ * @param string                $password Entered password.
+ *
+ * @return null|WP_User|WP_Error
+ */
+function cgt_handle_empty_login( $user, $username, $password ) {
+	if ( ! empty( $username ) && ! empty( $password ) ) {
+		return $user;
+	}
+
+	$login_page = cgt_get_login_page_url();
+	if ( $login_page ) {
+		$login_page = add_query_arg( 'login', 'empty', $login_page );
+		wp_safe_redirect( $login_page );
+		exit;
+	}
+
+	return $user;
+}
+add_filter( 'authenticate', 'cgt_handle_empty_login', 30, 3 );
+
+/**
+ * Redirect on successful login to espace adhérent by défaut.
+ *
+ * @param string           $redirect_to           Default redirect.
+ * @param string           $requested_redirect_to Requested redirect.
+ * @param WP_User|WP_Error $user                  User object.
+ *
+ * @return string
+ */
+function cgt_login_redirect( $redirect_to, $requested_redirect_to, $user ) {
+	if ( is_wp_error( $user ) || ! $user ) {
+		return $redirect_to;
+	}
+
+	if ( ! empty( $requested_redirect_to ) ) {
+		return $requested_redirect_to;
+	}
+
+	return home_url( '/espace-adherent' );
+}
+add_filter( 'login_redirect', 'cgt_login_redirect', 10, 3 );
