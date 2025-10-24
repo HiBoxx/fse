@@ -852,28 +852,47 @@ a:focus {
 	margin-top: 1rem;
 }
 
-.home-contact {
+.home-section__duo {
 	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 2rem;
-	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-	padding: 2rem;
+	align-items: stretch;
+}
+
+.home-duo-card {
 	background: var(--cgt-white);
 	border-radius: var(--radius);
 	border: 1px solid rgba(17, 17, 17, 0.08);
 	box-shadow: var(--shadow);
-}
-
-.home-contact__links {
-	list-style: none;
-	margin: 0;
-	padding: 0;
+	padding: 2rem;
 	display: grid;
-	gap: 0.5rem;
+	gap: 1rem;
+	align-content: start;
 }
 
-.home-contact__links a {
-	font-weight: 600;
-	color: var(--cgt-red);
+.home-duo-card h2 {
+	margin: 0;
+	font-size: clamp(1.6rem, 3vw, 2rem);
+}
+
+.home-duo-card p {
+	margin: 0;
+	color: rgba(17, 17, 17, 0.75);
+}
+
+.home-duo-card__content {
+	display: grid;
+	gap: 1rem;
+}
+
+.home-duo-card .btn {
+	justify-self: start;
+}
+
+@media (max-width: 900px) {
+	.home-section__duo {
+		grid-template-columns: 1fr;
+	}
 }
 
 .home-pillars {

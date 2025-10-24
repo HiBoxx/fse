@@ -283,39 +283,24 @@ $communiques_tabs = array(
 		</div>
 	</section>
 
-	<section class="home-section home-section--publish">
-		<div class="container">
-			<header class="home-section__header">
-				<h2><?php esc_html_e( 'Publiez vos articles', 'cgt' ); ?></h2>
-				<p><?php esc_html_e( 'Partagez vos bulletins, tracts ou communications avec la fédération en quelques clics.', 'cgt' ); ?></p>
-			</header>
-			<div class="home-submit">
-				<p><?php esc_html_e( 'Envoyez-nous vos contenus via le formulaire dédié. Ils seront vérifiés puis publiés par l’équipe fédérale.', 'cgt' ); ?></p>
-				<a class="btn" href="<?php echo esc_url( home_url( '/publier-article' ) ); ?>"><?php esc_html_e( 'Proposer un article', 'cgt' ); ?></a>
-			</div>
-		</div>
-	</section>
-
 	<section class="home-section home-section--shade">
 		<div class="container">
-			<header class="home-section__header">
-				<h2><?php esc_html_e( 'Contact presse & médias', 'cgt' ); ?></h2>
-				<p><?php esc_html_e( 'Nous répondons rapidement aux demandes d’interview et fournissons des dossiers prêts à l’emploi.', 'cgt' ); ?></p>
-			</header>
-
-			<div class="home-contact">
-				<div>
-					<h3><?php esc_html_e( 'Besoin d’un contact direct ?', 'cgt' ); ?></h3>
-					<p><?php esc_html_e( 'Écrivez-nous pour organiser une interview, vérifier une information ou obtenir des éléments chiffrés.', 'cgt' ); ?></p>
-					<a class="btn" href="mailto:contact@example.com"><?php esc_html_e( 'Contacter la cellule presse', 'cgt' ); ?></a>
+			<div class="home-section__duo">
+				<div class="home-duo-card">
+					<h2><?php esc_html_e( 'Contact presse & médias', 'cgt' ); ?></h2>
+					<p><?php esc_html_e( 'Nous répondons rapidement aux demandes d’interview et fournissons des dossiers prêts à l’emploi.', 'cgt' ); ?></p>
+					<div class="home-duo-card__content">
+						<p><?php esc_html_e( 'Écrivez-nous pour organiser une interview, vérifier une information ou obtenir des éléments chiffrés.', 'cgt' ); ?></p>
+						<a class="btn" href="mailto:contact@example.com"><?php esc_html_e( 'Contacter la cellule presse', 'cgt' ); ?></a>
+					</div>
 				</div>
-				<div>
-					<h3><?php esc_html_e( 'Ressources en libre accès', 'cgt' ); ?></h3>
-					<ul class="home-contact__links">
-						<li><a href="<?php echo esc_url( home_url( '/espace-presse' ) ); ?>"><?php esc_html_e( 'Espace Presse', 'cgt' ); ?></a></li>
-						<li><a href="<?php echo esc_url( get_post_type_archive_link( 'communiques_de_presse' ) ); ?>"><?php esc_html_e( 'Communiqués', 'cgt' ); ?></a></li>
-						<li><a href="<?php echo esc_url( get_post_type_archive_link( 'dossiers_de_presse' ) ); ?>"><?php esc_html_e( 'Dossiers de presse', 'cgt' ); ?></a></li>
-					</ul>
+				<div class="home-duo-card">
+					<h2><?php esc_html_e( 'Publiez vos articles', 'cgt' ); ?></h2>
+					<p><?php esc_html_e( 'Partagez vos bulletins, tracts ou communications avec la fédération en quelques clics.', 'cgt' ); ?></p>
+					<div class="home-duo-card__content">
+						<p><?php esc_html_e( 'Envoyez-nous vos contenus via le formulaire dédié. Ils seront vérifiés puis publiés par l’équipe fédérale.', 'cgt' ); ?></p>
+						<a class="btn" href="<?php echo esc_url( home_url( '/publier-article' ) ); ?>"><?php esc_html_e( 'Proposer un article', 'cgt' ); ?></a>
+					</div>
 				</div>
 			</div>
 		</div>

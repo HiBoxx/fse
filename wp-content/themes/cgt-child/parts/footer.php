@@ -27,6 +27,7 @@
 			<ul class="footer-list footer-list--compact">
 				<li><a href="https://www.instagram.com/fsetudcgt/" target="_blank" rel="noopener"><?php esc_html_e( 'Instagram', 'cgt' ); ?></a></li>
 				<li><a href="https://www.youtube.com/@fsetudcgt5057" target="_blank" rel="noopener"><?php esc_html_e( 'YouTube', 'cgt' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( '/rgpd' ) ); ?>"><?php esc_html_e( 'RGPD', 'cgt' ); ?></a></li>
 			</ul>
 		</div>
 	</div>
