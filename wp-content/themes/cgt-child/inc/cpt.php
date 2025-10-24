@@ -97,8 +97,8 @@ function cgt_register_cpts() {
 				'add_new'       => __( 'Ajouter', 'cgt' ),
 				'add_new_item'  => __( 'Ajouter un article adhérent', 'cgt' ),
 			),
-			'public'              => false,
-			'publicly_queryable'  => false,
+			'public'              => true,
+			'publicly_queryable'  => true,
 			'show_ui'             => true,
 			'show_in_menu'        => true,
 			'show_in_rest'        => true,
@@ -196,6 +196,7 @@ function cgt_register_cpts() {
 			'map_meta_cap'        => true,
 		)
 	);
+
 }
 add_action( 'init', 'cgt_register_cpts' );
 

@@ -26,6 +26,7 @@ $cgt_inc_files = array(
 	'rate-limiting.php',
 	'admin-dashboard.php',
 	'agenda.php',
+	'brevo.php',
 	'optimizations.php',
 );
 

@@ -534,11 +534,29 @@ function cgt_seed_demo_content() {
 			),
 		),
 		array(
-			'slug'     => 'tract-negociations-prives',
-			'title'    => __( 'Négociations internes (privé adhérents)', 'cgt' ),
+			'slug'     => 'tract-info-convention',
+			'title'    => __( 'Convention collective : points clés à retenir', 'cgt' ),
 			'status'   => 'publish',
 			'meta'     => array(
-				'cgt_fichier_pdf' => 'https://example.com/tract-prive.pdf',
+				'cgt_fichier_pdf' => 'https://example.com/tract-convention.pdf',
+				'cgt_visibilite'  => 'public',
+			),
+		),
+		array(
+			'slug'     => 'tract-bilan-prive',
+			'title'    => __( 'Bilan des négociations (adhérents)', 'cgt' ),
+			'status'   => 'publish',
+			'meta'     => array(
+				'cgt_fichier_pdf' => 'https://example.com/tract-bilan.pdf',
+				'cgt_visibilite'  => 'prive',
+			),
+		),
+		array(
+			'slug'     => 'tract-strategie-adherents',
+			'title'    => __( 'Stratégie fédérale 2025 (adhérents)', 'cgt' ),
+			'status'   => 'publish',
+			'meta'     => array(
+				'cgt_fichier_pdf' => 'https://example.com/tract-strategie.pdf',
 				'cgt_visibilite'  => 'prive',
 			),
 		),
@@ -581,7 +599,69 @@ function cgt_seed_demo_content() {
 			)
 		);
 	}
+
+	$demo_posts = array(
+		array(
+			'slug'    => 'actualite-negociations',
+			'title'   => __( 'Négociations salariales : point d’étape', 'cgt' ),
+			'content' => __( 'Retour sur la rencontre avec les directions et les revendications portées par la CGT.', 'cgt' ),
+		),
+		array(
+			'slug'    => 'actualite-formation',
+			'title'   => __( 'Formation syndicale de printemps', 'cgt' ),
+			'content' => __( 'Programme des ateliers et inscription pour les militants.', 'cgt' ),
+		),
+		array(
+			'slug'    => 'actualite-solidarite',
+			'title'   => __( 'Solidarité avec les personnels de la recherche', 'cgt' ),
+			'content' => __( 'La fédération relaie les actions locales et appelle à la mobilisation.', 'cgt' ),
+		),
+		array(
+			'slug'    => 'actualite-defense-droits',
+			'title'   => __( 'Défense des droits dans les bureaux d’études', 'cgt' ),
+			'content' => __( 'Interventions de la CGT face aux restructurations en cours.', 'cgt' ),
+		),
+	);
+
+	foreach ( $demo_posts as $data ) {
+		if ( get_page_by_path( $data['slug'], OBJECT, 'post' ) ) {
+			continue;
+		}
+
+		wp_insert_post(
+			array(
+				'post_type'    => 'post',
+				'post_title'   => $data['title'],
+				'post_name'    => $data['slug'],
+				'post_status'  => 'publish',
+				'post_excerpt' => wp_trim_words( $data['content'], 28 ),
+				'post_content' => '<p>' . esc_html( $data['content'] ) . '</p><div class="placeholder" aria-hidden="true"></div><p>' . esc_html__( 'Lire la suite sur le site de la fédération.', 'cgt' ) . '</p>',
+			)
+		);
+	}
+
+	// No default agenda event seed.
 }
+
+/**
+ * Remove legacy demo events that might avoir été créés avant la mise à jour.
+ */
+function cgt_cleanup_legacy_agenda_events() {
+	if ( get_option( 'cgt_cleanup_agenda_done' ) ) {
+		return;
+	}
+
+	$legacy = get_page_by_path( 'evenement-assemblee-generale', OBJECT, 'cgt_agenda' );
+	if ( $legacy instanceof WP_Post ) {
+		wp_delete_post( $legacy->ID, true );
+	}
+
+	update_option( 'cgt_cleanup_agenda_done', 1 );
+}
+add_action( 'init', 'cgt_cleanup_legacy_agenda_events', 40 );
+
+// Ensure demo content exists even après synchronisations depuis GitHub.
+add_action( 'init', 'cgt_seed_demo_content', 12 );
 
 /**
  * Ensure primary menu matches the new specification.
