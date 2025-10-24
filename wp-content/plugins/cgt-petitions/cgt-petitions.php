@@ -325,7 +325,20 @@ class CGT_Petitions_Plugin {
 	}
 
 	public function register_front_assets() {
-		wp_register_style( 'cgt-petition-front', false );
+		wp_register_style(
+			'cgt-petition-front',
+			plugin_dir_url( __FILE__ ) . 'assets/css/petition-public.css',
+			array(),
+			'1.0.0'
+		);
+
+		wp_register_script(
+			'cgt-petition-front-js',
+			plugin_dir_url( __FILE__ ) . 'assets/js/petition-public.js',
+			array(),
+			'1.0.0',
+			true
+		);
 	}
 
 	public function maybe_append_petition_content( $content ) {
@@ -359,17 +372,9 @@ class CGT_Petitions_Plugin {
 			return '';
 		}
 
+		// Enqueue assets
 		wp_enqueue_style( 'cgt-petition-front' );
-		$css = '.cgt-petition{display:grid;gap:1.5rem;align-items:start;margin:2rem 0;}' .
-			'.cgt-petition__meta{background:rgba(229,231,235,.5);padding:1.5rem;border-radius:12px;}' .
-			'.cgt-petition__progress{background:#f3f4f6;border-radius:999px;overflow:hidden;height:12px;margin:.5rem 0 1.2rem;}' .
-			'.cgt-petition__progress span{display:block;height:100%;background:#d00000;}' .
-			'.cgt-petition__form label{display:block;margin-bottom:1rem;font-weight:600;}' .
-			'.cgt-petition__form input{width:100%;padding:0.6rem;border-radius:8px;border:1px solid #d1d5db;margin-top:0.35rem;}' .
-			'.cgt-petition__messages{padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;}' .
-			'.cgt-petition__success{background:#dcfce7;color:#14532d;}' .
-			'.cgt-petition__error{background:#fee2e2;color:#b91c1c;}';
-		wp_add_inline_style( 'cgt-petition-front', $css );
+		wp_enqueue_script( 'cgt-petition-front-js' );
 
 		$target   = (int) get_post_meta( $petition_id, self::META_TARGET, true );
 		$pdf_id   = (int) get_post_meta( $petition_id, self::META_PDF, true );
@@ -378,52 +383,151 @@ class CGT_Petitions_Plugin {
 		$progress = $target > 0 ? min( 100, round( ( $count / $target ) * 100 ) ) : 0;
 		$status   = isset( $_GET['petition_status'] ) ? sanitize_key( $_GET['petition_status'] ) : '';
 
+		// Extract first paragraph as excerpt
+		$content_parts = explode( '</p>', $petition->post_content );
+		$excerpt = wp_strip_all_tags( $content_parts[0] ?? '' );
+
 		ob_start();
 		?>
 		<div class="cgt-petition">
-			<div class="cgt-petition__content">
-				<h2><?php echo esc_html( get_the_title( $petition_id ) ); ?></h2>
-				<div class="cgt-petition__meta">
-					<p><strong><?php esc_html_e( 'Signatures collectées', 'cgt' ); ?>:</strong> <?php printf( '%1$s / %2$s', number_format_i18n( $count ), $target ? number_format_i18n( $target ) : '—' ); ?></p>
-					<div class="cgt-petition__progress"><span style="width: <?php echo esc_attr( $progress ); ?>%;"></span></div>
+
+			<!-- Hero Section -->
+			<div class="cgt-petition-hero">
+				<div class="cgt-petition-hero__content">
+					<div class="cgt-petition-hero__badge">
+						<span>📢</span>
+						<?php esc_html_e( 'Pétition en cours', 'cgt' ); ?>
+					</div>
+					<h1><?php echo esc_html( get_the_title( $petition_id ) ); ?></h1>
+					<?php if ( $excerpt ) : ?>
+						<p class="cgt-petition-hero__excerpt"><?php echo esc_html( $excerpt ); ?></p>
+					<?php endif; ?>
+				</div>
+			</div>
+
+			<!-- Stats & Progress -->
+			<div class="cgt-petition-stats">
+				<div class="cgt-petition-stats__header">
+					<div class="cgt-petition-stats__numbers">
+						<span class="cgt-petition-stats__current"><?php echo number_format_i18n( $count ); ?></span>
+						<span class="cgt-petition-stats__target">
+							/ <?php echo $target ? number_format_i18n( $target ) : '∞'; ?> <?php esc_html_e( 'signatures', 'cgt' ); ?>
+						</span>
+					</div>
+					<div class="cgt-petition-stats__percentage">
+						<?php echo esc_html( $progress ); ?>%
+					</div>
+				</div>
+
+				<div class="cgt-petition-progress">
+					<div class="cgt-petition-progress__fill" style="width: <?php echo esc_attr( $progress ); ?>%;"></div>
+				</div>
+
+				<div class="cgt-petition-progress__label">
+					<span><?php echo number_format_i18n( $count ); ?> <?php esc_html_e( 'personnes ont signé', 'cgt' ); ?></span>
+					<?php if ( $target > $count ) : ?>
+						<span><?php printf( esc_html__( 'Encore %s signatures nécessaires', 'cgt' ), number_format_i18n( $target - $count ) ); ?></span>
+					<?php else : ?>
+						<span><?php esc_html_e( 'Objectif atteint !', 'cgt' ); ?> 🎉</span>
+					<?php endif; ?>
+				</div>
+			</div>
+
+			<!-- Content Grid -->
+			<div class="cgt-petition-grid">
+
+				<!-- Left: Content -->
+				<div class="cgt-petition-content">
+					<h2><?php esc_html_e( 'Notre demande', 'cgt' ); ?></h2>
+
+					<div class="cgt-petition-content__text">
+						<?php echo wpautop( wp_kses_post( $petition->post_content ) ); ?>
+					</div>
+
 					<?php if ( has_post_thumbnail( $petition_id ) ) : ?>
-						<div class="cgt-petition__thumb"><?php echo get_the_post_thumbnail( $petition_id, 'large', array( 'style' => 'border-radius:12px;' ) ); ?></div>
+						<div class="cgt-petition-content__thumb">
+							<?php echo get_the_post_thumbnail( $petition_id, 'large' ); ?>
+						</div>
 					<?php endif; ?>
+
 					<?php if ( $pdf_url ) : ?>
-						<p><a class="button" href="<?php echo esc_url( $pdf_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Télécharger le PDF', 'cgt' ); ?></a></p>
+						<div class="cgt-petition-pdf">
+							<div class="cgt-petition-pdf__icon">📄</div>
+							<p><strong><?php esc_html_e( 'Document disponible', 'cgt' ); ?></strong></p>
+							<a href="<?php echo esc_url( $pdf_url ); ?>" target="_blank" rel="noopener" class="cgt-petition-pdf__button">
+								<?php esc_html_e( 'Télécharger le PDF', 'cgt' ); ?>
+							</a>
+						</div>
 					<?php endif; ?>
 				</div>
-				<div class="cgt-petition__description">
-					<?php echo wpautop( wp_kses_post( $petition->post_content ) ); ?>
+
+				<!-- Right: Signature Form -->
+				<div class="cgt-petition-form-wrapper">
+					<div class="cgt-petition-form__header">
+						<div class="cgt-petition-form__icon">✍️</div>
+						<h3 class="cgt-petition-form__title"><?php esc_html_e( 'Signez la pétition', 'cgt' ); ?></h3>
+						<p class="cgt-petition-form__subtitle"><?php esc_html_e( 'Ajoutez votre voix à ce mouvement', 'cgt' ); ?></p>
+					</div>
+
+					<?php if ( 'success' === $status ) : ?>
+						<div class="cgt-petition-message cgt-petition-message--success">
+							<?php esc_html_e( 'Merci pour votre soutien ! Votre signature a été enregistrée.', 'cgt' ); ?>
+						</div>
+					<?php elseif ( 'duplicate' === $status ) : ?>
+						<div class="cgt-petition-message cgt-petition-message--error">
+							<?php esc_html_e( 'Vous avez déjà signé cette pétition.', 'cgt' ); ?>
+						</div>
+					<?php elseif ( 'error' === $status ) : ?>
+						<div class="cgt-petition-message cgt-petition-message--error">
+							<?php esc_html_e( 'Une erreur est survenue. Merci de réessayer.', 'cgt' ); ?>
+						</div>
+					<?php endif; ?>
+
+					<form method="post" class="cgt-petition-form">
+						<?php wp_nonce_field( 'cgt_petition_sign_' . $petition_id, 'cgt_petition_nonce' ); ?>
+						<input type="hidden" name="cgt_petition_action" value="sign">
+						<input type="hidden" name="petition_id" value="<?php echo esc_attr( $petition_id ); ?>">
+
+						<div class="cgt-petition-form__field">
+							<label class="cgt-petition-form__label" for="cgt_petition_name_<?php echo esc_attr( $petition_id ); ?>">
+								<?php esc_html_e( 'Nom et prénom', 'cgt' ); ?>
+							</label>
+							<input
+								type="text"
+								name="cgt_petition_name"
+								id="cgt_petition_name_<?php echo esc_attr( $petition_id ); ?>"
+								class="cgt-petition-form__input"
+								required
+								placeholder="<?php esc_attr_e( 'Jean Dupont', 'cgt' ); ?>"
+							>
+						</div>
+
+						<div class="cgt-petition-form__field">
+							<label class="cgt-petition-form__label" for="cgt_petition_email_<?php echo esc_attr( $petition_id ); ?>">
+								<?php esc_html_e( 'Adresse email', 'cgt' ); ?>
+							</label>
+							<input
+								type="email"
+								name="cgt_petition_email"
+								id="cgt_petition_email_<?php echo esc_attr( $petition_id ); ?>"
+								class="cgt-petition-form__input"
+								required
+								placeholder="<?php esc_attr_e( 'jean.dupont@email.fr', 'cgt' ); ?>"
+							>
+						</div>
+
+						<button type="submit" class="cgt-petition-form__submit">
+							<?php esc_html_e( 'Signer la pétition', 'cgt' ); ?>
+						</button>
+
+						<p class="cgt-petition-form__privacy">
+							<?php esc_html_e( 'Vos données sont sécurisées et ne seront jamais partagées avec des tiers.', 'cgt' ); ?>
+						</p>
+					</form>
 				</div>
+
 			</div>
-			<div class="cgt-petition__form">
-				<?php if ( 'success' === $status ) : ?>
-					<div class="cgt-petition__messages cgt-petition__success"><?php esc_html_e( 'Merci pour votre soutien !', 'cgt' ); ?></div>
-				<?php elseif ( 'duplicate' === $status ) : ?>
-					<div class="cgt-petition__messages cgt-petition__error"><?php esc_html_e( 'Vous avez déjà signé cette pétition.', 'cgt' ); ?></div>
-				<?php elseif ( 'error' === $status ) : ?>
-					<div class="cgt-petition__messages cgt-petition__error"><?php esc_html_e( 'Une erreur est survenue. Merci de réessayer.', 'cgt' ); ?></div>
-				<?php endif; ?>
 
-				<form method="post" class="cgt-petition-form">
-					<?php wp_nonce_field( 'cgt_petition_sign_' . $petition_id, 'cgt_petition_nonce' ); ?>
-					<input type="hidden" name="cgt_petition_action" value="sign">
-					<input type="hidden" name="petition_id" value="<?php echo esc_attr( $petition_id ); ?>">
-
-					<label>
-						<?php esc_html_e( 'Nom et prénom', 'cgt' ); ?>
-						<input type="text" name="cgt_petition_name" required>
-					</label>
-
-					<label>
-						<?php esc_html_e( 'Email', 'cgt' ); ?>
-						<input type="email" name="cgt_petition_email" required>
-					</label>
-
-					<button type="submit" class="button button-primary"><?php esc_html_e( 'Signer la pétition', 'cgt' ); ?></button>
-				</form>
-			</div>
 		</div>
 		<?php
 		return ob_get_clean();
