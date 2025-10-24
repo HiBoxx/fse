@@ -99,12 +99,6 @@ if ( ! is_wp_error( $branch_terms ) ) {
 			break;
 		}
 
-if ( ! is_wp_error( $branch_terms ) ) {
-	foreach ( $branch_terms as $branch_term ) {
-		if ( count( $branch_sections ) >= 4 ) {
-			break;
-		}
-
 		$branch_posts = get_posts(
 			array(
 				'post_type'      => 'articles_adherents',
@@ -198,7 +192,7 @@ $library_options = array(
 		'type'  => 'tax',
 	),
 	'tract-entreprise'                 => array(
-		'label' => __( 'Tracts d’entreprise', 'cgt' ),
+		'label' => __( 'Tracts d'entreprise', 'cgt' ),
 		'type'  => 'tax',
 	),
 	'tracts'                           => array(
@@ -254,36 +248,6 @@ if ( $library_search ) {
 }
 
 $library_query = new WP_Query( $library_query_args );
-
-		$branch_posts = get_posts(
-			array(
-				'post_type'      => 'articles_adherents',
-				'post_status'    => array( 'private' ),
-				'posts_per_page' => 3,
-				'tax_query'      => array(
-					array(
-						'taxonomy' => 'branche',
-						'field'    => 'term_id',
-						'terms'    => $branch_term->term_id,
-					),
-				),
-			)
-		);
-
-		if ( $branch_posts ) {
-			$branch_sections[] = array(
-				'term'  => $branch_term,
-				'posts' => $branch_posts,
-			);
-		}
-	}
-}
-
-$bulletins_term = get_term_by( 'slug', 'bulletins', 'thematique' );
-$bulletins_link = ( $bulletins_term && ! is_wp_error( $bulletins_term ) ) ? get_term_link( $bulletins_term ) : get_post_type_archive_link( 'communiques_de_presse' );
-
-$agenda_term = get_term_by( 'slug', 'agenda', 'thematique' );
-$agenda_link = ( $agenda_term && ! is_wp_error( $agenda_term ) ) ? get_term_link( $agenda_term ) : '#';
 
 $member_questions = new WP_Query(
 	array(
@@ -350,7 +314,7 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 				</form>
 			<?php endif; ?>
 		</div>
-		<p><?php esc_html_e( 'Votre tableau de bord centralise les ressources privées, les actions à venir et vos espaces d'échanges.', 'cgt' ); ?></p>
+		<p><?php esc_html_e( 'Votre tableau de bord centralise les ressources privées, les actions à venir et vos espaces d\'échanges.', 'cgt' ); ?></p>
 	</header>
 
 	<?php if ( ! $has_access ) : ?>
