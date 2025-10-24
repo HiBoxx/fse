@@ -118,6 +118,24 @@ function cgt_register_private_article_admin_page() {
 	);
 }
 
+/**
+ * Customize Branch submenu: remove "Branches" taxonomy, add "Articles", keep "Thématiques".
+ */
+add_action( 'admin_menu', 'cgt_customize_branch_menu', 999 );
+function cgt_customize_branch_menu() {
+	// Remove "Branches" taxonomy submenu
+	remove_submenu_page( 'edit.php?post_type=branch', 'edit-tags.php?taxonomy=branche&post_type=branch' );
+
+	// Add "Articles" submenu to redirect to posts filtered by branch taxonomy
+	add_submenu_page(
+		'edit.php?post_type=branch',
+		__( 'Articles', 'cgt' ),
+		__( 'Articles', 'cgt' ),
+		'edit_posts',
+		'edit.php?taxonomy=branche'
+	);
+}
+
 function cgt_render_private_article_admin_page() {
 	if ( ! current_user_can( 'edit_posts' ) ) {
 		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
@@ -267,5 +285,38 @@ function cgt_create_private_tract() {
 	}
 
 	wp_safe_redirect( $edit_link );
+	exit;
+}
+
+/**
+ * Handle user branch selection from member dashboard.
+ */
+add_action( 'admin_post_cgt_select_user_branch', 'cgt_handle_user_branch_selection' );
+add_action( 'admin_post_nopriv_cgt_select_user_branch', 'cgt_handle_user_branch_selection' );
+
+function cgt_handle_user_branch_selection() {
+	if ( ! is_user_logged_in() ) {
+		wp_die( esc_html__( 'Vous devez être connecté.', 'cgt' ) );
+	}
+
+	check_admin_referer( 'cgt_select_branch', 'cgt_branch_nonce' );
+
+	$user_id = get_current_user_id();
+	$branch_id = isset( $_POST['user_branch'] ) ? absint( $_POST['user_branch'] ) : 0;
+
+	if ( ! $branch_id ) {
+		wp_safe_redirect( home_url( '/espace-adherent' ) );
+		exit;
+	}
+
+	$branch_term = get_term( $branch_id, 'branche' );
+	if ( ! $branch_term || is_wp_error( $branch_term ) ) {
+		wp_safe_redirect( home_url( '/espace-adherent' ) );
+		exit;
+	}
+
+	update_user_meta( $user_id, 'cgt_user_branch', $branch_id );
+
+	wp_safe_redirect( home_url( '/espace-adherent' ) );
 	exit;
 }

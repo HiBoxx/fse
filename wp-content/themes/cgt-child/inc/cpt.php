@@ -64,6 +64,8 @@ function cgt_register_cpts() {
 					'with_front' => false,
 				),
 				'menu_icon'           => 'dashicons-portfolio',
+				'show_ui'             => false,
+				'show_in_menu'        => false,
 			)
 		)
 	);

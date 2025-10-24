@@ -18,29 +18,52 @@ $has_access    = cgt_user_can_read_private();
 $current_user  = wp_get_current_user();
 $display_name  = $current_user && $current_user->display_name ? $current_user->display_name : $current_user->user_login;
 
-$private_tracts = new WP_Query(
-	array(
-		'post_type'      => 'tracts',
-		'post_status'    => 'publish',
-		'posts_per_page' => 4,
-		'no_found_rows'  => true,
-		'meta_query'     => array(
-			array(
-				'key'   => 'cgt_visibilite',
-				'value' => 'prive',
-			),
+// Get user's selected branch
+$user_branch_id = get_user_meta( get_current_user_id(), 'cgt_user_branch', true );
+
+// Build tax_query for user's branch
+$branch_tax_query = array();
+if ( $user_branch_id ) {
+	$branch_tax_query = array(
+		array(
+			'taxonomy' => 'branche',
+			'field'    => 'term_id',
+			'terms'    => $user_branch_id,
 		),
-	)
+	);
+}
+
+$private_tracts_args = array(
+	'post_type'      => 'tracts',
+	'post_status'    => 'publish',
+	'posts_per_page' => 4,
+	'no_found_rows'  => true,
+	'meta_query'     => array(
+		array(
+			'key'   => 'cgt_visibilite',
+			'value' => 'prive',
+		),
+	),
 );
 
-$recent_communiques = new WP_Query(
-	array(
-		'post_type'      => 'communiques_de_presse',
-		'post_status'    => 'publish',
-		'posts_per_page' => 3,
-		'no_found_rows'  => true,
-	)
+if ( $branch_tax_query ) {
+	$private_tracts_args['tax_query'] = $branch_tax_query;
+}
+
+$private_tracts = new WP_Query( $private_tracts_args );
+
+$recent_communiques_args = array(
+	'post_type'      => 'communiques_de_presse',
+	'post_status'    => 'publish',
+	'posts_per_page' => 3,
+	'no_found_rows'  => true,
 );
+
+if ( $branch_tax_query ) {
+	$recent_communiques_args['tax_query'] = $branch_tax_query;
+}
+
+$recent_communiques = new WP_Query( $recent_communiques_args );
 
 $agenda_events = new WP_Query(
 	array(
@@ -108,6 +131,14 @@ if ( ! is_wp_error( $branch_terms ) ) {
 
 $bulletins_term = get_term_by( 'slug', 'bulletins', 'thematique' );
 $bulletins_link = ( $bulletins_term && ! is_wp_error( $bulletins_term ) ) ? get_term_link( $bulletins_term ) : get_post_type_archive_link( 'communiques_de_presse' );
+
+// Add branch filter to bulletins link if user has selected a branch
+if ( $user_branch_id && $bulletins_link ) {
+	$user_branch = get_term( $user_branch_id, 'branche' );
+	if ( $user_branch && ! is_wp_error( $user_branch ) ) {
+		$bulletins_link = add_query_arg( 'branche', $user_branch->slug, $bulletins_link );
+	}
+}
 
 $agenda_term = get_term_by( 'slug', 'agenda', 'thematique' );
 $agenda_link = ( $agenda_term && ! is_wp_error( $agenda_term ) ) ? get_term_link( $agenda_term ) : '#';
@@ -187,23 +218,39 @@ $library_query_args = array(
 	'no_found_rows'  => true,
 );
 
-if ( $library_search ) {
-	$library_query_args['s'] = $library_search;
+// Initialize tax_query array
+$library_tax_query = array();
+
+// First priority: Filter by user's branch if selected
+if ( $branch_tax_query ) {
+	$library_tax_query[] = $branch_tax_query[0];
 }
 
+// Second priority: Filter by category/rubrique if selected
 if ( $library_selected && isset( $library_options[ $library_selected ] ) ) {
 	$option = $library_options[ $library_selected ];
 	if ( 'tax' === $option['type'] ) {
-		$library_query_args['tax_query'] = array(
-			array(
-				'taxonomy' => 'thematique',
-				'field'    => 'slug',
-				'terms'    => $library_selected,
-			),
+		$library_tax_query[] = array(
+			'taxonomy' => 'thematique',
+			'field'    => 'slug',
+			'terms'    => $library_selected,
 		);
 	} elseif ( 'post_type' === $option['type'] ) {
 		$library_query_args['post_type'] = $option['value'];
 	}
+}
+
+// Apply tax_query if we have filters
+if ( ! empty( $library_tax_query ) ) {
+	if ( count( $library_tax_query ) > 1 ) {
+		$library_tax_query['relation'] = 'AND';
+	}
+	$library_query_args['tax_query'] = $library_tax_query;
+}
+
+// Third priority: Search
+if ( $library_search ) {
+	$library_query_args['s'] = $library_search;
 }
 
 $library_query = new WP_Query( $library_query_args );
@@ -267,8 +314,43 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 
 <main id="primary" class="site-main member-dashboard">
 	<header class="member-dashboard__header container">
-		<h1><?php printf( esc_html__( 'Bonjour %s', 'cgt' ), esc_html( $display_name ) ); ?></h1>
-		<p><?php esc_html_e( 'Votre tableau de bord centralise les ressources privées, les actions à venir et vos espaces d’échanges.', 'cgt' ); ?></p>
+		<div class="member-dashboard__welcome">
+			<div class="member-dashboard__user">
+				<span class="member-dashboard__icon">👤</span>
+				<div>
+					<h1 class="member-dashboard__title"><?php printf( esc_html__( 'Bonjour %s', 'cgt' ), esc_html( $display_name ) ); ?></h1>
+					<?php
+					// Get user's selected branch
+					$user_branch_id = get_user_meta( get_current_user_id(), 'cgt_user_branch', true );
+					if ( $user_branch_id ) {
+						$user_branch = get_term( $user_branch_id, 'branche' );
+						if ( $user_branch && ! is_wp_error( $user_branch ) ) {
+							echo '<p class="member-dashboard__branch">' . esc_html( $user_branch->name ) . '</p>';
+						}
+					}
+					?>
+				</div>
+			</div>
+			<?php if ( ! $user_branch_id ) : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="member-branch-selector">
+					<?php wp_nonce_field( 'cgt_select_branch', 'cgt_branch_nonce' ); ?>
+					<input type="hidden" name="action" value="cgt_select_user_branch">
+					<label for="user_branch"><?php esc_html_e( 'Sélectionnez votre branche :', 'cgt' ); ?></label>
+					<select name="user_branch" id="user_branch" required>
+						<option value=""><?php esc_html_e( '-- Choisir une branche --', 'cgt' ); ?></option>
+						<?php
+						if ( ! is_wp_error( $branch_terms ) ) {
+							foreach ( $branch_terms as $branch ) {
+								echo '<option value="' . esc_attr( $branch->term_id ) . '">' . esc_html( $branch->name ) . '</option>';
+							}
+						}
+						?>
+					</select>
+					<button type="submit" class="btn btn-compact"><?php esc_html_e( 'Valider', 'cgt' ); ?></button>
+				</form>
+			<?php endif; ?>
+		</div>
+		<p><?php esc_html_e( 'Votre tableau de bord centralise les ressources privées, les actions à venir et vos espaces d'échanges.', 'cgt' ); ?></p>
 	</header>
 
 	<?php if ( ! $has_access ) : ?>
@@ -396,16 +478,11 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 			</div>
 		</section>
 
-		<section class="member-section member-section--two-col container member-section--actions">
+		<section class="member-section container member-section--actions">
 			<div class="member-panel member-panel--actions">
 				<h2><?php esc_html_e( 'Bulletins fédéraux', 'cgt' ); ?></h2>
-				<p><?php esc_html_e( 'Consultez l’intégralité des bulletins publiés pour suivre la vie de la fédération et de ses branches.', 'cgt' ); ?></p>
+				<p><?php esc_html_e( 'Consultez l'intégralité des bulletins publiés pour suivre la vie de la fédération et de ses branches.', 'cgt' ); ?></p>
 				<a class="btn btn-compact" href="<?php echo esc_url( $bulletins_link ); ?>"><?php esc_html_e( 'Voir tous les bulletins', 'cgt' ); ?></a>
-			</div>
-			<div class="member-panel member-panel--actions">
-				<h2><?php esc_html_e( 'Agenda complet', 'cgt' ); ?></h2>
-				<p><?php esc_html_e( 'Retrouvez l’ensemble des événements, formations et rendez-vous à venir pour les adhérent·es.', 'cgt' ); ?></p>
-				<a class="btn btn-compact" href="<?php echo esc_url( $agenda_link ); ?>"><?php esc_html_e( 'Voir l’agenda et les événements', 'cgt' ); ?></a>
 			</div>
 		</section>
 
