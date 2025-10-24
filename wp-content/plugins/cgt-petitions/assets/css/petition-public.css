@@ -1,0 +1,662 @@
+/**
+ * CGT Pétitions - Styles publics
+ * Design moderne pour la page de pétition
+ */
+
+:root {
+	--cgt-red: #e30613;
+	--cgt-red-dark: #b8050f;
+	--cgt-red-light: #ff1a2a;
+	--color-success: #10b981;
+	--color-success-light: #d1fae5;
+	--color-error: #ef4444;
+	--color-error-light: #fee2e2;
+	--color-warning: #f59e0b;
+	--color-gray-50: #f9fafb;
+	--color-gray-100: #f3f4f6;
+	--color-gray-200: #e5e7eb;
+	--color-gray-300: #d1d5db;
+	--color-gray-600: #4b5563;
+	--color-gray-700: #374151;
+	--color-gray-900: #111827;
+	--radius: 16px;
+	--radius-sm: 12px;
+	--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+	--transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================
+   Main Container
+   ========================= */
+
+.cgt-petition {
+	max-width: 1200px;
+	margin: 3rem auto;
+	padding: 0 1.5rem;
+	display: grid;
+	gap: 2.5rem;
+}
+
+/* =========================
+   Hero Section
+   ========================= */
+
+.cgt-petition-hero {
+	background: linear-gradient(135deg, var(--cgt-red) 0%, var(--cgt-red-dark) 100%);
+	border-radius: var(--radius);
+	padding: 3rem;
+	color: white;
+	box-shadow: var(--shadow-xl);
+	position: relative;
+	overflow: hidden;
+}
+
+.cgt-petition-hero::before {
+	content: '';
+	position: absolute;
+	top: -50%;
+	right: -10%;
+	width: 400px;
+	height: 400px;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+.cgt-petition-hero::after {
+	content: '';
+	position: absolute;
+	bottom: -30%;
+	left: -5%;
+	width: 300px;
+	height: 300px;
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+.cgt-petition-hero__content {
+	position: relative;
+	z-index: 1;
+}
+
+.cgt-petition-hero__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: rgba(255, 255, 255, 0.2);
+	padding: 0.5rem 1.25rem;
+	border-radius: 999px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	margin-bottom: 1.5rem;
+	backdrop-filter: blur(10px);
+}
+
+.cgt-petition-hero h1 {
+	font-size: 2.5rem;
+	font-weight: 800;
+	margin: 0 0 1rem 0;
+	line-height: 1.2;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cgt-petition-hero__excerpt {
+	font-size: 1.125rem;
+	line-height: 1.6;
+	opacity: 0.95;
+	max-width: 800px;
+}
+
+/* =========================
+   Progress Stats
+   ========================= */
+
+.cgt-petition-stats {
+	background: white;
+	border-radius: var(--radius);
+	padding: 2.5rem;
+	box-shadow: var(--shadow-lg);
+	margin-top: -4rem;
+	position: relative;
+	z-index: 2;
+}
+
+.cgt-petition-stats__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 2rem;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+.cgt-petition-stats__numbers {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5rem;
+}
+
+.cgt-petition-stats__current {
+	font-size: 3rem;
+	font-weight: 800;
+	color: var(--cgt-red);
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+.cgt-petition-stats__target {
+	font-size: 1.25rem;
+	color: var(--color-gray-600);
+	font-weight: 600;
+}
+
+.cgt-petition-stats__percentage {
+	background: var(--color-gray-100);
+	padding: 0.75rem 1.5rem;
+	border-radius: var(--radius-sm);
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--cgt-red);
+}
+
+/* Progress Bar */
+.cgt-petition-progress {
+	position: relative;
+	height: 24px;
+	background: var(--color-gray-100);
+	border-radius: 999px;
+	overflow: visible;
+	margin-bottom: 1rem;
+}
+
+.cgt-petition-progress__fill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--cgt-red), var(--cgt-red-light));
+	border-radius: 999px;
+	transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	box-shadow: 0 0 20px rgba(227, 6, 19, 0.3);
+}
+
+.cgt-petition-progress__fill::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+	border-radius: 999px;
+	animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+	0% { transform: translateX(-100%); }
+	100% { transform: translateX(100%); }
+}
+
+.cgt-petition-progress__label {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.875rem;
+	color: var(--color-gray-600);
+	font-weight: 600;
+	margin-top: 0.5rem;
+}
+
+/* =========================
+   Main Content Grid
+   ========================= */
+
+.cgt-petition-grid {
+	display: grid;
+	grid-template-columns: 1fr 450px;
+	gap: 2.5rem;
+	align-items: start;
+}
+
+@media (max-width: 1024px) {
+	.cgt-petition-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* =========================
+   Content Section
+   ========================= */
+
+.cgt-petition-content {
+	background: white;
+	border-radius: var(--radius);
+	padding: 2.5rem;
+	box-shadow: var(--shadow);
+}
+
+.cgt-petition-content h2 {
+	font-size: 1.875rem;
+	font-weight: 700;
+	color: var(--color-gray-900);
+	margin: 0 0 1.5rem 0;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.cgt-petition-content h2::before {
+	content: '📢';
+	font-size: 2rem;
+}
+
+.cgt-petition-content__text {
+	font-size: 1.0625rem;
+	line-height: 1.8;
+	color: var(--color-gray-700);
+}
+
+.cgt-petition-content__text p {
+	margin-bottom: 1.25rem;
+}
+
+.cgt-petition-content__text strong {
+	color: var(--color-gray-900);
+	font-weight: 700;
+}
+
+/* Thumbnail */
+.cgt-petition-content__thumb {
+	margin: 2rem 0;
+	border-radius: var(--radius);
+	overflow: hidden;
+	box-shadow: var(--shadow-lg);
+}
+
+.cgt-petition-content__thumb img {
+	width: 100%;
+	height: auto;
+	display: block;
+	border-radius: var(--radius);
+}
+
+/* PDF Download */
+.cgt-petition-pdf {
+	background: var(--color-gray-50);
+	border: 2px dashed var(--color-gray-300);
+	border-radius: var(--radius-sm);
+	padding: 1.5rem;
+	margin: 2rem 0;
+	text-align: center;
+}
+
+.cgt-petition-pdf__icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.cgt-petition-pdf__button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.75rem;
+	background: var(--cgt-red);
+	color: white;
+	padding: 0.875rem 2rem;
+	border-radius: var(--radius-sm);
+	text-decoration: none;
+	font-weight: 700;
+	font-size: 1rem;
+	transition: var(--transition);
+	box-shadow: var(--shadow);
+}
+
+.cgt-petition-pdf__button:hover {
+	background: var(--cgt-red-dark);
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lg);
+	color: white;
+}
+
+.cgt-petition-pdf__button::before {
+	content: '📥';
+	font-size: 1.25rem;
+}
+
+/* =========================
+   Signature Form
+   ========================= */
+
+.cgt-petition-form-wrapper {
+	background: white;
+	border-radius: var(--radius);
+	padding: 2.5rem;
+	box-shadow: var(--shadow-lg);
+	position: sticky;
+	top: 2rem;
+	border: 3px solid var(--cgt-red);
+}
+
+.cgt-petition-form-wrapper::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: linear-gradient(90deg, var(--cgt-red), var(--cgt-red-light));
+}
+
+.cgt-petition-form__header {
+	text-align: center;
+	margin-bottom: 2rem;
+}
+
+.cgt-petition-form__icon {
+	width: 64px;
+	height: 64px;
+	background: linear-gradient(135deg, var(--cgt-red), var(--cgt-red-light));
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 2rem;
+	margin: 0 auto 1rem;
+	box-shadow: 0 4px 12px rgba(227, 6, 19, 0.3);
+}
+
+.cgt-petition-form__title {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--color-gray-900);
+	margin: 0 0 0.5rem 0;
+}
+
+.cgt-petition-form__subtitle {
+	font-size: 0.9375rem;
+	color: var(--color-gray-600);
+	margin: 0;
+}
+
+/* Messages */
+.cgt-petition-message {
+	padding: 1.25rem 1.5rem;
+	border-radius: var(--radius-sm);
+	margin-bottom: 1.5rem;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.cgt-petition-message--success {
+	background: var(--color-success-light);
+	color: #065f46;
+	border: 2px solid var(--color-success);
+}
+
+.cgt-petition-message--success::before {
+	content: '✓';
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+.cgt-petition-message--error {
+	background: var(--color-error-light);
+	color: #991b1b;
+	border: 2px solid var(--color-error);
+}
+
+.cgt-petition-message--error::before {
+	content: '⚠';
+	font-size: 1.5rem;
+}
+
+/* Form Fields */
+.cgt-petition-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.cgt-petition-form__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.cgt-petition-form__label {
+	font-weight: 700;
+	color: var(--color-gray-900);
+	font-size: 0.9375rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.cgt-petition-form__label::before {
+	content: '●';
+	color: var(--cgt-red);
+	font-size: 0.5rem;
+}
+
+.cgt-petition-form__input {
+	width: 100%;
+	padding: 0.875rem 1.25rem;
+	border: 2px solid var(--color-gray-300);
+	border-radius: var(--radius-sm);
+	font-size: 1rem;
+	transition: var(--transition);
+	font-family: inherit;
+}
+
+.cgt-petition-form__input:focus {
+	outline: none;
+	border-color: var(--cgt-red);
+	box-shadow: 0 0 0 4px rgba(227, 6, 19, 0.1);
+}
+
+.cgt-petition-form__input:hover {
+	border-color: var(--color-gray-600);
+}
+
+/* Submit Button */
+.cgt-petition-form__submit {
+	background: linear-gradient(135deg, var(--cgt-red), var(--cgt-red-dark));
+	color: white;
+	padding: 1.125rem 2rem;
+	border: none;
+	border-radius: var(--radius-sm);
+	font-size: 1.125rem;
+	font-weight: 700;
+	cursor: pointer;
+	transition: var(--transition);
+	box-shadow: var(--shadow-lg);
+	position: relative;
+	overflow: hidden;
+}
+
+.cgt-petition-form__submit::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+	transition: left 0.5s;
+}
+
+.cgt-petition-form__submit:hover::before {
+	left: 100%;
+}
+
+.cgt-petition-form__submit:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-xl);
+}
+
+.cgt-petition-form__submit:active {
+	transform: translateY(0);
+}
+
+.cgt-petition-form__submit:disabled {
+	background: var(--color-gray-300);
+	cursor: not-allowed;
+	transform: none;
+	box-shadow: none;
+}
+
+/* Privacy Notice */
+.cgt-petition-form__privacy {
+	font-size: 0.8125rem;
+	color: var(--color-gray-600);
+	text-align: center;
+	padding-top: 1rem;
+	border-top: 1px solid var(--color-gray-200);
+	margin-top: 0.5rem;
+	line-height: 1.5;
+}
+
+.cgt-petition-form__privacy::before {
+	content: '🔒';
+	margin-right: 0.5rem;
+}
+
+/* =========================
+   Supporters Section
+   ========================= */
+
+.cgt-petition-supporters {
+	background: white;
+	border-radius: var(--radius);
+	padding: 2.5rem;
+	box-shadow: var(--shadow);
+	margin-top: 2rem;
+}
+
+.cgt-petition-supporters h3 {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--color-gray-900);
+	margin: 0 0 1.5rem 0;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.cgt-petition-supporters h3::before {
+	content: '👥';
+	font-size: 1.75rem;
+}
+
+.cgt-petition-supporters__count {
+	color: var(--cgt-red);
+}
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 768px) {
+	.cgt-petition {
+		margin: 1.5rem auto;
+		padding: 0 1rem;
+	}
+
+	.cgt-petition-hero {
+		padding: 2rem;
+	}
+
+	.cgt-petition-hero h1 {
+		font-size: 1.875rem;
+	}
+
+	.cgt-petition-stats {
+		padding: 1.5rem;
+		margin-top: -2rem;
+	}
+
+	.cgt-petition-stats__current {
+		font-size: 2.25rem;
+	}
+
+	.cgt-petition-stats__target {
+		font-size: 1rem;
+	}
+
+	.cgt-petition-content,
+	.cgt-petition-form-wrapper {
+		padding: 1.5rem;
+	}
+
+	.cgt-petition-form-wrapper {
+		position: static;
+	}
+
+	.cgt-petition-stats__header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+/* =========================
+   Animations
+   ========================= */
+
+.cgt-petition-hero,
+.cgt-petition-stats,
+.cgt-petition-content,
+.cgt-petition-form-wrapper {
+	animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.cgt-petition-stats {
+	animation-delay: 0.1s;
+}
+
+.cgt-petition-content {
+	animation-delay: 0.2s;
+}
+
+.cgt-petition-form-wrapper {
+	animation-delay: 0.3s;
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Counter Animation */
+.cgt-petition-stats__current {
+	animation: countUp 2s ease-out;
+}
+
+@keyframes countUp {
+	from {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
