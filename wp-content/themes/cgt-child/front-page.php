@@ -291,7 +291,7 @@ $communiques_tabs = array(
 					<p><?php esc_html_e( 'Nous répondons rapidement aux demandes d’interview et fournissons des dossiers prêts à l’emploi.', 'cgt' ); ?></p>
 					<div class="home-duo-card__content">
 						<p><?php esc_html_e( 'Écrivez-nous pour organiser une interview, vérifier une information ou obtenir des éléments chiffrés.', 'cgt' ); ?></p>
-						<a class="btn" href="mailto:contact@example.com"><?php esc_html_e( 'Contacter la cellule presse', 'cgt' ); ?></a>
+						<a class="btn" href="mailto:ccnprest@cgt.fr"><?php esc_html_e( 'Contacter la cellule presse', 'cgt' ); ?></a>
 					</div>
 				</div>
 				<div class="home-duo-card">
