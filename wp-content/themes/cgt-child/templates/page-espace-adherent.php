@@ -355,24 +355,8 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 				<a class="btn btn-compact" href="<?php echo esc_url( $article_submission_link ); ?>"><?php esc_html_e( 'Proposer un article adhérent', 'cgt' ); ?></a>
 				<a class="btn btn-compact btn-outline" href="<?php echo esc_url( $tract_submission_link ); ?>"><?php esc_html_e( 'Soumettre un tract réservé aux adhérent·es', 'cgt' ); ?></a>
 			</div>
-			<?php if ( ! empty( $branch_sections ) ) : ?>
-				<div class="member-branch-grid">
-						<?php foreach ( $branch_sections as $section ) : ?>
-							<div class="member-branch-panel">
-								<h3><?php echo esc_html( $section['term']->name ); ?></h3>
-								<ul>
-									<?php foreach ( $section['posts'] as $branch_post ) : ?>
-										<li><a href="<?php echo esc_url( get_permalink( $branch_post ) ); ?>"><?php echo esc_html( get_the_title( $branch_post ) ); ?></a></li>
-									<?php endforeach; ?>
-								</ul>
-							</div>
-						<?php endforeach; ?>
-					</div>
-				<?php else : ?>
-					<p><?php esc_html_e( 'Aucun article par branche pour le moment. Ajoutez des contenus privés dans l’administration.', 'cgt' ); ?></p>
-				<?php endif; ?>
-			</div>
-		</section>
+		</div>
+	</section>
 
 		<section class="member-section container">
 			<div class="member-panel member-panel--library">

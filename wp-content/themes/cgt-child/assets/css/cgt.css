@@ -1238,6 +1238,13 @@ a:focus {
 	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+@media (max-width: 600px) {
+	.member-branch-grid {
+		grid-template-columns: 1fr;
+		gap: 1.1rem;
+	}
+}
+
 .member-branch-panel {
 	background: rgba(229, 231, 235, 0.4);
 	border-radius: var(--radius);
@@ -1467,6 +1474,7 @@ a:focus {
 	border-radius: var(--radius);
 	text-align: center;
 }
+
 
 .legal-page {
 	padding: 2rem 0;
