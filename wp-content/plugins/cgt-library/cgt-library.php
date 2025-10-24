@@ -181,44 +181,22 @@ class CGT_PDF_Library {
             return;
         }
 
-		wp_register_script( 'cgt-library-admin', '', array( 'jquery' ), false, true );
-		wp_enqueue_script( 'cgt-library-admin' );
-		wp_enqueue_style( 'wp-components' );
+		// Enqueue custom CSS
+		wp_enqueue_style(
+			'cgt-library-admin-css',
+			plugin_dir_url( __FILE__ ) . 'assets/css/library-admin.css',
+			array(),
+			'1.0.0'
+		);
 
-        $inline_css = <<<CSS
-.cgt-library-wrapper { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: start; }
-.cgt-library-sidebar { background: #fff; border: 1px solid #dcdcde; border-radius: 6px; padding: 16px; }
-.cgt-library-sidebar ul { margin: 0; padding-left: 18px; }
-.cgt-library-sidebar li { margin: 6px 0; }
-.cgt-library-content table.wp-list-table td { vertical-align: middle; }
-.cgt-library-actions { display: flex; gap: 8px; align-items: center; }
-@media (max-width: 960px) {
-	.cgt-library-wrapper { grid-template-columns: 1fr; }
-}
-CSS;
-        wp_add_inline_style( 'wp-components', $inline_css );
-
-        $inline_js = <<<JS
-document.addEventListener('click', function(event) {
-    if ( event.target.classList.contains('cgt-copy-shortcode') ) {
-        event.preventDefault();
-        const shortcode = event.target.getAttribute('data-shortcode');
-        if ( shortcode ) {
-            navigator.clipboard.writeText(shortcode).then(function() {
-                event.target.innerText = event.target.getAttribute('data-success');
-                setTimeout(function(){ event.target.innerText = event.target.getAttribute('data-label'); }, 2000);
-            });
-        }
-    }
-
-    if ( event.target.classList.contains('cgt-delete-pdf') ) {
-        if ( ! window.confirm(event.target.getAttribute('data-confirm')) ) {
-            event.preventDefault();
-        }
-    }
-});
-JS;
-        wp_add_inline_script( 'cgt-library-admin', $inline_js );
+		// Enqueue custom JS
+		wp_enqueue_script(
+			'cgt-library-admin-js',
+			plugin_dir_url( __FILE__ ) . 'assets/js/library-admin.js',
+			array( 'jquery' ),
+			'1.0.0',
+			true
+		);
 	}
 
 	/**
@@ -234,6 +212,8 @@ JS;
 		$args = array(
 			'post_type'      => self::CPT,
 			'posts_per_page' => -1,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
 		);
 
 		if ( $selected_cat ) {
@@ -249,52 +229,76 @@ JS;
 		$query      = new WP_Query( $args );
 		$categories = get_categories( array( 'hide_empty' => false ) );
 		?>
-		<div class="wrap">
-			<h1 class="wp-heading-inline"><?php esc_html_e( 'Bibliothèque de PDF', 'cgt' ); ?></h1>
-			<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . self::CPT ) ); ?>" class="page-title-action"><?php esc_html_e( 'Ajouter un PDF', 'cgt' ); ?></a>
+		<div class="wrap cgt-library-page">
+
+			<!-- Header -->
+			<div class="cgt-library-header">
+				<h1>
+					<span class="icon">📚</span>
+					<?php esc_html_e( 'Bibliothèque PDF', 'cgt' ); ?>
+				</h1>
+				<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . self::CPT ) ); ?>" class="page-title-action">
+					<?php esc_html_e( 'Ajouter un PDF', 'cgt' ); ?>
+				</a>
+			</div>
+
+			<!-- Success Notice -->
 			<?php if ( isset( $_GET['deleted'] ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Document supprimé.', 'cgt' ); ?></p></div>
+				<div class="cgt-library-notice">
+					<?php esc_html_e( 'Document supprimé avec succès.', 'cgt' ); ?>
+				</div>
 			<?php endif; ?>
-			<hr class="wp-header-end">
+
+			<!-- Main Wrapper -->
 			<div class="cgt-library-wrapper">
+
+				<!-- Sidebar -->
 				<aside class="cgt-library-sidebar">
 					<h2><?php esc_html_e( 'Catégories', 'cgt' ); ?></h2>
 					<ul>
-						<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=cgt-library' ) ); ?>"<?php echo 0 === $selected_cat ? ' class="current"' : ''; ?>><?php esc_html_e( 'Toutes les catégories', 'cgt' ); ?></a></li>
+						<li>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=cgt-library' ) ); ?>"<?php echo 0 === $selected_cat ? ' class="current"' : ''; ?>>
+								<?php esc_html_e( 'Toutes les catégories', 'cgt' ); ?>
+								<span class="count"><?php echo (int) $query->found_posts; ?></span>
+							</a>
+						</li>
 						<?php foreach ( $categories as $cat ) : ?>
-							<li><a href="<?php echo esc_url( add_query_arg( array( 'page' => 'cgt-library', 'cgt_cat' => $cat->term_id ), admin_url( 'admin.php' ) ) ); ?>"<?php echo $selected_cat === $cat->term_id ? ' class="current"' : ''; ?>><?php echo esc_html( $cat->name ); ?> (<?php echo (int) $cat->count; ?>)</a></li>
+							<li>
+								<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'cgt-library', 'cgt_cat' => $cat->term_id ), admin_url( 'admin.php' ) ) ); ?>"<?php echo $selected_cat === $cat->term_id ? ' class="current"' : ''; ?>>
+									<?php echo esc_html( $cat->name ); ?>
+									<span class="count"><?php echo (int) $cat->count; ?></span>
+								</a>
+							</li>
 						<?php endforeach; ?>
 					</ul>
 				</aside>
+
+				<!-- Content Area -->
 				<div class="cgt-library-content">
-					<form method="get" class="alignleft actions cgt-library-filter">
+
+					<!-- Filters -->
+					<form method="get" class="cgt-library-filters">
 						<input type="hidden" name="page" value="cgt-library">
+						<label for="cgt_cat_select"><?php esc_html_e( 'Filtrer par catégorie:', 'cgt' ); ?></label>
 						<?php
 						wp_dropdown_categories(
 							array(
 								'taxonomy'         => 'category',
 								'show_option_all'  => __( 'Toutes les catégories', 'cgt' ),
 								'name'             => 'cgt_cat',
+								'id'               => 'cgt_cat_select',
 								'orderby'          => 'name',
 								'selected'         => $selected_cat,
 								'show_count'       => true,
 								'hide_empty'       => false,
 							)
 						);
-						submit_button( __( 'Filtrer', 'cgt' ), '', 'filter_action', false );
+						submit_button( __( 'Filtrer', 'cgt' ), 'primary', 'filter_action', false );
 						?>
 					</form>
-					<table class="wp-list-table widefat fixed striped">
-						<thead>
-							<tr>
-								<th><?php esc_html_e( 'Titre', 'cgt' ); ?></th>
-								<th><?php esc_html_e( 'Catégories', 'cgt' ); ?></th>
-								<th><?php esc_html_e( 'Fichier', 'cgt' ); ?></th>
-								<th><?php esc_html_e( 'Shortcode', 'cgt' ); ?></th>
-								<th><?php esc_html_e( 'Actions', 'cgt' ); ?></th>
-							</tr>
-						</thead>
-						<tbody>
+
+					<!-- PDF Cards Grid -->
+					<div class="cgt-library-grid">
 						<?php if ( $query->have_posts() ) : ?>
 							<?php
 							while ( $query->have_posts() ) :
@@ -303,48 +307,97 @@ JS;
 								$file_id   = (int) get_post_meta( $post_id, self::META_FILE, true );
 								$file_url  = $file_id ? wp_get_attachment_url( $file_id ) : '';
 								$shortcode = '[pdf_document id="' . $post_id . '"]';
+								$terms     = get_the_terms( $post_id, 'category' );
 								?>
-								<tr>
-									<td><strong><a href="<?php echo esc_url( get_edit_post_link( $post_id ) ); ?>"><?php the_title(); ?></a></strong></td>
-									<td>
-										<?php
-										$terms = get_the_terms( $post_id, 'category' );
-										if ( $terms && ! is_wp_error( $terms ) ) {
-											echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
-										} else {
-											esc_html_e( 'Non classé', 'cgt' );
-										}
-										?>
-									</td>
-									<td>
-										<?php
-										if ( $file_url ) {
-											echo '<a href="' . esc_url( $file_url ) . '" target="_blank" rel="noopener">' . esc_html__( 'Voir le PDF', 'cgt' ) . '</a>';
-										} else {
-											esc_html_e( 'Aucun fichier', 'cgt' );
-										}
-										?>
-									</td>
-									<td>
-										<code><?php echo esc_html( $shortcode ); ?></code><br>
-										<button class="button button-secondary cgt-copy-shortcode" data-shortcode="<?php echo esc_attr( $shortcode ); ?>" data-success="<?php esc_attr_e( 'Copié !', 'cgt' ); ?>" data-label="<?php esc_attr_e( 'Copier', 'cgt' ); ?>"><?php esc_html_e( 'Copier', 'cgt' ); ?></button>
-									</td>
-									<td>
-										<div class="cgt-library-actions">
-											<a class="button" href="<?php echo esc_url( get_edit_post_link( $post_id ) ); ?>"><?php esc_html_e( 'Modifier', 'cgt' ); ?></a>
-											<a class="button button-link-delete cgt-delete-pdf" data-confirm="<?php esc_attr_e( 'Supprimer ce PDF ?', 'cgt' ); ?>" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cgt_delete_pdf&post=' . $post_id ), 'cgt_delete_pdf_' . $post_id ) ); ?>"><?php esc_html_e( 'Supprimer', 'cgt' ); ?></a>
+
+								<article class="cgt-pdf-card">
+
+									<!-- Card Header -->
+									<div class="cgt-pdf-card-header">
+										<div class="cgt-pdf-icon">📄</div>
+										<div class="cgt-pdf-card-title">
+											<h3>
+												<a href="<?php echo esc_url( get_edit_post_link( $post_id ) ); ?>">
+													<?php the_title(); ?>
+												</a>
+											</h3>
 										</div>
-									</td>
-								</tr>
+									</div>
+
+									<!-- Categories -->
+									<div class="cgt-pdf-categories">
+										<?php if ( $terms && ! is_wp_error( $terms ) ) : ?>
+											<?php foreach ( $terms as $term ) : ?>
+												<span class="cgt-pdf-category-badge">
+													<?php echo esc_html( $term->name ); ?>
+												</span>
+											<?php endforeach; ?>
+										<?php else : ?>
+											<span class="cgt-pdf-category-badge empty">
+												<?php esc_html_e( 'Non classé', 'cgt' ); ?>
+											</span>
+										<?php endif; ?>
+									</div>
+
+									<!-- File Info -->
+									<div class="cgt-pdf-file-info <?php echo ! $file_url ? 'no-file' : ''; ?>">
+										<?php if ( $file_url ) : ?>
+											<span class="icon">📎</span>
+											<a href="<?php echo esc_url( $file_url ); ?>" target="_blank" rel="noopener">
+												<?php esc_html_e( 'Voir le PDF', 'cgt' ); ?>
+											</a>
+										<?php else : ?>
+											<span class="icon">⚠️</span>
+											<?php esc_html_e( 'Aucun fichier associé', 'cgt' ); ?>
+										<?php endif; ?>
+									</div>
+
+									<!-- Shortcode -->
+									<div class="cgt-pdf-shortcode">
+										<div class="cgt-pdf-shortcode-label">
+											<?php esc_html_e( 'Shortcode', 'cgt' ); ?>
+										</div>
+										<div class="cgt-pdf-shortcode-box">
+											<code><?php echo esc_html( $shortcode ); ?></code>
+											<button type="button" class="cgt-copy-btn" data-shortcode="<?php echo esc_attr( $shortcode ); ?>">
+												<?php esc_html_e( 'Copier', 'cgt' ); ?>
+											</button>
+										</div>
+									</div>
+
+									<!-- Actions -->
+									<div class="cgt-pdf-actions">
+										<a class="button button-primary" href="<?php echo esc_url( get_edit_post_link( $post_id ) ); ?>">
+											✏️ <?php esc_html_e( 'Modifier', 'cgt' ); ?>
+										</a>
+										<a class="button button-delete cgt-delete-pdf"
+										   data-confirm="<?php esc_attr_e( 'Êtes-vous sûr de vouloir supprimer ce PDF ?', 'cgt' ); ?>"
+										   href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cgt_delete_pdf&post=' . $post_id ), 'cgt_delete_pdf_' . $post_id ) ); ?>">
+											🗑️ <?php esc_html_e( 'Supprimer', 'cgt' ); ?>
+										</a>
+									</div>
+
+								</article>
+
 								<?php
 							endwhile;
 							wp_reset_postdata();
 							?>
 						<?php else : ?>
-							<tr><td colspan="5"><?php esc_html_e( 'Aucun PDF disponible pour cette sélection.', 'cgt' ); ?></td></tr>
+
+							<!-- Empty State -->
+							<div class="cgt-library-empty">
+								<div class="icon">📭</div>
+								<h3><?php esc_html_e( 'Aucun PDF disponible', 'cgt' ); ?></h3>
+								<p><?php esc_html_e( 'Commencez par ajouter votre premier document PDF à la bibliothèque.', 'cgt' ); ?></p>
+								<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . self::CPT ) ); ?>" class="button">
+									<?php esc_html_e( 'Ajouter un PDF', 'cgt' ); ?>
+								</a>
+							</div>
+
 						<?php endif; ?>
-						</tbody>
-					</table>
+					</div>
+
 				</div>
 			</div>
 		</div>
