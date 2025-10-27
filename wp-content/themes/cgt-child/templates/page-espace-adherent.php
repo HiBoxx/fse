@@ -284,8 +284,7 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 				<div>
 					<h1 class="member-dashboard__title"><?php printf( esc_html__( 'Bonjour %s', 'cgt' ), esc_html( $display_name ) ); ?></h1>
 					<?php
-					// Get user's selected branch
-					$user_branch_id = get_user_meta( get_current_user_id(), 'cgt_user_branch', true );
+					// Use already defined $user_branch_id from line 22
 					if ( $user_branch_id ) {
 						$user_branch = get_term( $user_branch_id, 'branche' );
 						if ( $user_branch && ! is_wp_error( $user_branch ) ) {

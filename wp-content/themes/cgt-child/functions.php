@@ -483,3 +483,29 @@ function cgt_enqueue_espace_adherent_styles() {
 		);
 	}
 }
+
+/**
+ * Add security headers to HTTP responses
+ */
+add_action( 'send_headers', 'cgt_add_security_headers' );
+function cgt_add_security_headers() {
+	// Ne pas ajouter les headers dans l'admin pour éviter les conflits
+	if ( is_admin() ) {
+		return;
+	}
+
+	// Protection contre le MIME type sniffing
+	header( 'X-Content-Type-Options: nosniff' );
+
+	// Protection contre le clickjacking
+	header( 'X-Frame-Options: SAMEORIGIN' );
+
+	// Protection XSS pour les anciens navigateurs
+	header( 'X-XSS-Protection: 1; mode=block' );
+
+	// Politique de referrer stricte
+	header( 'Referrer-Policy: strict-origin-when-cross-origin' );
+
+	// Permissions Policy (anciennement Feature Policy)
+	header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
+}
