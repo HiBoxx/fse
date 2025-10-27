@@ -260,7 +260,7 @@
 }
 
 .form-control {
-    width: 100%;
+    width: 90%;
     padding: 0.875rem 1rem;
     border: 2px solid var(--color-gray);
     border-radius: var(--radius-sm);
