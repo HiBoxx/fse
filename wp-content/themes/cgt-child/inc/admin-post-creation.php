@@ -1,7 +1,7 @@
 <?php
 /**
- * Admin Post Creation Pages
- * Pages d'administration pour créer des articles et tracts facilement
+ * Admin Post Creation - Custom Edit Screens
+ * Remplace les pages d'édition standard WordPress pour articles et tracts
  *
  * @package CGT_Child
  */
@@ -9,40 +9,14 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Add admin menu pages
- */
-add_action( 'admin_menu', 'cgt_add_post_creation_pages' );
-function cgt_add_post_creation_pages() {
-	// Ajouter Article
-	add_menu_page(
-		__( 'Ajouter Article', 'cgt' ),
-		__( 'Ajouter Article', 'cgt' ),
-		'edit_posts',
-		'cgt-add-article',
-		'cgt_render_add_article_page',
-		'dashicons-edit-large',
-		25
-	);
-
-	// Ajouter Tract
-	add_menu_page(
-		__( 'Ajouter Tract', 'cgt' ),
-		__( 'Ajouter Tract', 'cgt' ),
-		'edit_posts',
-		'cgt-add-tract',
-		'cgt_render_add_tract_page',
-		'dashicons-media-document',
-		26
-	);
-}
-
-/**
- * Enqueue admin styles and scripts for post creation pages
+ * Enqueue admin styles and scripts for post creation
  */
 add_action( 'admin_enqueue_scripts', 'cgt_enqueue_post_creation_assets' );
 function cgt_enqueue_post_creation_assets( $hook ) {
-	// Charger uniquement sur nos pages
-	if ( 'toplevel_page_cgt-add-article' !== $hook && 'toplevel_page_cgt-add-tract' !== $hook ) {
+	global $post_type;
+
+	// Charger uniquement sur les pages d'édition d'articles et tracts
+	if ( ( 'post.php' !== $hook && 'post-new.php' !== $hook ) || ! in_array( $post_type, array( 'post', 'tracts' ), true ) ) {
 		return;
 	}
 
@@ -56,430 +30,337 @@ function cgt_enqueue_post_creation_assets( $hook ) {
 
 	// Charger WordPress media uploader
 	wp_enqueue_media();
+
+	// Styles inline pour intégration
+	wp_add_inline_style(
+		'cgt-admin-post-creation',
+		'
+		.submit-article-container {
+			background: #fff;
+			border: 1px solid #c3c4c7;
+			border-radius: 4px;
+			padding: 0;
+			margin: 20px 0;
+		}
+		.submit-article-header {
+			background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+			color: white;
+			padding: 20px;
+			border-radius: 4px 4px 0 0;
+		}
+		.submit-article-header h1 {
+			color: white;
+			margin: 0 0 10px 0;
+			font-size: 24px;
+		}
+		.submit-article-header p {
+			margin: 0;
+			opacity: 0.9;
+		}
+		.cgt-submit-article {
+			padding: 20px;
+		}
+		.form-step {
+			display: block;
+		}
+		.media-upload-container {
+			margin-top: 10px;
+		}
+		.media-preview {
+			margin-bottom: 10px;
+			padding: 10px;
+			background: #f9f9f9;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			min-height: 50px;
+		}
+		.media-preview:empty {
+			display: none;
+		}
+		.media-preview img {
+			max-width: 300px;
+			height: auto;
+			display: block;
+		}
+		.form-actions {
+			margin-top: 2rem;
+			padding-top: 2rem;
+			border-top: 2px solid #e5e7eb;
+		}
+		.optional {
+			font-weight: normal;
+			color: #6b7280;
+			font-size: 0.9em;
+		}
+		#post-body-content {
+			margin-bottom: 20px;
+		}
+		'
+	);
 }
 
 /**
- * Render the Add Article page
+ * Remove default editor and meta boxes for articles and tracts
  */
-function cgt_render_add_article_page() {
-	$message = '';
-	$errors  = array();
+add_action( 'admin_init', 'cgt_remove_default_editor' );
+function cgt_remove_default_editor() {
+	remove_post_type_support( 'post', 'editor' );
+	remove_post_type_support( 'tracts', 'editor' );
+}
 
-	// Traitement du formulaire
-	if ( isset( $_POST['cgt_add_article_submit'] ) ) {
-		if ( ! wp_verify_nonce( sanitize_key( $_POST['cgt_add_article_nonce'] ), 'cgt_add_article' ) ) {
-			$errors[] = __( 'Jeton de sécurité invalide.', 'cgt' );
-		} else {
-			// Récupération des données
-			$title      = isset( $_POST['cgt_article_title'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_title'] ) ) : '';
-			$content    = isset( $_POST['cgt_article_content'] ) ? wp_kses_post( wp_unslash( $_POST['cgt_article_content'] ) ) : '';
-			$excerpt    = isset( $_POST['cgt_article_excerpt'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_article_excerpt'] ) ) : '';
-			$category   = isset( $_POST['cgt_article_category'] ) ? absint( $_POST['cgt_article_category'] ) : 0;
-			$branche    = isset( $_POST['cgt_article_branche'] ) ? absint( $_POST['cgt_article_branche'] ) : 0;
-			$keywords   = isset( $_POST['cgt_article_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_keywords'] ) ) : '';
-			$sources    = isset( $_POST['cgt_article_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_article_sources'] ) ) : '';
-			$featured_id = isset( $_POST['cgt_article_featured_id'] ) ? absint( $_POST['cgt_article_featured_id'] ) : 0;
+/**
+ * Add custom meta boxes for articles and tracts
+ */
+add_action( 'add_meta_boxes', 'cgt_add_custom_post_meta_boxes' );
+function cgt_add_custom_post_meta_boxes() {
+	// Meta box pour les articles
+	add_meta_box(
+		'cgt_article_content',
+		__( 'Contenu de l\'article', 'cgt' ),
+		'cgt_render_article_meta_box',
+		'post',
+		'normal',
+		'high'
+	);
 
-			// Validation
-			if ( empty( $title ) ) {
-				$errors[] = __( 'Le titre est requis.', 'cgt' );
-			}
+	// Meta box pour les tracts
+	add_meta_box(
+		'cgt_tract_content',
+		__( 'Contenu du tract', 'cgt' ),
+		'cgt_render_tract_meta_box',
+		'tracts',
+		'normal',
+		'high'
+	);
+}
 
-			if ( empty( $content ) ) {
-				$errors[] = __( 'Le contenu est requis.', 'cgt' );
-			}
-
-			if ( empty( $errors ) ) {
-				// Créer l'article
-				$post_args = array(
-					'post_type'    => 'post',
-					'post_title'   => $title,
-					'post_content' => $content,
-					'post_excerpt' => $excerpt,
-					'post_status'  => 'publish', // Publier directement
-					'post_author'  => get_current_user_id(),
-					'post_category'=> $category ? array( $category ) : array(),
-				);
-
-				$post_id = wp_insert_post( $post_args );
-
-				if ( $post_id && ! is_wp_error( $post_id ) ) {
-					// Ajouter la branche
-					if ( $branche ) {
-						wp_set_post_terms( $post_id, array( $branche ), 'branche', false );
-					}
-
-					// Ajouter les mots-clés
-					if ( $keywords ) {
-						$tags = array_map( 'trim', explode( ',', $keywords ) );
-						wp_set_post_terms( $post_id, $tags, 'post_tag', false );
-					}
-
-					// Ajouter les sources
-					if ( $sources ) {
-						update_post_meta( $post_id, 'cgt_submission_sources', $sources );
-					}
-
-					// Ajouter l'image mise en avant
-					if ( $featured_id ) {
-						set_post_thumbnail( $post_id, $featured_id );
-					}
-
-					// Message de succès avec lien
-					$edit_link = get_edit_post_link( $post_id );
-					$view_link = get_permalink( $post_id );
-					$message = sprintf(
-						__( 'Article créé avec succès ! <a href="%1$s" target="_blank">Voir l\'article</a> | <a href="%2$s">Modifier</a>', 'cgt' ),
-						esc_url( $view_link ),
-						esc_url( $edit_link )
-					);
-
-					// Réinitialiser les champs
-					$title = $content = $excerpt = $keywords = $sources = '';
-					$category = $branche = $featured_id = 0;
-				} else {
-					$errors[] = __( 'Erreur lors de la création de l\'article.', 'cgt' );
-				}
-			}
-		}
-	}
+/**
+ * Render article meta box
+ */
+function cgt_render_article_meta_box( $post ) {
+	// Récupérer les valeurs existantes
+	$content    = $post->post_content;
+	$excerpt    = $post->post_excerpt;
+	$category   = wp_get_post_categories( $post->ID );
+	$category   = ! empty( $category ) ? $category[0] : 0;
+	$branche_terms = wp_get_post_terms( $post->ID, 'branche' );
+	$branche    = ! empty( $branche_terms ) ? $branche_terms[0]->term_id : 0;
+	$tags       = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+	$keywords   = implode( ', ', $tags );
+	$sources    = get_post_meta( $post->ID, 'cgt_submission_sources', true );
+	$featured_id = get_post_thumbnail_id( $post->ID );
 
 	// Récupérer les catégories et branches
 	$categories = get_categories( array( 'hide_empty' => false ) );
 	$branches   = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
 
-	// Afficher le formulaire
-	cgt_render_post_creation_form( 'article', $message, $errors, compact( 'categories', 'branches', 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id' ) );
+	wp_nonce_field( 'cgt_save_article_meta', 'cgt_article_meta_nonce' );
+
+	cgt_render_post_fields( 'article', compact( 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'categories', 'branches' ) );
 }
 
 /**
- * Render the Add Tract page
+ * Render tract meta box
  */
-function cgt_render_add_tract_page() {
-	$message = '';
-	$errors  = array();
-
-	// Traitement du formulaire
-	if ( isset( $_POST['cgt_add_tract_submit'] ) ) {
-		if ( ! wp_verify_nonce( sanitize_key( $_POST['cgt_add_tract_nonce'] ), 'cgt_add_tract' ) ) {
-			$errors[] = __( 'Jeton de sécurité invalide.', 'cgt' );
-		} else {
-			// Récupération des données
-			$title      = isset( $_POST['cgt_tract_title'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_tract_title'] ) ) : '';
-			$content    = isset( $_POST['cgt_tract_content'] ) ? wp_kses_post( wp_unslash( $_POST['cgt_tract_content'] ) ) : '';
-			$excerpt    = isset( $_POST['cgt_tract_excerpt'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_tract_excerpt'] ) ) : '';
-			$category   = isset( $_POST['cgt_tract_category'] ) ? absint( $_POST['cgt_tract_category'] ) : 0;
-			$branche    = isset( $_POST['cgt_tract_branche'] ) ? absint( $_POST['cgt_tract_branche'] ) : 0;
-			$keywords   = isset( $_POST['cgt_tract_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_tract_keywords'] ) ) : '';
-			$sources    = isset( $_POST['cgt_tract_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_tract_sources'] ) ) : '';
-			$featured_id = isset( $_POST['cgt_tract_featured_id'] ) ? absint( $_POST['cgt_tract_featured_id'] ) : 0;
-			$pdf_id     = isset( $_POST['cgt_tract_pdf_id'] ) ? absint( $_POST['cgt_tract_pdf_id'] ) : 0;
-
-			// Validation
-			if ( empty( $title ) ) {
-				$errors[] = __( 'Le titre est requis.', 'cgt' );
-			}
-
-			if ( empty( $content ) ) {
-				$errors[] = __( 'Le contenu est requis.', 'cgt' );
-			}
-
-			if ( empty( $errors ) ) {
-				// Créer le tract
-				$post_args = array(
-					'post_type'    => 'tracts',
-					'post_title'   => $title,
-					'post_content' => $content,
-					'post_excerpt' => $excerpt,
-					'post_status'  => 'publish', // Publier directement
-					'post_author'  => get_current_user_id(),
-				);
-
-				$post_id = wp_insert_post( $post_args );
-
-				if ( $post_id && ! is_wp_error( $post_id ) ) {
-					// Ajouter la catégorie (thématique)
-					if ( $category ) {
-						wp_set_post_terms( $post_id, array( $category ), 'thematique', false );
-					}
-
-					// Ajouter la branche
-					if ( $branche ) {
-						wp_set_post_terms( $post_id, array( $branche ), 'branche', false );
-					}
-
-					// Ajouter les mots-clés
-					if ( $keywords ) {
-						$tags = array_map( 'trim', explode( ',', $keywords ) );
-						wp_set_post_terms( $post_id, $tags, 'post_tag', false );
-					}
-
-					// Ajouter les sources
-					if ( $sources ) {
-						update_post_meta( $post_id, 'cgt_submission_sources', $sources );
-					}
-
-					// Ajouter l'image mise en avant
-					if ( $featured_id ) {
-						set_post_thumbnail( $post_id, $featured_id );
-					}
-
-					// Ajouter le PDF
-					if ( $pdf_id ) {
-						$pdf_url = wp_get_attachment_url( $pdf_id );
-						update_post_meta( $post_id, 'cgt_fichier_pdf', $pdf_url );
-					}
-
-					// Visibilité par défaut : public
-					update_post_meta( $post_id, 'cgt_visibilite', 'public' );
-
-					// Message de succès avec lien
-					$edit_link = get_edit_post_link( $post_id );
-					$view_link = get_permalink( $post_id );
-					$message = sprintf(
-						__( 'Tract créé avec succès ! <a href="%1$s" target="_blank">Voir le tract</a> | <a href="%2$s">Modifier</a>', 'cgt' ),
-						esc_url( $view_link ),
-						esc_url( $edit_link )
-					);
-
-					// Réinitialiser les champs
-					$title = $content = $excerpt = $keywords = $sources = '';
-					$category = $branche = $featured_id = $pdf_id = 0;
-				} else {
-					$errors[] = __( 'Erreur lors de la création du tract.', 'cgt' );
-				}
-			}
-		}
-	}
+function cgt_render_tract_meta_box( $post ) {
+	// Récupérer les valeurs existantes
+	$content    = $post->post_content;
+	$excerpt    = $post->post_excerpt;
+	$category_terms = wp_get_post_terms( $post->ID, 'thematique' );
+	$category   = ! empty( $category_terms ) ? $category_terms[0]->term_id : 0;
+	$branche_terms = wp_get_post_terms( $post->ID, 'branche' );
+	$branche    = ! empty( $branche_terms ) ? $branche_terms[0]->term_id : 0;
+	$tags       = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+	$keywords   = implode( ', ', $tags );
+	$sources    = get_post_meta( $post->ID, 'cgt_submission_sources', true );
+	$featured_id = get_post_thumbnail_id( $post->ID );
+	$pdf_url    = get_post_meta( $post->ID, 'cgt_fichier_pdf', true );
+	$pdf_id     = $pdf_url ? attachment_url_to_postid( $pdf_url ) : 0;
 
 	// Récupérer les thématiques et branches
 	$categories = get_terms( array( 'taxonomy' => 'thematique', 'hide_empty' => false ) );
 	$branches   = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
 
-	// Afficher le formulaire
-	cgt_render_post_creation_form( 'tract', $message, $errors, compact( 'categories', 'branches', 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'pdf_id' ) );
+	wp_nonce_field( 'cgt_save_tract_meta', 'cgt_tract_meta_nonce' );
+
+	cgt_render_post_fields( 'tract', compact( 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'pdf_id', 'categories', 'branches' ) );
 }
 
 /**
- * Render the post creation form (Article ou Tract)
+ * Render post fields
  */
-function cgt_render_post_creation_form( $type, $message, $errors, $data ) {
+function cgt_render_post_fields( $type, $data ) {
 	$is_article = ( 'article' === $type );
 	$post_type_label = $is_article ? __( 'Article', 'cgt' ) : __( 'Tract', 'cgt' );
 	$icon = $is_article ? '✍️' : '📄';
-	$nonce_action = $is_article ? 'cgt_add_article' : 'cgt_add_tract';
-	$nonce_name = $is_article ? 'cgt_add_article_nonce' : 'cgt_add_tract_nonce';
-	$submit_name = $is_article ? 'cgt_add_article_submit' : 'cgt_add_tract_submit';
 	$field_prefix = $is_article ? 'article' : 'tract';
 
+	// Initialiser les variables par défaut si elles n'existent pas
+	$content     = isset( $data['content'] ) ? $data['content'] : '';
+	$excerpt     = isset( $data['excerpt'] ) ? $data['excerpt'] : '';
+	$category    = isset( $data['category'] ) ? $data['category'] : 0;
+	$branche     = isset( $data['branche'] ) ? $data['branche'] : 0;
+	$keywords    = isset( $data['keywords'] ) ? $data['keywords'] : '';
+	$sources     = isset( $data['sources'] ) ? $data['sources'] : '';
+	$featured_id = isset( $data['featured_id'] ) ? $data['featured_id'] : 0;
+	$pdf_id      = isset( $data['pdf_id'] ) ? $data['pdf_id'] : 0;
+	$categories  = isset( $data['categories'] ) ? $data['categories'] : array();
+	$branches    = isset( $data['branches'] ) ? $data['branches'] : array();
+
 	?>
-	<div class="wrap">
-		<div class="submit-article-page">
-			<div class="submit-article-container">
-				<!-- Header -->
-				<header class="submit-article-header">
-					<h1>
-						<span class="icon"><?php echo $icon; ?></span>
-						<?php echo esc_html( sprintf( __( 'Ajouter un %s', 'cgt' ), $post_type_label ) ); ?>
-					</h1>
-					<p><?php echo esc_html( sprintf( __( 'Créez rapidement un nouveau %s et publiez-le directement sur le site.', 'cgt' ), strtolower( $post_type_label ) ) ); ?></p>
-				</header>
+	<div class="submit-article-container">
+		<header class="submit-article-header">
+			<h1>
+				<span class="icon"><?php echo esc_html( $icon ); ?></span>
+				<?php echo esc_html( sprintf( __( 'Informations du %s', 'cgt' ), strtolower( $post_type_label ) ) ); ?>
+			</h1>
+			<p><?php esc_html_e( 'Remplissez les informations ci-dessous pour votre publication.', 'cgt' ); ?></p>
+		</header>
 
-				<?php if ( ! empty( $message ) ) : ?>
-					<div class="notice success">
-						<span style="font-size: 1.5rem;">✓</span>
-						<div>
-							<?php echo wp_kses_post( $message ); ?>
-						</div>
+		<div class="cgt-submit-article">
+			<div class="form-step active">
+				<!-- Description (Contenu) -->
+				<div class="form-group">
+					<label>
+						<?php esc_html_e( 'Description', 'cgt' ); ?> <span class="required">*</span>
+						<span class="hint"><?php esc_html_e( 'Contenu complet de votre publication', 'cgt' ); ?></span>
+					</label>
+					<?php
+					wp_editor(
+						$content,
+						'content',
+						array(
+							'textarea_name' => 'content',
+							'media_buttons' => true,
+							'textarea_rows' => 10,
+							'teeny'         => false,
+							'tinymce'       => true,
+						)
+					);
+					?>
+				</div>
+
+				<!-- Extrait (Facultatif) -->
+				<div class="form-group">
+					<label>
+						<?php esc_html_e( 'Extrait', 'cgt' ); ?> <span class="optional"><?php esc_html_e( '(Facultatif)', 'cgt' ); ?></span>
+						<span class="hint"><?php esc_html_e( 'Résumé court pour l\'aperçu', 'cgt' ); ?></span>
+					</label>
+					<textarea
+						name="excerpt"
+						class="form-control"
+						rows="3"
+					><?php echo esc_textarea( $excerpt ); ?></textarea>
+				</div>
+
+				<div class="form-row">
+					<!-- Branche -->
+					<div class="form-group">
+						<label>
+							<?php esc_html_e( 'Branche', 'cgt' ); ?>
+							<span class="hint"><?php esc_html_e( 'Sélectionnez la branche concernée', 'cgt' ); ?></span>
+						</label>
+						<select name="cgt_<?php echo esc_attr( $field_prefix ); ?>_branche" class="form-control">
+							<option value=""><?php esc_html_e( '— Choisir une branche —', 'cgt' ); ?></option>
+							<?php foreach ( $branches as $branch ) : ?>
+								<option value="<?php echo esc_attr( $branch->term_id ); ?>" <?php selected( $branche, $branch->term_id ); ?>>
+									<?php echo esc_html( $branch->name ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
 					</div>
-				<?php endif; ?>
 
-				<?php if ( ! empty( $errors ) ) : ?>
-					<div class="notice error">
-						<span style="font-size: 1.5rem;">⚠</span>
-						<div>
-							<strong><?php esc_html_e( 'Erreurs détectées :', 'cgt' ); ?></strong>
-							<ul>
-								<?php foreach ( $errors as $error ) : ?>
-									<li><?php echo esc_html( $error ); ?></li>
-								<?php endforeach; ?>
-							</ul>
-						</div>
+					<!-- Catégorie/Thématique -->
+					<div class="form-group">
+						<label>
+							<?php echo $is_article ? esc_html__( 'Catégorie', 'cgt' ) : esc_html__( 'Thématique', 'cgt' ); ?>
+							<span class="hint"><?php esc_html_e( 'Sélectionnez la plus pertinente', 'cgt' ); ?></span>
+						</label>
+						<select name="cgt_<?php echo esc_attr( $field_prefix ); ?>_category" class="form-control">
+							<option value=""><?php esc_html_e( '— Choisir —', 'cgt' ); ?></option>
+							<?php foreach ( $categories as $cat ) : ?>
+								<option value="<?php echo esc_attr( $cat->term_id ); ?>" <?php selected( $category, $cat->term_id ); ?>>
+									<?php echo esc_html( $cat->name ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
 					</div>
-				<?php endif; ?>
+				</div>
 
-				<!-- Form -->
-				<form class="cgt-submit-article" method="post" enctype="multipart/form-data">
-					<?php wp_nonce_field( $nonce_action, $nonce_name ); ?>
+				<!-- Mots-clés -->
+				<div class="form-group">
+					<label>
+						<?php esc_html_e( 'Mots-clés', 'cgt' ); ?>
+						<span class="hint"><?php esc_html_e( 'Séparés par des virgules (ex: salaire, négociation, grève)', 'cgt' ); ?></span>
+					</label>
+					<input
+						type="text"
+						name="cgt_<?php echo esc_attr( $field_prefix ); ?>_keywords"
+						class="form-control"
+						value="<?php echo esc_attr( $keywords ); ?>"
+						placeholder="<?php esc_attr_e( 'Ex: salaire, négociation, grève', 'cgt' ); ?>"
+					>
+				</div>
 
-					<div class="form-step active">
-						<!-- Titre -->
-						<div class="form-group">
-							<label>
-								<?php esc_html_e( 'Titre', 'cgt' ); ?> <span class="required">*</span>
-								<span class="hint"><?php esc_html_e( 'Titre clair et explicite', 'cgt' ); ?></span>
-							</label>
-							<input
-								type="text"
-								name="cgt_<?php echo esc_attr( $field_prefix ); ?>_title"
-								class="form-control"
-								value="<?php echo isset( $data['title'] ) ? esc_attr( $data['title'] ) : ''; ?>"
-								required
-							>
+				<!-- Sources et références -->
+				<div class="form-group">
+					<label>
+						<?php esc_html_e( 'Sources et références', 'cgt' ); ?>
+						<span class="hint"><?php esc_html_e( 'Liens, documents ou références utilisés', 'cgt' ); ?></span>
+					</label>
+					<textarea
+						name="cgt_<?php echo esc_attr( $field_prefix ); ?>_sources"
+						class="form-control"
+						rows="3"
+						placeholder="<?php esc_attr_e( 'Ex: Article du Monde, Rapport INSEE, etc.', 'cgt' ); ?>"
+					><?php echo esc_textarea( $sources ); ?></textarea>
+				</div>
+
+				<!-- Image mise en avant -->
+				<div class="form-group">
+					<label>
+						<?php esc_html_e( 'Image mise en avant', 'cgt' ); ?>
+						<span class="hint"><?php esc_html_e( 'Image qui sera affichée dans les cartes', 'cgt' ); ?></span>
+					</label>
+					<div class="media-upload-container">
+						<input type="hidden" name="cgt_<?php echo esc_attr( $field_prefix ); ?>_featured_id" id="<?php echo esc_attr( $field_prefix ); ?>-featured-id" value="<?php echo esc_attr( $featured_id ); ?>">
+						<div id="<?php echo esc_attr( $field_prefix ); ?>-featured-preview" class="media-preview">
+							<?php if ( ! empty( $featured_id ) ) : ?>
+								<?php echo wp_get_attachment_image( $featured_id, 'medium' ); ?>
+							<?php endif; ?>
 						</div>
+						<button type="button" class="button button-primary" id="<?php echo esc_attr( $field_prefix ); ?>-featured-upload">
+							<?php esc_html_e( 'Sélectionner une image', 'cgt' ); ?>
+						</button>
+						<button type="button" class="button" id="<?php echo esc_attr( $field_prefix ); ?>-featured-remove" style="<?php echo empty( $featured_id ) ? 'display:none;' : ''; ?>">
+							<?php esc_html_e( 'Supprimer l\'image', 'cgt' ); ?>
+						</button>
+					</div>
+				</div>
 
-						<!-- Description (Contenu) -->
-						<div class="form-group">
-							<label>
-								<?php esc_html_e( 'Description', 'cgt' ); ?> <span class="required">*</span>
-								<span class="hint"><?php esc_html_e( 'Contenu complet de votre publication', 'cgt' ); ?></span>
-							</label>
-							<?php
-							$content = isset( $data['content'] ) ? $data['content'] : '';
-							wp_editor(
-								$content,
-								'cgt_' . $field_prefix . '_content',
-								array(
-									'textarea_name' => 'cgt_' . $field_prefix . '_content',
-									'media_buttons' => true,
-									'textarea_rows' => 10,
-									'teeny'         => false,
-									'tinymce'       => true,
-								)
-							);
-							?>
-						</div>
-
-						<!-- Extrait (Facultatif) -->
-						<div class="form-group">
-							<label>
-								<?php esc_html_e( 'Extrait', 'cgt' ); ?> <span class="optional"><?php esc_html_e( '(Facultatif)', 'cgt' ); ?></span>
-								<span class="hint"><?php esc_html_e( 'Résumé court pour l\'aperçu', 'cgt' ); ?></span>
-							</label>
-							<textarea
-								name="cgt_<?php echo esc_attr( $field_prefix ); ?>_excerpt"
-								class="form-control"
-								rows="3"
-							><?php echo isset( $data['excerpt'] ) ? esc_textarea( $data['excerpt'] ) : ''; ?></textarea>
-						</div>
-
-						<div class="form-row">
-							<!-- Branche -->
-							<div class="form-group">
-								<label>
-									<?php esc_html_e( 'Branche', 'cgt' ); ?>
-									<span class="hint"><?php esc_html_e( 'Sélectionnez la branche concernée', 'cgt' ); ?></span>
-								</label>
-								<select name="cgt_<?php echo esc_attr( $field_prefix ); ?>_branche" class="form-control">
-									<option value=""><?php esc_html_e( '— Choisir une branche —', 'cgt' ); ?></option>
-									<?php foreach ( $data['branches'] as $branch ) : ?>
-										<option value="<?php echo esc_attr( $branch->term_id ); ?>" <?php selected( isset( $data['branche'] ) ? $data['branche'] : '', $branch->term_id ); ?>>
-											<?php echo esc_html( $branch->name ); ?>
-										</option>
-									<?php endforeach; ?>
-								</select>
+				<?php if ( ! $is_article ) : ?>
+					<!-- PDF (uniquement pour tract) -->
+					<div class="form-group">
+						<label>
+							<?php esc_html_e( 'Fichier PDF', 'cgt' ); ?>
+							<span class="hint"><?php esc_html_e( 'Document PDF du tract (max 15 MB)', 'cgt' ); ?></span>
+						</label>
+						<div class="media-upload-container">
+							<input type="hidden" name="cgt_tract_pdf_id" id="tract-pdf-id" value="<?php echo esc_attr( $pdf_id ); ?>">
+							<div id="tract-pdf-preview" class="media-preview">
+								<?php if ( ! empty( $pdf_id ) ) : ?>
+									<p>📄 <?php echo esc_html( basename( wp_get_attachment_url( $pdf_id ) ) ); ?></p>
+								<?php endif; ?>
 							</div>
-
-							<!-- Catégorie/Thématique -->
-							<div class="form-group">
-								<label>
-									<?php echo $is_article ? esc_html__( 'Catégorie', 'cgt' ) : esc_html__( 'Thématique', 'cgt' ); ?>
-									<span class="hint"><?php esc_html_e( 'Sélectionnez la plus pertinente', 'cgt' ); ?></span>
-								</label>
-								<select name="cgt_<?php echo esc_attr( $field_prefix ); ?>_category" class="form-control">
-									<option value=""><?php esc_html_e( '— Choisir —', 'cgt' ); ?></option>
-									<?php foreach ( $data['categories'] as $cat ) : ?>
-										<option value="<?php echo esc_attr( $cat->term_id ); ?>" <?php selected( isset( $data['category'] ) ? $data['category'] : '', $cat->term_id ); ?>>
-											<?php echo esc_html( $cat->name ); ?>
-										</option>
-									<?php endforeach; ?>
-								</select>
-							</div>
-						</div>
-
-						<!-- Mots-clés -->
-						<div class="form-group">
-							<label>
-								<?php esc_html_e( 'Mots-clés', 'cgt' ); ?>
-								<span class="hint"><?php esc_html_e( 'Séparés par des virgules (ex: salaire, négociation, grève)', 'cgt' ); ?></span>
-							</label>
-							<input
-								type="text"
-								name="cgt_<?php echo esc_attr( $field_prefix ); ?>_keywords"
-								class="form-control"
-								value="<?php echo isset( $data['keywords'] ) ? esc_attr( $data['keywords'] ) : ''; ?>"
-								placeholder="<?php esc_attr_e( 'Ex: salaire, négociation, grève', 'cgt' ); ?>"
-							>
-						</div>
-
-						<!-- Sources et références -->
-						<div class="form-group">
-							<label>
-								<?php esc_html_e( 'Sources et références', 'cgt' ); ?>
-								<span class="hint"><?php esc_html_e( 'Liens, documents ou références utilisés', 'cgt' ); ?></span>
-							</label>
-							<textarea
-								name="cgt_<?php echo esc_attr( $field_prefix ); ?>_sources"
-								class="form-control"
-								rows="3"
-								placeholder="<?php esc_attr_e( 'Ex: Article du Monde, Rapport INSEE, etc.', 'cgt' ); ?>"
-							><?php echo isset( $data['sources'] ) ? esc_textarea( $data['sources'] ) : ''; ?></textarea>
-						</div>
-
-						<!-- Image mise en avant -->
-						<div class="form-group">
-							<label>
-								<?php esc_html_e( 'Image mise en avant', 'cgt' ); ?>
-								<span class="hint"><?php esc_html_e( 'Image qui sera affichée dans les cartes', 'cgt' ); ?></span>
-							</label>
-							<div class="media-upload-container">
-								<input type="hidden" name="cgt_<?php echo esc_attr( $field_prefix ); ?>_featured_id" id="<?php echo esc_attr( $field_prefix ); ?>-featured-id" value="<?php echo isset( $data['featured_id'] ) ? esc_attr( $data['featured_id'] ) : ''; ?>">
-								<div id="<?php echo esc_attr( $field_prefix ); ?>-featured-preview" class="media-preview">
-									<?php if ( ! empty( $data['featured_id'] ) ) : ?>
-										<?php echo wp_get_attachment_image( $data['featured_id'], 'medium' ); ?>
-									<?php endif; ?>
-								</div>
-								<button type="button" class="button button-primary" id="<?php echo esc_attr( $field_prefix ); ?>-featured-upload">
-									<?php esc_html_e( 'Sélectionner une image', 'cgt' ); ?>
-								</button>
-								<button type="button" class="button" id="<?php echo esc_attr( $field_prefix ); ?>-featured-remove" style="<?php echo empty( $data['featured_id'] ) ? 'display:none;' : ''; ?>">
-									<?php esc_html_e( 'Supprimer l\'image', 'cgt' ); ?>
-								</button>
-							</div>
-						</div>
-
-						<?php if ( ! $is_article ) : ?>
-							<!-- PDF (uniquement pour tract) -->
-							<div class="form-group">
-								<label>
-									<?php esc_html_e( 'Fichier PDF', 'cgt' ); ?>
-									<span class="hint"><?php esc_html_e( 'Document PDF du tract (max 15 MB)', 'cgt' ); ?></span>
-								</label>
-								<div class="media-upload-container">
-									<input type="hidden" name="cgt_tract_pdf_id" id="tract-pdf-id" value="<?php echo isset( $data['pdf_id'] ) ? esc_attr( $data['pdf_id'] ) : ''; ?>">
-									<div id="tract-pdf-preview" class="media-preview">
-										<?php if ( ! empty( $data['pdf_id'] ) ) : ?>
-											<p>📄 <?php echo esc_html( basename( wp_get_attachment_url( $data['pdf_id'] ) ) ); ?></p>
-										<?php endif; ?>
-									</div>
-									<button type="button" class="button button-primary" id="tract-pdf-upload">
-										<?php esc_html_e( 'Sélectionner un PDF', 'cgt' ); ?>
-									</button>
-									<button type="button" class="button" id="tract-pdf-remove" style="<?php echo empty( $data['pdf_id'] ) ? 'display:none;' : ''; ?>">
-										<?php esc_html_e( 'Supprimer le PDF', 'cgt' ); ?>
-									</button>
-								</div>
-							</div>
-						<?php endif; ?>
-
-						<!-- Bouton submit -->
-						<div class="form-actions">
-							<button type="submit" name="<?php echo esc_attr( $submit_name ); ?>" class="button button-primary button-hero">
-								<?php echo esc_html( sprintf( __( 'Publier le %s', 'cgt' ), $post_type_label ) ); ?>
+							<button type="button" class="button button-primary" id="tract-pdf-upload">
+								<?php esc_html_e( 'Sélectionner un PDF', 'cgt' ); ?>
+							</button>
+							<button type="button" class="button" id="tract-pdf-remove" style="<?php echo empty( $pdf_id ) ? 'display:none;' : ''; ?>">
+								<?php esc_html_e( 'Supprimer le PDF', 'cgt' ); ?>
 							</button>
 						</div>
 					</div>
-				</form>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
@@ -549,52 +430,106 @@ function cgt_render_post_creation_form( $type, $message, $errors, $data ) {
 		<?php endif; ?>
 	});
 	</script>
-
-	<style>
-		.media-upload-container {
-			margin-top: 10px;
-		}
-		.media-preview {
-			margin-bottom: 10px;
-			padding: 10px;
-			background: #f9f9f9;
-			border: 1px solid #ddd;
-			border-radius: 4px;
-			min-height: 50px;
-		}
-		.media-preview:empty {
-			display: none;
-		}
-		.media-preview img {
-			max-width: 300px;
-			height: auto;
-			display: block;
-		}
-		.form-actions {
-			margin-top: 2rem;
-			padding-top: 2rem;
-			border-top: 2px solid #e5e7eb;
-		}
-		.optional {
-			font-weight: normal;
-			color: #6b7280;
-			font-size: 0.9em;
-		}
-		.notice.success {
-			background: #d1fae5;
-			border-left: 4px solid #10b981;
-			padding: 1rem;
-			margin-bottom: 1.5rem;
-			border-radius: 4px;
-		}
-		.notice.success a {
-			color: #065f46;
-			font-weight: 600;
-			text-decoration: underline;
-		}
-		.notice.success a:hover {
-			color: #047857;
-		}
-	</style>
 	<?php
+}
+
+/**
+ * Save post meta data
+ */
+add_action( 'save_post', 'cgt_save_post_meta_data', 10, 2 );
+function cgt_save_post_meta_data( $post_id, $post ) {
+	// Vérifier les permissions
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// Éviter l'auto-save
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	// Vérifier le type de post
+	if ( ! in_array( $post->post_type, array( 'post', 'tracts' ), true ) ) {
+		return;
+	}
+
+	$is_article = ( 'post' === $post->post_type );
+
+	// Vérifier le nonce
+	$nonce_name = $is_article ? 'cgt_article_meta_nonce' : 'cgt_tract_meta_nonce';
+	$nonce_action = $is_article ? 'cgt_save_article_meta' : 'cgt_save_tract_meta';
+
+	if ( ! isset( $_POST[ $nonce_name ] ) || ! wp_verify_nonce( sanitize_key( $_POST[ $nonce_name ] ), $nonce_action ) ) {
+		return;
+	}
+
+	$field_prefix = $is_article ? 'article' : 'tract';
+
+	// Sauvegarder le contenu et l'extrait (gérés par WordPress)
+	// Pas besoin de les sauvegarder ici car WordPress le fait automatiquement
+
+	// Sauvegarder la branche
+	$branche = isset( $_POST[ 'cgt_' . $field_prefix . '_branche' ] ) ? absint( $_POST[ 'cgt_' . $field_prefix . '_branche' ] ) : 0;
+	if ( $branche ) {
+		wp_set_post_terms( $post_id, array( $branche ), 'branche', false );
+	} else {
+		wp_set_post_terms( $post_id, array(), 'branche', false );
+	}
+
+	// Sauvegarder la catégorie/thématique
+	$category = isset( $_POST[ 'cgt_' . $field_prefix . '_category' ] ) ? absint( $_POST[ 'cgt_' . $field_prefix . '_category' ] ) : 0;
+	if ( $category ) {
+		if ( $is_article ) {
+			wp_set_post_categories( $post_id, array( $category ) );
+		} else {
+			wp_set_post_terms( $post_id, array( $category ), 'thematique', false );
+		}
+	} else {
+		if ( $is_article ) {
+			wp_set_post_categories( $post_id, array() );
+		} else {
+			wp_set_post_terms( $post_id, array(), 'thematique', false );
+		}
+	}
+
+	// Sauvegarder les mots-clés
+	$keywords = isset( $_POST[ 'cgt_' . $field_prefix . '_keywords' ] ) ? sanitize_text_field( wp_unslash( $_POST[ 'cgt_' . $field_prefix . '_keywords' ] ) ) : '';
+	if ( $keywords ) {
+		$tags = array_map( 'trim', explode( ',', $keywords ) );
+		wp_set_post_terms( $post_id, $tags, 'post_tag', false );
+	} else {
+		wp_set_post_terms( $post_id, array(), 'post_tag', false );
+	}
+
+	// Sauvegarder les sources
+	$sources = isset( $_POST[ 'cgt_' . $field_prefix . '_sources' ] ) ? sanitize_textarea_field( wp_unslash( $_POST[ 'cgt_' . $field_prefix . '_sources' ] ) ) : '';
+	if ( $sources ) {
+		update_post_meta( $post_id, 'cgt_submission_sources', $sources );
+	} else {
+		delete_post_meta( $post_id, 'cgt_submission_sources' );
+	}
+
+	// Sauvegarder l'image mise en avant
+	$featured_id = isset( $_POST[ 'cgt_' . $field_prefix . '_featured_id' ] ) ? absint( $_POST[ 'cgt_' . $field_prefix . '_featured_id' ] ) : 0;
+	if ( $featured_id ) {
+		set_post_thumbnail( $post_id, $featured_id );
+	} else {
+		delete_post_thumbnail( $post_id );
+	}
+
+	// Sauvegarder le PDF (uniquement pour les tracts)
+	if ( ! $is_article ) {
+		$pdf_id = isset( $_POST['cgt_tract_pdf_id'] ) ? absint( $_POST['cgt_tract_pdf_id'] ) : 0;
+		if ( $pdf_id ) {
+			$pdf_url = wp_get_attachment_url( $pdf_id );
+			update_post_meta( $post_id, 'cgt_fichier_pdf', $pdf_url );
+		} else {
+			delete_post_meta( $post_id, 'cgt_fichier_pdf' );
+		}
+
+		// S'assurer que la visibilité est définie pour les nouveaux tracts
+		if ( ! get_post_meta( $post_id, 'cgt_visibilite', true ) ) {
+			update_post_meta( $post_id, 'cgt_visibilite', 'public' );
+		}
+	}
 }
