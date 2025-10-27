@@ -171,4 +171,110 @@
 			}
 		});
 	});
+
+	// ========================================
+	// NEWSLETTER MODAL
+	// ========================================
+	const newsletterModal = document.getElementById('newsletterModal');
+	const openModalBtn = document.getElementById('openNewsletterModal');
+	const closeModalBtn = document.getElementById('closeNewsletterModal');
+	const newsletterForm = document.getElementById('newsletterForm');
+	const newsletterMessage = document.getElementById('newsletterMessage');
+
+	if (openModalBtn && newsletterModal) {
+		// Open modal
+		openModalBtn.addEventListener('click', function() {
+			newsletterModal.classList.add('is-open');
+			document.body.style.overflow = 'hidden';
+		});
+	}
+
+	if (closeModalBtn && newsletterModal) {
+		// Close modal
+		closeModalBtn.addEventListener('click', function() {
+			closeModal();
+		});
+
+		// Close modal on overlay click
+		newsletterModal.querySelector('.newsletter-modal__overlay').addEventListener('click', function() {
+			closeModal();
+		});
+	}
+
+	// Close modal function
+	function closeModal() {
+		newsletterModal.classList.remove('is-open');
+		document.body.style.overflow = '';
+	}
+
+	// Close modal on ESC key
+	document.addEventListener('keydown', function(e) {
+		if (e.key === 'Escape' && newsletterModal && newsletterModal.classList.contains('is-open')) {
+			closeModal();
+		}
+	});
+
+	// Handle form submission
+	if (newsletterForm) {
+		newsletterForm.addEventListener('submit', function(e) {
+			e.preventDefault();
+
+			// Get form data
+			const formData = new FormData(newsletterForm);
+			formData.append('action', 'cgt_subscribe_newsletter');
+			formData.append('nonce', cgtNewsletterData.nonce);
+
+			// Disable submit button
+			const submitBtn = newsletterForm.querySelector('button[type="submit"]');
+			const originalText = submitBtn.textContent;
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'Envoi en cours...';
+
+			// Hide previous messages
+			newsletterMessage.style.display = 'none';
+			newsletterMessage.className = 'newsletter-form__message';
+
+			// Send AJAX request
+			fetch(cgtNewsletterData.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: formData
+			})
+			.then(response => response.json())
+			.then(data => {
+				// Show message
+				newsletterMessage.style.display = 'block';
+				newsletterMessage.textContent = data.data.message;
+
+				if (data.success) {
+					newsletterMessage.classList.add('newsletter-form__message--success');
+					// Reset form
+					newsletterForm.reset();
+					// Close modal after 2 seconds
+					setTimeout(function() {
+						closeModal();
+						// Reset message for next time
+						setTimeout(function() {
+							newsletterMessage.style.display = 'none';
+							newsletterMessage.className = 'newsletter-form__message';
+						}, 300);
+					}, 2000);
+				} else {
+					newsletterMessage.classList.add('newsletter-form__message--error');
+				}
+
+				// Re-enable submit button
+				submitBtn.disabled = false;
+				submitBtn.textContent = originalText;
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				newsletterMessage.style.display = 'block';
+				newsletterMessage.textContent = 'Une erreur est survenue. Veuillez réessayer.';
+				newsletterMessage.classList.add('newsletter-form__message--error');
+				submitBtn.disabled = false;
+				submitBtn.textContent = originalText;
+			});
+		});
+	}
 })();

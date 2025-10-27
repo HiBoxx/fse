@@ -326,7 +326,7 @@ $communiques_tabs = array(
 							</div>
 							<h3><?php esc_html_e( 'Se syndiquer', 'cgt' ); ?></h3>
 							<p><?php esc_html_e( 'Adhérez à la CGT et bénéficiez d\'un accompagnement syndical complet.', 'cgt' ); ?></p>
-							<a href="<?php echo esc_url( home_url( '/adhesion' ) ); ?>" class="btn btn-compact"><?php esc_html_e( 'Adhérer maintenant', 'cgt' ); ?></a>
+							<a href="<?php echo esc_url( home_url( '/connexion' ) ); ?>" class="btn btn-compact"><?php esc_html_e( 'Adhérer maintenant', 'cgt' ); ?></a>
 						</div>
 
 						<div class="home-join-card">
@@ -338,7 +338,7 @@ $communiques_tabs = array(
 							</div>
 							<h3><?php esc_html_e( 'Liste de diffusion', 'cgt' ); ?></h3>
 							<p><?php esc_html_e( 'Recevez nos actualités, tracts et bulletins directement par email.', 'cgt' ); ?></p>
-							<a href="<?php echo esc_url( home_url( '/inscription-newsletter' ) ); ?>" class="btn btn-compact btn-outline"><?php esc_html_e( 'S\'inscrire', 'cgt' ); ?></a>
+							<button type="button" class="btn btn-compact btn-outline" id="openNewsletterModal"><?php esc_html_e( 'S\'inscrire', 'cgt' ); ?></button>
 						</div>
 					</div>
 				</div>
@@ -394,6 +394,51 @@ $communiques_tabs = array(
 						</div>
 					<?php endif; ?>
 				</div>
+			</div>
+		</div>
+
+		<!-- Modal Newsletter -->
+		<div class="newsletter-modal" id="newsletterModal">
+			<div class="newsletter-modal__overlay"></div>
+			<div class="newsletter-modal__content">
+				<button type="button" class="newsletter-modal__close" id="closeNewsletterModal" aria-label="<?php esc_attr_e( 'Fermer', 'cgt' ); ?>">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+
+				<div class="newsletter-modal__header">
+					<div class="newsletter-modal__icon">
+						<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+							<polyline points="22,6 12,13 2,6"></polyline>
+						</svg>
+					</div>
+					<h2><?php esc_html_e( 'Inscription à la liste de diffusion', 'cgt' ); ?></h2>
+					<p><?php esc_html_e( 'Restez informé·e de nos actualités, tracts et bulletins fédéraux.', 'cgt' ); ?></p>
+				</div>
+
+				<form id="newsletterForm" class="newsletter-form">
+					<div class="newsletter-form__message" id="newsletterMessage" style="display: none;"></div>
+
+					<div class="newsletter-form__field">
+						<label for="newsletter_prenom"><?php esc_html_e( 'Prénom', 'cgt' ); ?> <span class="required">*</span></label>
+						<input type="text" id="newsletter_prenom" name="prenom" required>
+					</div>
+
+					<div class="newsletter-form__field">
+						<label for="newsletter_nom"><?php esc_html_e( 'Nom', 'cgt' ); ?> <span class="required">*</span></label>
+						<input type="text" id="newsletter_nom" name="nom" required>
+					</div>
+
+					<div class="newsletter-form__field">
+						<label for="newsletter_email"><?php esc_html_e( 'Email', 'cgt' ); ?> <span class="required">*</span></label>
+						<input type="email" id="newsletter_email" name="email" required>
+					</div>
+
+					<button type="submit" class="btn btn-full"><?php esc_html_e( 'S\'inscrire', 'cgt' ); ?></button>
+				</form>
 			</div>
 		</div>
 	</section>
