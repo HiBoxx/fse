@@ -306,6 +306,98 @@ $communiques_tabs = array(
 		</div>
 	</section>
 
+	<!-- Section Rejoignez-nous & Slider -->
+	<section class="home-section home-section--join">
+		<div class="container">
+			<div class="home-join-wrapper">
+				<div class="home-join-content">
+					<h2><?php esc_html_e( 'Rejoignez-nous', 'cgt' ); ?></h2>
+					<p><?php esc_html_e( 'Ensemble, nous sommes plus forts. Syndiquez-vous et restez informé·e de l\'actualité fédérale.', 'cgt' ); ?></p>
+
+					<div class="home-join-actions">
+						<div class="home-join-card">
+							<div class="home-join-card__icon">
+								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+									<circle cx="9" cy="7" r="4"></circle>
+									<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+									<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+								</svg>
+							</div>
+							<h3><?php esc_html_e( 'Se syndiquer', 'cgt' ); ?></h3>
+							<p><?php esc_html_e( 'Adhérez à la CGT et bénéficiez d\'un accompagnement syndical complet.', 'cgt' ); ?></p>
+							<a href="<?php echo esc_url( home_url( '/adhesion' ) ); ?>" class="btn btn-compact"><?php esc_html_e( 'Adhérer maintenant', 'cgt' ); ?></a>
+						</div>
+
+						<div class="home-join-card">
+							<div class="home-join-card__icon">
+								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+									<polyline points="22,6 12,13 2,6"></polyline>
+								</svg>
+							</div>
+							<h3><?php esc_html_e( 'Liste de diffusion', 'cgt' ); ?></h3>
+							<p><?php esc_html_e( 'Recevez nos actualités, tracts et bulletins directement par email.', 'cgt' ); ?></p>
+							<a href="<?php echo esc_url( home_url( '/inscription-newsletter' ) ); ?>" class="btn btn-compact btn-outline"><?php esc_html_e( 'S\'inscrire', 'cgt' ); ?></a>
+						</div>
+					</div>
+				</div>
+
+				<div class="home-join-slider">
+					<?php
+					// Récupérer les images du slider depuis les options
+					$slider_images = get_option( 'cgt_home_slider_images', array() );
+
+					if ( ! empty( $slider_images ) && is_array( $slider_images ) ) :
+						?>
+						<div class="home-slider">
+							<div class="home-slider__track">
+								<?php foreach ( $slider_images as $index => $image_id ) : ?>
+									<?php if ( $image_id ) : ?>
+										<div class="home-slider__slide <?php echo 0 === $index ? 'is-active' : ''; ?>">
+											<?php echo wp_get_attachment_image( $image_id, 'medium_large', false, array( 'class' => 'home-slider__image' ) ); ?>
+										</div>
+									<?php endif; ?>
+								<?php endforeach; ?>
+							</div>
+
+							<?php if ( count( $slider_images ) > 1 ) : ?>
+								<div class="home-slider__controls">
+									<button type="button" class="home-slider__btn home-slider__btn--prev" aria-label="<?php esc_attr_e( 'Image précédente', 'cgt' ); ?>">
+										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<polyline points="15 18 9 12 15 6"></polyline>
+										</svg>
+									</button>
+									<button type="button" class="home-slider__btn home-slider__btn--next" aria-label="<?php esc_attr_e( 'Image suivante', 'cgt' ); ?>">
+										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<polyline points="9 18 15 12 9 6"></polyline>
+										</svg>
+									</button>
+								</div>
+								<div class="home-slider__dots">
+									<?php foreach ( $slider_images as $index => $image_id ) : ?>
+										<button type="button" class="home-slider__dot <?php echo 0 === $index ? 'is-active' : ''; ?>" data-slide="<?php echo esc_attr( $index ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Aller à l\'image %d', 'cgt' ), $index + 1 ) ); ?>"></button>
+									<?php endforeach; ?>
+								</div>
+							<?php endif; ?>
+						</div>
+					<?php else : ?>
+						<div class="home-slider home-slider--placeholder">
+							<div class="home-slider__placeholder">
+								<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+									<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+									<circle cx="8.5" cy="8.5" r="1.5"></circle>
+									<polyline points="21 15 16 10 5 21"></polyline>
+								</svg>
+								<p><?php esc_html_e( 'Aucune image configurée', 'cgt' ); ?></p>
+							</div>
+						</div>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div>
+	</section>
+
 </main>
 
 <?php

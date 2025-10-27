@@ -28,6 +28,7 @@ $cgt_inc_files = array(
 	'agenda.php',
 	'brevo.php',
 	'optimizations.php',
+	'home-slider.php',
 );
 
 foreach ( $cgt_inc_files as $cgt_inc_file ) {
@@ -99,6 +100,24 @@ add_action(
 			CGT_CHILD_VERSION,
 			true
 		);
+
+		// Charger les styles et scripts de la page d'accueil
+		if ( is_front_page() ) {
+			wp_enqueue_style(
+				'cgt-home-join',
+				get_stylesheet_directory_uri() . '/assets/css/home-join-section.css',
+				array( 'cgt-child' ),
+				CGT_CHILD_VERSION
+			);
+
+			wp_enqueue_script(
+				'cgt-home-slider',
+				get_stylesheet_directory_uri() . '/assets/js/home-slider.js',
+				array(),
+				CGT_CHILD_VERSION,
+				true
+			);
+		}
 
 		// Charger les styles et scripts de la page de connexion
 		if ( is_page_template( 'page-connexion.php' ) ) {
