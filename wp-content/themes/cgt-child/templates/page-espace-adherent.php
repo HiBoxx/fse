@@ -192,7 +192,7 @@ $library_options = array(
 		'type'  => 'tax',
 	),
 	'tract-entreprise'                 => array(
-		'label' => __( 'Tracts d'entreprise', 'cgt' ),
+		'label' => __( 'Tracts d\'entreprise', 'cgt' ),
 		'type'  => 'tax',
 	),
 	'tracts'                           => array(
@@ -453,7 +453,7 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 		<section class="member-section member-section--two-col container">
 			<div class="member-panel member-panel--question">
 				<h2><?php esc_html_e( 'Envoyer une question', 'cgt' ); ?></h2>
-				<p><?php esc_html_e( 'Partagez vos questions, vos besoins d’appui juridique ou vos retours terrain.', 'cgt' ); ?></p>
+				<p><?php esc_html_e( 'Partagez vos questions, vos besoins d\'appui juridique ou vos retours terrain.', 'cgt' ); ?></p>
 				<?php echo do_shortcode( '[cgt_questions]' ); ?>
 			</div>
 
@@ -464,35 +464,35 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 					$faq_items = array(
 						array(
 							'question' => __( 'Quels sont mes droits en cas de licenciement ?', 'cgt' ),
-							'answer'   => __( 'En cas de licenciement, l’employeur doit respecter une procédure (convocation, entretien, notification, préavis). Selon l’ancienneté, des indemnités légales ou conventionnelles sont dues. Vérifiez votre convention collective et contactez la fédération pour un accompagnement personnalisé.', 'cgt' ),
+							'answer'   => __( 'En cas de licenciement, l\'employeur doit respecter une procédure (convocation, entretien, notification, préavis). Selon l\'ancienneté, des indemnités légales ou conventionnelles sont dues. Vérifiez votre convention collective et contactez la fédération pour un accompagnement personnalisé.', 'cgt' ),
 						),
 						array(
 							'question' => __( 'Comment contester un licenciement ?', 'cgt' ),
-							'answer'   => __( 'Vous disposez de 12 mois pour saisir le conseil de prud’hommes après la notification. Il est recommandé de réunir tous les justificatifs (contrat, échanges, bulletins de salaire) et de solliciter la CGT pour préparer le dossier et, si nécessaire, bénéficier d’un appui juridique.', 'cgt' ),
+							'answer'   => __( 'Vous disposez de 12 mois pour saisir le conseil de prud\'hommes après la notification. Il est recommandé de réunir tous les justificatifs (contrat, échanges, bulletins de salaire) et de solliciter la CGT pour préparer le dossier et, si nécessaire, bénéficier d\'un appui juridique.', 'cgt' ),
 						),
 						array(
 							'question' => __( 'Que prévoit la loi sur les heures supplémentaires ?', 'cgt' ),
-							'answer'   => __( 'Les heures au-delà de 35h doivent être rémunérées avec une majoration (généralement +25 % puis +50 %). La convention collective peut prévoir des taux plus favorables. Elles doivent être demandées ou validées par l’employeur et apparaître sur le bulletin de salaire.', 'cgt' ),
+							'answer'   => __( 'Les heures au-delà de 35h doivent être rémunérées avec une majoration (généralement +25 % puis +50 %). La convention collective peut prévoir des taux plus favorables. Elles doivent être demandées ou validées par l\'employeur et apparaître sur le bulletin de salaire.', 'cgt' ),
 						),
 						array(
 							'question' => __( 'Puis-je refuser une modification de mon contrat ?', 'cgt' ),
-							'answer'   => __( 'Toute modification d’un élément essentiel du contrat (salaire, horaires, lieu de travail) nécessite votre accord écrit. En cas de refus, l’employeur peut tenter un licenciement mais devra justifier d’une cause réelle et sérieuse. Contactez la fédération avant de répondre.', 'cgt' ),
+							'answer'   => __( 'Toute modification d\'un élément essentiel du contrat (salaire, horaires, lieu de travail) nécessite votre accord écrit. En cas de refus, l\'employeur peut tenter un licenciement mais devra justifier d\'une cause réelle et sérieuse. Contactez la fédération avant de répondre.', 'cgt' ),
 						),
 						array(
 							'question' => __( 'Comment faire respecter un accord collectif ?', 'cgt' ),
-							'answer'   => __( 'Les accords collectifs s’imposent à l’employeur. Si vous constatez un non-respect (salaires, classifications, congés), signalez-le à vos représentants CGT ou à la fédération. Ils pourront organiser un rappel à l’employeur ou saisir l’inspection du travail.', 'cgt' ),
+							'answer'   => __( 'Les accords collectifs s\'imposent à l\'employeur. Si vous constatez un non-respect (salaires, classifications, congés), signalez-le à vos représentants CGT ou à la fédération. Ils pourront organiser un rappel à l\'employeur ou saisir l\'inspection du travail.', 'cgt' ),
 						),
 						array(
 							'question' => __( 'Quelles démarches pour obtenir des formations ?', 'cgt' ),
-							'answer'   => __( 'Vous pouvez mobiliser le Compte Personnel de Formation (CPF), le plan de développement des compétences de l’entreprise ou demander un congé de formation économique, sociale et syndicale. L’employeur doit répondre à votre demande dans des délais précis.', 'cgt' ),
+							'answer'   => __( 'Vous pouvez mobiliser le Compte Personnel de Formation (CPF), le plan de développement des compétences de l\'entreprise ou demander un congé de formation économique, sociale et syndicale. L\'employeur doit répondre à votre demande dans des délais précis.', 'cgt' ),
 						),
 						array(
 							'question' => __( 'Que faire en cas de harcèlement ?', 'cgt' ),
-							'answer'   => __( 'Conservez toutes les preuves (mails, témoignages). Alertez vos représentants CGT et la fédération. L’employeur a l’obligation d’enquêter et de protéger les salarié·es. Vous pouvez aussi saisir l’inspection du travail et, si besoin, le conseil de prud’hommes.', 'cgt' ),
+							'answer'   => __( 'Conservez toutes les preuves (mails, témoignages). Alertez vos représentants CGT et la fédération. L\'employeur a l\'obligation d\'enquêter et de protéger les salarié·es. Vous pouvez aussi saisir l\'inspection du travail et, si besoin, le conseil de prud\'hommes.', 'cgt' ),
 						),
 						array(
 							'question' => __( 'Comment utiliser mon droit de grève ?', 'cgt' ),
-							'answer'   => __( 'La grève doit être collective et concerner des revendications professionnelles. Informez-vous auprès de la CGT pour organiser le mouvement dans le cadre légal. L’employeur ne peut sanctionner qu’en cas de faute lourde, mais la retenue de salaire est possible pour les heures non travaillées.', 'cgt' ),
+							'answer'   => __( 'La grève doit être collective et concerner des revendications professionnelles. Informez-vous auprès de la CGT pour organiser le mouvement dans le cadre légal. L\'employeur ne peut sanctionner qu\'en cas de faute lourde, mais la retenue de salaire est possible pour les heures non travaillées.', 'cgt' ),
 						),
 					);
 
