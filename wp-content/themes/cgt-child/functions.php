@@ -29,6 +29,7 @@ $cgt_inc_files = array(
 	'brevo.php',
 	'optimizations.php',
 	'home-slider.php',
+	'newsletter.php',
 );
 
 foreach ( $cgt_inc_files as $cgt_inc_file ) {
@@ -116,6 +117,16 @@ add_action(
 				array(),
 				CGT_CHILD_VERSION,
 				true
+			);
+
+			// Localize script for newsletter AJAX
+			wp_localize_script(
+				'cgt-home-slider',
+				'cgtNewsletterData',
+				array(
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+					'nonce'   => wp_create_nonce( 'cgt_newsletter_nonce' ),
+				)
 			);
 		}
 
