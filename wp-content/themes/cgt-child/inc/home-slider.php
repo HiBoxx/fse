@@ -12,12 +12,14 @@ defined( 'ABSPATH' ) || exit;
  */
 add_action( 'admin_menu', 'cgt_add_slider_settings_page' );
 function cgt_add_slider_settings_page() {
-	add_options_page(
-		__( 'Slider Page d\'Accueil', 'cgt' ),
-		__( 'Slider Accueil', 'cgt' ),
+	add_menu_page(
+		__( 'Ads', 'cgt' ),
+		__( 'Ads', 'cgt' ),
 		'manage_options',
 		'cgt-home-slider',
-		'cgt_render_slider_settings_page'
+		'cgt_render_slider_settings_page',
+		'dashicons-images-alt2',
+		26
 	);
 }
 
@@ -33,12 +35,15 @@ function cgt_register_slider_settings() {
  * Render the settings page
  */
 function cgt_render_slider_settings_page() {
+	// Enqueue WordPress media uploader
+	wp_enqueue_media();
+
 	$slider_images = get_option( 'cgt_home_slider_images', array() );
 
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Slider de la Page d\'Accueil', 'cgt' ); ?></h1>
-		<p><?php esc_html_e( 'Gérez les images qui s\'affichent dans le slider de la section "Rejoignez-nous" sur la page d\'accueil.', 'cgt' ); ?></p>
+		<h1><?php esc_html_e( 'Ads - Slider Page d\'Accueil', 'cgt' ); ?></h1>
+		<p><?php esc_html_e( 'Gérez les images publicitaires qui s\'affichent dans le slider de la section "Rejoignez-nous" sur la page d\'accueil.', 'cgt' ); ?></p>
 
 		<form method="post" action="options.php">
 			<?php settings_fields( 'cgt_home_slider_group' ); ?>
@@ -63,6 +68,11 @@ function cgt_render_slider_settings_page() {
 										echo '</div>';
 									}
 								}
+							} else {
+								echo '<p class="cgt-no-images-message" style="padding: 20px; background: #f0f0f1; border-left: 4px solid #72aee6; margin: 10px 0;">';
+								echo '<strong>ℹ️ ' . esc_html__( 'Aucune image ajoutée', 'cgt' ) . '</strong><br>';
+								echo esc_html__( 'Cliquez sur le bouton "Ajouter une image" ci-dessous pour commencer à créer votre slider d\'ads.', 'cgt' );
+								echo '</p>';
 							}
 							?>
 						</div>
@@ -89,80 +99,151 @@ function cgt_render_slider_settings_page() {
 			display: inline-block;
 			margin: 10px 10px 10px 0;
 			padding: 15px;
-			background: #f9f9f9;
-			border: 1px solid #ddd;
-			border-radius: 4px;
+			background: #fff;
+			border: 2px solid #e5e7eb;
+			border-radius: 8px;
 			vertical-align: top;
+			transition: all 0.3s ease;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+		}
+		.cgt-slider-image-item:hover {
+			border-color: #2271b1;
+			box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+			transform: translateY(-2px);
 		}
 		.cgt-slider-image-item img {
 			border: 1px solid #ddd;
 			border-radius: 4px;
+			background: #f9f9f9;
 		}
 		#cgt-slider-images-container {
 			margin-bottom: 15px;
+			min-height: 50px;
+		}
+		#cgt-add-slider-image {
+			font-size: 16px;
+			padding: 8px 20px;
+			height: auto;
+		}
+		.cgt-no-images-message {
+			animation: fadeIn 0.5s ease;
+		}
+		@keyframes fadeIn {
+			from { opacity: 0; transform: translateY(-10px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+		.button.cgt-remove-slider-image {
+			background: #dc3545;
+			border-color: #dc3545;
+			color: white;
+		}
+		.button.cgt-remove-slider-image:hover {
+			background: #c82333;
+			border-color: #bd2130;
 		}
 	</style>
 
 	<script>
 	jQuery(document).ready(function($) {
+		console.log('CGT Slider Admin Script chargé');
+
+		// Vérifier que wp.media est disponible
+		if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
+			console.error('wp.media n\'est pas disponible');
+			alert('Erreur: La médiathèque WordPress n\'est pas chargée. Veuillez recharger la page.');
+			return;
+		}
+
 		var mediaUploader;
 
 		// Add image
 		$('#cgt-add-slider-image').on('click', function(e) {
 			e.preventDefault();
+			console.log('Bouton Ajouter image cliqué');
 
+			// Si l'uploader existe déjà, on l'ouvre
 			if (mediaUploader) {
 				mediaUploader.open();
 				return;
 			}
 
+			// Créer le media uploader
 			mediaUploader = wp.media({
-				title: '<?php esc_html_e( 'Choisir une image', 'cgt' ); ?>',
+				title: '<?php esc_html_e( 'Choisir une image pour le slider', 'cgt' ); ?>',
 				button: {
 					text: '<?php esc_html_e( 'Ajouter au slider', 'cgt' ); ?>'
+				},
+				library: {
+					type: 'image'
 				},
 				multiple: true
 			});
 
+			// Quand une image est sélectionnée
 			mediaUploader.on('select', function() {
+				console.log('Image(s) sélectionnée(s)');
 				var attachments = mediaUploader.state().get('selection').toJSON();
+				console.log('Nombre d\'images:', attachments.length);
+
+				// Supprimer le message "Aucune image" si présent
+				$('.cgt-no-images-message').remove();
 
 				attachments.forEach(function(attachment) {
+					console.log('Ajout image ID:', attachment.id);
+
+					// Utiliser thumbnail ou full selon disponibilité
+					var imageUrl = attachment.sizes && attachment.sizes.thumbnail
+						? attachment.sizes.thumbnail.url
+						: attachment.url;
+
 					var imageItem = $('<div class="cgt-slider-image-item">');
-					imageItem.append('<img src="' + attachment.sizes.thumbnail.url + '" style="max-width: 150px; height: auto; display: block; margin-bottom: 10px;">');
+					imageItem.append('<img src="' + imageUrl + '" style="max-width: 150px; height: auto; display: block; margin-bottom: 10px;">');
 					imageItem.append('<input type="hidden" name="cgt_home_slider_images[]" value="' + attachment.id + '">');
 					imageItem.append('<button type="button" class="button cgt-remove-slider-image"><?php esc_html_e( 'Supprimer', 'cgt' ); ?></button>');
 					imageItem.append('<button type="button" class="button cgt-move-slider-image-up" style="margin-left: 5px;">↑</button>');
 					imageItem.append('<button type="button" class="button cgt-move-slider-image-down" style="margin-left: 5px;">↓</button>');
 					$('#cgt-slider-images-container').append(imageItem);
 				});
+
+				console.log('Images ajoutées au conteneur');
 			});
 
+			// Ouvrir le media uploader
 			mediaUploader.open();
 		});
 
 		// Remove image
-		$(document).on('click', '.cgt-remove-slider-image', function() {
-			$(this).closest('.cgt-slider-image-item').remove();
+		$(document).on('click', '.cgt-remove-slider-image', function(e) {
+			e.preventDefault();
+			if (confirm('<?php esc_html_e( 'Voulez-vous vraiment supprimer cette image ?', 'cgt' ); ?>')) {
+				$(this).closest('.cgt-slider-image-item').remove();
+				console.log('Image supprimée');
+			}
 		});
 
 		// Move image up
-		$(document).on('click', '.cgt-move-slider-image-up', function() {
+		$(document).on('click', '.cgt-move-slider-image-up', function(e) {
+			e.preventDefault();
 			var item = $(this).closest('.cgt-slider-image-item');
 			var prev = item.prev('.cgt-slider-image-item');
 			if (prev.length) {
 				item.insertBefore(prev);
+				console.log('Image déplacée vers le haut');
 			}
 		});
 
 		// Move image down
-		$(document).on('click', '.cgt-move-slider-image-down', function() {
+		$(document).on('click', '.cgt-move-slider-image-down', function(e) {
+			e.preventDefault();
 			var item = $(this).closest('.cgt-slider-image-item');
 			var next = item.next('.cgt-slider-image-item');
 			if (next.length) {
 				item.insertAfter(next);
+				console.log('Image déplacée vers le bas');
 			}
 		});
+
+		console.log('Tous les événements sont attachés');
 	});
 	</script>
 	<?php
