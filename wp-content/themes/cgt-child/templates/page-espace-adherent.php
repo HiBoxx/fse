@@ -389,7 +389,7 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 						<?php endwhile; wp_reset_postdata(); ?>
 					</ul>
 				<?php else : ?>
-					<p><?php esc_html_e( 'Aucun événement planifié pour le moment. Créez vos rendez-vous depuis l’administration.', 'cgt' ); ?></p>
+					<p><?php esc_html_e( 'Aucun événement planifié pour le moment. Créez vos rendez-vous depuis l\'administration.', 'cgt' ); ?></p>
 				<?php endif; ?>
 			</div>
 		</section>
@@ -445,7 +445,7 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 		<section class="member-section container member-section--actions">
 			<div class="member-panel member-panel--actions">
 				<h2><?php esc_html_e( 'Bulletins fédéraux', 'cgt' ); ?></h2>
-				<p><?php esc_html_e( 'Consultez l'intégralité des bulletins publiés pour suivre la vie de la fédération et de ses branches.', 'cgt' ); ?></p>
+				<p><?php esc_html_e( 'Consultez l\'intégralité des bulletins publiés pour suivre la vie de la fédération et de ses branches.', 'cgt' ); ?></p>
 				<a class="btn btn-compact" href="<?php echo esc_url( $bulletins_link ); ?>"><?php esc_html_e( 'Voir tous les bulletins', 'cgt' ); ?></a>
 			</div>
 		</section>
@@ -551,7 +551,7 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 						?>
 					</ul>
 				<?php else : ?>
-					<p><?php esc_html_e( 'Vous n’avez pas encore posé de question.', 'cgt' ); ?></p>
+					<p><?php esc_html_e( 'Vous n\'avez pas encore posé de question.', 'cgt' ); ?></p>
 				<?php endif; ?>
 			</div>
 		</section>
