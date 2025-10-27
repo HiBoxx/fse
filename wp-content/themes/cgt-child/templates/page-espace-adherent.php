@@ -466,6 +466,33 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 				<h2><?php esc_html_e( 'Envoyer une question', 'cgt' ); ?></h2>
 				<p><?php esc_html_e( 'Partagez vos questions, vos besoins d\'appui juridique ou vos retours terrain.', 'cgt' ); ?></p>
 				<?php echo do_shortcode( '[cgt_questions]' ); ?>
+
+				<div class="member-contact-info">
+					<h3><?php esc_html_e( 'Contact par voie postale ou téléphonique', 'cgt' ); ?></h3>
+					<p><?php esc_html_e( 'Vous pouvez aussi nous joindre par voie postale ou téléphonique aux coordonnées ci-dessous :', 'cgt' ); ?></p>
+					<div class="member-contact-info__details">
+						<div class="member-contact-info__item">
+							<svg class="member-contact-info__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+								<polyline points="9 22 9 12 15 12 15 22"></polyline>
+							</svg>
+							<div>
+								<strong><?php esc_html_e( 'Fédération CGT des Sociétés d\'Études', 'cgt' ); ?></strong><br>
+								<?php esc_html_e( '263, rue de Paris - Case 421', 'cgt' ); ?><br>
+								<?php esc_html_e( '93514 Montreuil cedex', 'cgt' ); ?>
+							</div>
+						</div>
+						<div class="member-contact-info__item">
+							<svg class="member-contact-info__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+							</svg>
+							<div>
+								<strong><?php esc_html_e( 'Tél.', 'cgt' ); ?></strong> <a href="tel:+33155828941">+33 1 55 82 89 41</a><br>
+								<strong><?php esc_html_e( 'Fax.', 'cgt' ); ?></strong> +33 1 55 82 89 42
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			<div class="member-panel member-panel--faq">
