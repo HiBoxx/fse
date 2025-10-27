@@ -30,6 +30,7 @@ $cgt_inc_files = array(
 	'optimizations.php',
 	'home-slider.php',
 	'newsletter.php',
+	'admin-post-creation.php',
 );
 
 foreach ( $cgt_inc_files as $cgt_inc_file ) {
