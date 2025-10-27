@@ -355,7 +355,17 @@ $communiques_tabs = array(
 								<?php foreach ( $slider_images as $index => $image_id ) : ?>
 									<?php if ( $image_id ) : ?>
 										<div class="home-slider__slide <?php echo 0 === $index ? 'is-active' : ''; ?>">
-											<?php echo wp_get_attachment_image( $image_id, 'medium_large', false, array( 'class' => 'home-slider__image' ) ); ?>
+											<?php
+											echo wp_get_attachment_image(
+												$image_id,
+												'medium_large',
+												false,
+												array(
+													'class'   => 'home-slider__image',
+													'loading' => 0 === $index ? 'eager' : 'lazy', // Lazy load sauf première image
+												)
+											);
+											?>
 										</div>
 									<?php endif; ?>
 								<?php endforeach; ?>
@@ -435,6 +445,22 @@ $communiques_tabs = array(
 					<div class="newsletter-form__field">
 						<label for="newsletter_email"><?php esc_html_e( 'Email', 'cgt' ); ?> <span class="required">*</span></label>
 						<input type="email" id="newsletter_email" name="email" required>
+					</div>
+
+					<div class="newsletter-form__field newsletter-form__field--checkbox">
+						<label class="newsletter-form__checkbox-label">
+							<input type="checkbox" name="consent" id="newsletter_consent" required>
+							<span>
+								<?php
+								printf(
+									/* translators: %s: Link to privacy policy */
+									esc_html__( 'J\'accepte que mes données soient utilisées pour recevoir la newsletter. Voir notre %s.', 'cgt' ),
+									'<a href="' . esc_url( home_url( '/politique-de-confidentialite' ) ) . '" target="_blank" rel="noopener">' . esc_html__( 'politique de confidentialité', 'cgt' ) . '</a>'
+								);
+								?>
+								<span class="required">*</span>
+							</span>
+						</label>
 					</div>
 
 					<button type="submit" class="btn btn-full"><?php esc_html_e( 'S\'inscrire', 'cgt' ); ?></button>

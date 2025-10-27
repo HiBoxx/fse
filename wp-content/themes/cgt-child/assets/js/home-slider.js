@@ -19,12 +19,17 @@
 
 		let currentSlide = 0;
 		let autoplayInterval;
+		let isAnimating = false; // Debounce flag
 		const autoplayDelay = 5000; // 5 secondes
 
 		/**
 		 * Affiche une slide spécifique
 		 */
 		function showSlide(index) {
+			// Debounce - Prevent rapid clicks
+			if (isAnimating) return;
+			isAnimating = true;
+
 			// Gestion du loop
 			if (index >= slides.length) {
 				currentSlide = 0;
@@ -51,6 +56,11 @@
 			if (dots[currentSlide]) {
 				dots[currentSlide].classList.add('is-active');
 			}
+
+			// Reset debounce after animation duration (600ms matches CSS transition)
+			setTimeout(function() {
+				isAnimating = false;
+			}, 600);
 		}
 
 		/**
@@ -180,12 +190,61 @@
 	const closeModalBtn = document.getElementById('closeNewsletterModal');
 	const newsletterForm = document.getElementById('newsletterForm');
 	const newsletterMessage = document.getElementById('newsletterMessage');
+	let lastFocusedElement;
+
+	/**
+	 * Focus trap - Keeps focus within modal
+	 */
+	function trapFocus(element) {
+		const focusableElements = element.querySelectorAll(
+			'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+		);
+		const firstElement = focusableElements[0];
+		const lastElement = focusableElements[focusableElements.length - 1];
+
+		// Handle tab key
+		const handleTab = function(e) {
+			if (e.key !== 'Tab') return;
+
+			if (e.shiftKey) {
+				// Shift + Tab
+				if (document.activeElement === firstElement) {
+					e.preventDefault();
+					lastElement.focus();
+				}
+			} else {
+				// Tab
+				if (document.activeElement === lastElement) {
+					e.preventDefault();
+					firstElement.focus();
+				}
+			}
+		};
+
+		element.addEventListener('keydown', handleTab);
+		return handleTab; // Return for cleanup
+	}
 
 	if (openModalBtn && newsletterModal) {
 		// Open modal
 		openModalBtn.addEventListener('click', function() {
+			lastFocusedElement = document.activeElement; // Save current focus
 			newsletterModal.classList.add('is-open');
 			document.body.style.overflow = 'hidden';
+
+			// Trap focus
+			const modalContent = newsletterModal.querySelector('.newsletter-modal__content');
+			if (modalContent) {
+				trapFocus(modalContent);
+			}
+
+			// Focus on first input field
+			const firstInput = newsletterModal.querySelector('input:not([type="checkbox"])');
+			if (firstInput) {
+				setTimeout(function() {
+					firstInput.focus();
+				}, 100);
+			}
 		});
 	}
 
@@ -196,15 +255,23 @@
 		});
 
 		// Close modal on overlay click
-		newsletterModal.querySelector('.newsletter-modal__overlay').addEventListener('click', function() {
-			closeModal();
-		});
+		const overlay = newsletterModal.querySelector('.newsletter-modal__overlay');
+		if (overlay) {
+			overlay.addEventListener('click', function() {
+				closeModal();
+			});
+		}
 	}
 
 	// Close modal function
 	function closeModal() {
 		newsletterModal.classList.remove('is-open');
 		document.body.style.overflow = '';
+
+		// Restore focus to element that opened the modal
+		if (lastFocusedElement) {
+			lastFocusedElement.focus();
+		}
 	}
 
 	// Close modal on ESC key

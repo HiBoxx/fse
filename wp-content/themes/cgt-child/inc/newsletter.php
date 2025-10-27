@@ -35,7 +35,7 @@ add_action( 'after_switch_theme', 'cgt_create_newsletter_table' );
  */
 add_action( 'admin_menu', 'cgt_add_newsletter_admin_page' );
 function cgt_add_newsletter_admin_page() {
-	add_menu_page(
+	$hook = add_menu_page(
 		__( 'Liste de Diffusion', 'cgt' ),
 		__( 'Liste de Diffusion', 'cgt' ),
 		'manage_options',
@@ -43,6 +43,22 @@ function cgt_add_newsletter_admin_page() {
 		'cgt_render_newsletter_admin_page',
 		'dashicons-email',
 		25
+	);
+
+	// Enqueue admin script only on this page
+	add_action( 'admin_print_scripts-' . $hook, 'cgt_enqueue_newsletter_admin_scripts' );
+}
+
+/**
+ * Enqueue admin scripts for newsletter page
+ */
+function cgt_enqueue_newsletter_admin_scripts() {
+	wp_enqueue_script(
+		'cgt-admin-newsletter',
+		get_stylesheet_directory_uri() . '/assets/js/admin-newsletter.js',
+		array( 'jquery' ),
+		CGT_CHILD_VERSION,
+		true
 	);
 }
 
@@ -73,8 +89,8 @@ function cgt_render_newsletter_admin_page() {
 	}
 
 	// Get all subscriptions
-	$subscriptions = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY date_inscription DESC" );
-	$total_count   = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+	$subscriptions = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i ORDER BY date_inscription DESC", $table_name ) );
+	$total_count   = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i", $table_name ) );
 
 	?>
 	<div class="wrap">
@@ -93,7 +109,7 @@ function cgt_render_newsletter_admin_page() {
 						</button>
 					</div>
 					<div class="alignleft actions">
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=cgt-newsletter&export=csv' ) ); ?>" class="button">
+						<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=cgt-newsletter&export=csv' ), 'cgt_export_newsletter' ) ); ?>" class="button">
 							<?php esc_html_e( 'Exporter en CSV', 'cgt' ); ?>
 						</a>
 					</div>
@@ -138,14 +154,6 @@ function cgt_render_newsletter_admin_page() {
 			<p><?php esc_html_e( 'Aucune inscription pour le moment.', 'cgt' ); ?></p>
 		<?php endif; ?>
 	</div>
-
-	<script>
-	jQuery(document).ready(function($) {
-		$('#cb-select-all').on('change', function() {
-			$('input[name="newsletter_ids[]"]').prop('checked', this.checked);
-		});
-	});
-	</script>
 	<?php
 }
 
@@ -155,13 +163,18 @@ function cgt_render_newsletter_admin_page() {
 add_action( 'admin_init', 'cgt_handle_newsletter_export' );
 function cgt_handle_newsletter_export() {
 	if ( isset( $_GET['page'] ) && 'cgt-newsletter' === $_GET['page'] && isset( $_GET['export'] ) && 'csv' === $_GET['export'] ) {
+		// Vérifier le nonce
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'cgt_export_newsletter' ) ) {
+			wp_die( esc_html__( 'Action non autorisée.', 'cgt' ) );
+		}
+
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
 		global $wpdb;
 		$table_name    = $wpdb->prefix . 'cgt_newsletter';
-		$subscriptions = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY date_inscription DESC", ARRAY_A );
+		$subscriptions = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i ORDER BY date_inscription DESC", $table_name ), ARRAY_A );
 
 		// Set headers for CSV download
 		header( 'Content-Type: text/csv; charset=utf-8' );
@@ -207,6 +220,17 @@ function cgt_handle_newsletter_subscription() {
 		wp_send_json_error( array( 'message' => __( 'Erreur de sécurité.', 'cgt' ) ) );
 	}
 
+	// Rate limiting - Protection contre le spam
+	$user_ip       = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$transient_key = 'newsletter_submit_' . md5( $user_ip );
+
+	if ( get_transient( $transient_key ) ) {
+		wp_send_json_error( array( 'message' => __( 'Veuillez patienter avant de soumettre une nouvelle inscription.', 'cgt' ) ) );
+	}
+
+	// Définir un transient de 60 secondes
+	set_transient( $transient_key, true, 60 );
+
 	// Sanitize inputs
 	$prenom = isset( $_POST['prenom'] ) ? sanitize_text_field( wp_unslash( $_POST['prenom'] ) ) : '';
 	$nom    = isset( $_POST['nom'] ) ? sanitize_text_field( wp_unslash( $_POST['nom'] ) ) : '';
@@ -219,6 +243,25 @@ function cgt_handle_newsletter_subscription() {
 
 	if ( ! is_email( $email ) ) {
 		wp_send_json_error( array( 'message' => __( 'Email invalide.', 'cgt' ) ) );
+	}
+
+	// Bloquer les emails jetables (disposable email domains)
+	$disposable_domains = array(
+		'tempmail.com',
+		'guerrillamail.com',
+		'10minutemail.com',
+		'mailinator.com',
+		'throwaway.email',
+		'temp-mail.org',
+		'getnada.com',
+		'trashmail.com',
+	);
+
+	$email_parts  = explode( '@', $email );
+	$email_domain = isset( $email_parts[1] ) ? strtolower( $email_parts[1] ) : '';
+
+	if ( in_array( $email_domain, $disposable_domains, true ) ) {
+		wp_send_json_error( array( 'message' => __( 'Les adresses email jetables ne sont pas autorisées.', 'cgt' ) ) );
 	}
 
 	global $wpdb;
