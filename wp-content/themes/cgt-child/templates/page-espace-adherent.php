@@ -289,30 +289,41 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 					if ( $user_branch_id ) {
 						$user_branch = get_term( $user_branch_id, 'branche' );
 						if ( $user_branch && ! is_wp_error( $user_branch ) ) {
+							echo '<div class="member-dashboard__branch-container">';
 							echo '<p class="member-dashboard__branch">' . esc_html( $user_branch->name ) . '</p>';
+							echo '<button type="button" class="btn-change-branch" id="changeBranchBtn">';
+							echo '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+							esc_html_e( 'Modifier la branche', 'cgt' );
+							echo '</button>';
+							echo '</div>';
 						}
 					}
 					?>
 				</div>
 			</div>
-			<?php if ( ! $user_branch_id ) : ?>
-				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="member-branch-selector">
-					<?php wp_nonce_field( 'cgt_select_branch', 'cgt_branch_nonce' ); ?>
-					<input type="hidden" name="action" value="cgt_select_user_branch">
-					<label for="user_branch"><?php esc_html_e( 'Sélectionnez votre branche :', 'cgt' ); ?></label>
-					<select name="user_branch" id="user_branch" required>
-						<option value=""><?php esc_html_e( '-- Choisir une branche --', 'cgt' ); ?></option>
-						<?php
-						if ( ! is_wp_error( $branch_terms ) ) {
-							foreach ( $branch_terms as $branch ) {
-								echo '<option value="' . esc_attr( $branch->term_id ) . '">' . esc_html( $branch->name ) . '</option>';
-							}
+
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="member-branch-selector" id="branchSelectorForm" style="<?php echo $user_branch_id ? 'display: none;' : ''; ?>">
+				<?php wp_nonce_field( 'cgt_select_branch', 'cgt_branch_nonce' ); ?>
+				<input type="hidden" name="action" value="cgt_select_user_branch">
+				<label for="user_branch"><?php esc_html_e( $user_branch_id ? 'Modifier votre branche :' : 'Sélectionnez votre branche :', 'cgt' ); ?></label>
+				<select name="user_branch" id="user_branch" required>
+					<option value=""><?php esc_html_e( '-- Choisir une branche --', 'cgt' ); ?></option>
+					<?php
+					if ( ! is_wp_error( $branch_terms ) ) {
+						foreach ( $branch_terms as $branch ) {
+							$selected = ( $user_branch_id && $branch->term_id == $user_branch_id ) ? ' selected' : '';
+							echo '<option value="' . esc_attr( $branch->term_id ) . '"' . $selected . '>' . esc_html( $branch->name ) . '</option>';
 						}
-						?>
-					</select>
+					}
+					?>
+				</select>
+				<div class="member-branch-selector__actions">
 					<button type="submit" class="btn btn-compact"><?php esc_html_e( 'Valider', 'cgt' ); ?></button>
-				</form>
-			<?php endif; ?>
+					<?php if ( $user_branch_id ) : ?>
+						<button type="button" class="btn btn-compact btn-outline" id="cancelBranchBtn"><?php esc_html_e( 'Annuler', 'cgt' ); ?></button>
+					<?php endif; ?>
+				</div>
+			</form>
 		</div>
 		<p><?php esc_html_e( 'Votre tableau de bord centralise les ressources privées, les actions à venir et vos espaces d\'échanges.', 'cgt' ); ?></p>
 	</header>

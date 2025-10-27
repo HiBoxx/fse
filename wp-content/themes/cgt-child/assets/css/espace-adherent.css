@@ -130,6 +130,14 @@
 	letter-spacing: -0.02em;
 }
 
+.member-dashboard__branch-container {
+	display: flex;
+	align-items: center;
+	gap: var(--member-spacing-sm);
+	flex-wrap: wrap;
+	margin-top: 0.5rem;
+}
+
 .member-dashboard__branch {
 	display: inline-block;
 	background: rgba(255, 255, 255, 0.25);
@@ -138,8 +146,37 @@
 	border-radius: 20px;
 	font-size: 0.9rem;
 	font-weight: 500;
-	margin-top: 0.25rem;
+	margin: 0;
 	border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-change-branch {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.5rem 1rem;
+	background: rgba(255, 255, 255, 0.15);
+	backdrop-filter: blur(8px);
+	color: white;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	border-radius: var(--member-radius-sm);
+	font-size: 0.85rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: var(--member-transition);
+	text-decoration: none;
+}
+
+.btn-change-branch:hover {
+	background: rgba(255, 255, 255, 0.25);
+	border-color: rgba(255, 255, 255, 0.5);
+	transform: translateY(-1px);
+}
+
+.btn-change-branch svg {
+	width: 14px;
+	height: 14px;
+	flex-shrink: 0;
 }
 
 .member-dashboard__header > p {
@@ -209,6 +246,35 @@
 .member-branch-selector .btn:hover {
 	transform: translateY(-2px);
 	box-shadow: var(--member-shadow-md);
+}
+
+.member-branch-selector__actions {
+	display: flex;
+	gap: var(--member-spacing-sm);
+	width: 100%;
+	flex-wrap: wrap;
+}
+
+.member-branch-selector__actions .btn {
+	flex: 1;
+	min-width: 120px;
+	justify-content: center;
+}
+
+/* Animation pour l'apparition du formulaire */
+.member-branch-selector.is-visible {
+	animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* ========================================

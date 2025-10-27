@@ -432,7 +432,7 @@ function cgt_disable_comments_admin_bar() {
 }
 
 /**
- * Enqueue modern styles for espace adhérent page.
+ * Enqueue modern styles and scripts for espace adhérent page.
  */
 add_action( 'wp_enqueue_scripts', 'cgt_enqueue_espace_adherent_styles', 20 );
 function cgt_enqueue_espace_adherent_styles() {
@@ -442,6 +442,14 @@ function cgt_enqueue_espace_adherent_styles() {
 			get_stylesheet_directory_uri() . '/assets/css/espace-adherent.css',
 			array( 'cgt-child' ),
 			CGT_CHILD_VERSION
+		);
+
+		wp_enqueue_script(
+			'cgt-espace-adherent',
+			get_stylesheet_directory_uri() . '/assets/js/espace-adherent.js',
+			array(),
+			CGT_CHILD_VERSION,
+			true
 		);
 	}
 }
