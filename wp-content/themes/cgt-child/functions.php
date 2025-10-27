@@ -430,3 +430,18 @@ function cgt_disable_comments_admin_bar() {
 		$wp_admin_bar->remove_menu( 'comments' );
 	}
 }
+
+/**
+ * Enqueue modern styles for espace adhérent page.
+ */
+add_action( 'wp_enqueue_scripts', 'cgt_enqueue_espace_adherent_styles', 20 );
+function cgt_enqueue_espace_adherent_styles() {
+	if ( is_page_template( 'page-espace-adherent.php' ) || is_page( 'espace-adherent' ) ) {
+		wp_enqueue_style(
+			'cgt-espace-adherent',
+			get_stylesheet_directory_uri() . '/assets/css/espace-adherent.css',
+			array( 'cgt-child' ),
+			CGT_CHILD_VERSION
+		);
+	}
+}
