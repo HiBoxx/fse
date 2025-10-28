@@ -463,6 +463,68 @@ function cgt_disable_comments_admin_bar() {
 }
 
 /**
+ * Cleanup helper: remove all standard articles, tracts, and events once.
+ */
+add_action(
+	'init',
+	function () {
+		if ( get_option( 'cgt_cleanup_articles_tracts_events_done' ) ) {
+			return;
+		}
+
+		$post_types = array( 'post', 'tracts', 'cgt_agenda' );
+
+		foreach ( $post_types as $post_type ) {
+			$posts = get_posts(
+				array(
+					'post_type'      => $post_type,
+					'post_status'    => 'any',
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+				)
+			);
+
+			if ( empty( $posts ) ) {
+				continue;
+			}
+
+			foreach ( $posts as $post_id ) {
+				wp_delete_post( $post_id, true );
+			}
+		}
+
+		update_option( 'cgt_cleanup_articles_tracts_events_done', current_time( 'mysql' ) );
+	},
+	20
+);
+
+/**
+ * Rename legacy "Matériels" menu item to "Menu" in the primary navigation.
+ */
+add_filter(
+	'wp_nav_menu_objects',
+	function ( $items, $args ) {
+		if ( empty( $items ) || ! isset( $args->theme_location ) || 'primary' !== $args->theme_location ) {
+			return $items;
+		}
+
+		foreach ( $items as $item ) {
+			if ( isset( $item->post_name ) && 'materiels' === $item->post_name ) {
+				$item->title = __( 'Ressources', 'cgt' );
+			} elseif ( isset( $item->title ) && 'Matériels' === $item->title ) {
+				$item->title = __( 'Ressources', 'cgt' );
+			} elseif ( isset( $item->title ) && 'Menu' === $item->title ) {
+				$item->title = __( 'Ressources', 'cgt' );
+			}
+		}
+
+		return $items;
+	},
+	10,
+	2
+);
+
+/**
  * Enqueue modern styles and scripts for espace adhérent page.
  */
 add_action( 'wp_enqueue_scripts', 'cgt_enqueue_espace_adherent_styles', 20 );
@@ -481,6 +543,15 @@ function cgt_enqueue_espace_adherent_styles() {
 			array(),
 			CGT_CHILD_VERSION,
 			true
+		);
+	}
+
+	if ( is_page_template( 'templates/page-classes.php' ) ) {
+		wp_enqueue_style(
+			'cgt-classes',
+			get_stylesheet_directory_uri() . '/assets/css/classes.css',
+			array( 'cgt-child' ),
+			CGT_CHILD_VERSION
 		);
 	}
 }

@@ -7,301 +7,197 @@
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'admin_post_cgt_create_private_adherent_article', 'cgt_create_private_adherent_article' );
-
 /**
- * Register hidden dashboard page for creating private tracts with branch selection.
+ * Enregistre les sous-menus personnalisés dans "Articles adhérents".
  */
-add_action( 'admin_menu', 'cgt_register_private_tract_admin_page' );
-function cgt_register_private_tract_admin_page() {
-	if ( ! current_user_can( 'edit_posts' ) ) {
-		return;
-	}
+add_action( 'admin_menu', 'cgt_register_private_content_submenus', 20 );
+function cgt_register_private_content_submenus() {
+    if ( ! current_user_can( 'edit_posts' ) ) {
+        return;
+    }
 
-	add_dashboard_page(
-		__( 'Créer un tract privé', 'cgt' ),
-		__( 'Créer un tract privé', 'cgt' ),
-		'edit_posts',
-		'cgt-create-private-tract',
-		'cgt_render_private_tract_admin_page'
-	);
+    global $submenu;
 
-	remove_submenu_page( 'index.php', 'cgt-create-private-tract' );
-}
+    $primary_slug = 'edit.php?post_type=articles_adherents';
 
-/**
- * Render the admin page allowing branch selection for private tracts.
- */
-function cgt_render_private_tract_admin_page() {
-	if ( ! current_user_can( 'edit_posts' ) ) {
-		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
-	}
-
-	$branches = get_terms(
-		array(
-			'taxonomy'   => 'branche',
-			'hide_empty' => false,
-			'orderby'    => 'name',
-			'order'      => 'ASC',
-		)
-	);
-
-	$error = isset( $_GET['cgt_error'] ) ? sanitize_key( wp_unslash( $_GET['cgt_error'] ) ) : '';
-	?>
-	<div class="wrap">
-		<h1><?php esc_html_e( 'Créer un tract privé adhérent', 'cgt' ); ?></h1>
-		<p><?php esc_html_e( 'Sélectionnez la branche concernée avant de rédiger le tract réservé aux adhérent·es.', 'cgt' ); ?></p>
-
-		<?php if ( 'no_branch' === $error ) : ?>
-			<div class="notice notice-error"><p><?php esc_html_e( 'Merci de sélectionner une branche avant de continuer.', 'cgt' ); ?></p></div>
-		<?php elseif ( 'invalid_branch' === $error ) : ?>
-			<div class="notice notice-error"><p><?php esc_html_e( 'La branche sélectionnée est introuvable.', 'cgt' ); ?></p></div>
-		<?php endif; ?>
-
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<?php wp_nonce_field( 'cgt_create_private_tract' ); ?>
-			<input type="hidden" name="action" value="cgt_create_private_tract">
-
-			<table class="form-table">
-				<tr>
-					<th scope="row"><label for="cgt_private_tract_branch"><?php esc_html_e( 'Branche', 'cgt' ); ?></label></th>
-					<td>
-						<select id="cgt_private_tract_branch" name="cgt_private_tract_branch" required>
-							<option value=""><?php esc_html_e( 'Sélectionner une branche', 'cgt' ); ?></option>
-							<?php if ( ! is_wp_error( $branches ) ) : ?>
-								<?php foreach ( $branches as $branch ) : ?>
-									<option value="<?php echo esc_attr( $branch->slug ); ?>"><?php echo esc_html( $branch->name ); ?></option>
-								<?php endforeach; ?>
-							<?php endif; ?>
-						</select>
-					</td>
-				</tr>
-			</table>
-
-			<?php submit_button( __( 'Créer le tract privé', 'cgt' ) ); ?>
-		</form>
-	</div>
-	<?php
-}
-
-add_action( 'admin_menu', 'cgt_register_private_article_admin_page' );
-function cgt_register_private_article_admin_page() {
-	if ( ! current_user_can( 'edit_posts' ) ) {
-		return;
-	}
+	$submenu[ $primary_slug ] = array();
 
 	add_submenu_page(
-		'edit.php?post_type=articles_adherents',
+		$primary_slug,
 		__( 'Créer un article privé', 'cgt' ),
 		__( 'Créer un article privé', 'cgt' ),
-		'edit_posts',
-		'cgt-create-private-article',
-		'cgt_render_private_article_admin_page'
+        'edit_posts',
+        'cgt-add-private-article',
+        'cgt_render_add_private_article_page'
+    );
+
+    add_submenu_page(
+        $primary_slug,
+        __( 'Créer un tract privé', 'cgt' ),
+        __( 'Créer un tract privé', 'cgt' ),
+        'edit_posts',
+		'cgt-add-private-tract',
+		'cgt_render_add_private_tract_page'
 	);
 
 	add_submenu_page(
-		'edit.php?post_type=articles_adherents',
-		__( 'Créer un tract privé', 'cgt' ),
-		__( 'Créer un tract privé', 'cgt' ),
+		$primary_slug,
+		__( 'Articles privés', 'cgt' ),
+		__( 'Articles privés', 'cgt' ),
 		'edit_posts',
-		'cgt-create-private-tract',
-		'cgt_render_private_tract_admin_page'
+		'cgt-list-private-articles',
+		'cgt_redirect_private_articles_list'
 	);
 
-	// Ajouter un sous-menu dans Messages de contact vers la liste des questions adhérents.
 	add_submenu_page(
-		'edit.php?post_type=cgt_contact',
-		__( 'Questions adhérents', 'cgt' ),
-		__( 'Questions adhérents', 'cgt' ),
+		$primary_slug,
+		__( 'Tracts privés', 'cgt' ),
+		__( 'Tracts privés', 'cgt' ),
 		'edit_posts',
-		'edit.php?post_type=cgt_question'
+		'cgt-list-private-tracts',
+        'cgt_redirect_private_tracts_list'
+    );
+
+    add_submenu_page(
+        $primary_slug,
+        __( 'Branches', 'cgt' ),
+        __( 'Branches', 'cgt' ),
+        'edit_posts',
+        'cgt-manage-branches',
+        'cgt_redirect_branches_admin'
+    );
+
+    add_submenu_page(
+        $primary_slug,
+        __( 'Classes', 'cgt' ),
+        __( 'Classes', 'cgt' ),
+        'edit_posts',
+		'cgt-manage-classes',
+		'cgt_redirect_classes_admin'
 	);
 }
 
 /**
- * Customize Branch submenu: remove "Branches" taxonomy, add "Articles", keep "Thématiques".
+ * Redirige vers la liste des articles adhérents privés.
  */
-add_action( 'admin_menu', 'cgt_customize_branch_menu', 999 );
-function cgt_customize_branch_menu() {
-	// Remove "Branches" taxonomy submenu
-	remove_submenu_page( 'edit.php?post_type=branch', 'edit-tags.php?taxonomy=branche&post_type=branch' );
-
-	// Add "Articles" submenu to redirect to posts filtered by branch taxonomy
-	add_submenu_page(
-		'edit.php?post_type=branch',
-		__( 'Articles', 'cgt' ),
-		__( 'Articles', 'cgt' ),
-		'edit_posts',
-		'edit.php?taxonomy=branche'
-	);
-}
-
-function cgt_render_private_article_admin_page() {
-	if ( ! current_user_can( 'edit_posts' ) ) {
-		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
-	}
-
-	$branches = get_terms(
-		array(
-			'taxonomy'   => 'branche',
-			'hide_empty' => false,
-			'orderby'    => 'name',
-			'order'      => 'ASC',
-		)
-	);
-
-	$error = isset( $_GET['cgt_error'] ) ? sanitize_key( wp_unslash( $_GET['cgt_error'] ) ) : '';
-	?>
-	<div class="wrap">
-		<h1><?php esc_html_e( 'Créer un article privé adhérent', 'cgt' ); ?></h1>
-		<p><?php esc_html_e( 'Sélectionnez la branche concernée avant de rédiger l’article réservé aux adhérent·es.', 'cgt' ); ?></p>
-
-		<?php if ( 'no_branch' === $error ) : ?>
-			<div class="notice notice-error"><p><?php esc_html_e( 'Merci de sélectionner une branche avant de continuer.', 'cgt' ); ?></p></div>
-		<?php elseif ( 'invalid_branch' === $error ) : ?>
-			<div class="notice notice-error"><p><?php esc_html_e( 'La branche sélectionnée est introuvable.', 'cgt' ); ?></p></div>
-		<?php endif; ?>
-
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<?php wp_nonce_field( 'cgt_create_private_article' ); ?>
-			<input type="hidden" name="action" value="cgt_create_private_adherent_article">
-
-			<table class="form-table">
-				<tr>
-					<th scope="row"><label for="cgt_private_article_branch"><?php esc_html_e( 'Branche', 'cgt' ); ?></label></th>
-					<td>
-						<select id="cgt_private_article_branch" name="cgt_private_article_branch" required>
-							<option value=""><?php esc_html_e( 'Sélectionner une branche', 'cgt' ); ?></option>
-							<?php if ( ! is_wp_error( $branches ) ) : ?>
-								<?php foreach ( $branches as $branch ) : ?>
-									<option value="<?php echo esc_attr( $branch->slug ); ?>"><?php echo esc_html( $branch->name ); ?></option>
-								<?php endforeach; ?>
-							<?php endif; ?>
-						</select>
-					</td>
-				</tr>
-			</table>
-
-			<?php submit_button( __( 'Créer l’article privé', 'cgt' ) ); ?>
-		</form>
-	</div>
-	<?php
-}
-
-add_action( 'admin_post_cgt_create_private_adherent_article', 'cgt_create_private_adherent_article' );
-
-function cgt_create_private_adherent_article() {
-	if ( ! current_user_can( 'edit_others_posts' ) ) {
-		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
-	}
-
-	check_admin_referer( 'cgt_create_private_article' );
-
-	$branch_slug = isset( $_POST['cgt_private_article_branch'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_private_article_branch'] ) ) : '';
-	$redirect    = admin_url( 'index.php?page=cgt-create-private-article' );
-
-	if ( empty( $branch_slug ) ) {
-		wp_safe_redirect( add_query_arg( 'cgt_error', 'no_branch', $redirect ) );
-		exit;
-	}
-
-	$branch_term = get_term_by( 'slug', $branch_slug, 'branche' );
-	if ( ! $branch_term || is_wp_error( $branch_term ) ) {
-		wp_safe_redirect( add_query_arg( 'cgt_error', 'invalid_branch', $redirect ) );
-		exit;
-	}
-
-	$post_id = wp_insert_post(
-		array(
-			'post_type'   => 'articles_adherents',
-			'post_status' => 'private',
-			'post_title'  => __( 'Privé adhérent – article', 'cgt' ),
-		),
-		true
-	);
-
-	if ( is_wp_error( $post_id ) || ! $post_id ) {
-		wp_safe_redirect( add_query_arg( 'cgt_error', 'creation_failed', $redirect ) );
-		exit;
-	}
-
-	wp_set_object_terms( $post_id, array( (int) $branch_term->term_id ), 'branche', false );
-
-	$edit_link = get_edit_post_link( $post_id, 'raw' );
-	if ( ! $edit_link ) {
-		$edit_link = admin_url( 'post.php?post=' . $post_id . '&action=edit' );
-	}
-
-	wp_safe_redirect( $edit_link );
-	exit;
-}
-
-add_action( 'admin_post_cgt_create_private_tract', 'cgt_create_private_tract' );
-
-/**
- * Create a blank private tract for adherents.
- */
-function cgt_create_private_tract() {
-	if ( ! current_user_can( 'edit_others_posts' ) ) {
-		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
-	}
-
-	check_admin_referer( 'cgt_create_private_tract' );
-
-	$branch_slug = isset( $_POST['cgt_private_tract_branch'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_private_tract_branch'] ) ) : '';
-
-	$redirect = admin_url( 'index.php?page=cgt-create-private-tract' );
-	if ( empty( $branch_slug ) ) {
-		wp_safe_redirect( add_query_arg( 'cgt_error', 'no_branch', $redirect ) );
-		exit;
-	}
-
-	$branch_term = get_term_by( 'slug', $branch_slug, 'branche' );
-	if ( ! $branch_term || is_wp_error( $branch_term ) ) {
-		wp_safe_redirect( add_query_arg( 'cgt_error', 'invalid_branch', $redirect ) );
-		exit;
-	}
-
-	$post_id = wp_insert_post(
-		array(
-			'post_type'   => 'tracts',
-			'post_status' => 'private',
-			'post_title'  => __( 'Privé adhérent – tract', 'cgt' ),
-		),
-		true
-	);
-
-	if ( is_wp_error( $post_id ) || ! $post_id ) {
-		wp_safe_redirect( add_query_arg( 'cgt_error', 'creation_failed', $redirect ) );
-		exit;
-	}
-
-	update_post_meta( $post_id, 'cgt_visibilite', 'prive' );
-	wp_set_object_terms( $post_id, array( (int) $branch_term->term_id ), 'branche', false );
-
-	$edit_link = get_edit_post_link( $post_id, 'raw' );
-	if ( ! $edit_link ) {
-		$edit_link = admin_url( 'post.php?post=' . $post_id . '&action=edit' );
-	}
-
-	wp_safe_redirect( $edit_link );
+function cgt_redirect_private_articles_list() {
+	wp_safe_redirect( admin_url( 'edit.php?post_type=articles_adherents' ) );
 	exit;
 }
 
 /**
- * Handle user branch selection from member dashboard.
+ * Redirige vers la liste des tracts privés.
+ */
+function cgt_redirect_private_tracts_list() {
+	wp_safe_redirect( admin_url( 'edit.php?post_type=tracts&cgt_private=1' ) );
+	exit;
+}
+
+/**
+ * Redirige vers l'administration des branches.
+ */
+function cgt_redirect_branches_admin() {
+	wp_safe_redirect( admin_url( 'edit-tags.php?taxonomy=branche&post_type=articles_adherents' ) );
+	exit;
+}
+
+/**
+ * Redirige vers l'administration des classes.
+ */
+function cgt_redirect_classes_admin() {
+	wp_safe_redirect( admin_url( 'edit-tags.php?taxonomy=thematique&post_type=articles_adherents' ) );
+	exit;
+}
+
+/**
+ * Définit l'ordre personnalisé du menu principal de l'administration.
+ */
+add_filter( 'custom_menu_order', '__return_true' );
+add_filter( 'menu_order', 'cgt_custom_menu_order' );
+function cgt_custom_menu_order( $menu_order ) {
+	if ( ! is_array( $menu_order ) ) {
+		return $menu_order;
+	}
+
+	$desired_order = array(
+		'index.php',                                // Tableau de bord.
+		'edit.php',                                 // Articles.
+		'edit.php?post_type=tracts',                // Tracts.
+		'edit.php?post_type=page',                  // Pages.
+		'edit.php?post_type=cgt_petition',          // Pétitions.
+		'edit.php?post_type=cgt_pdf_library',       // Bibliothèque.
+		'upload.php',                               // Médias.
+		'cgt-newsletter',                           // Liste de diffusion.
+		'edit.php?post_type=cgt_ad',                // Ads (si présent).
+		'edit.php?post_type=articles_adherents',    // Articles adhérents.
+		'edit.php?post_type=cgt_contact',           // Messages.
+		'edit.php?post_type=cgt_agenda',            // Événements.
+		'edit.php?post_type=cgt_adhesion',          // Adhérents.
+		'themes.php',                               // Apparence.
+		'plugins.php',                              // Extensions.
+		'tools.php',                                // Outils.
+		'options-general.php',                      // Réglages.
+	);
+
+	$ordered = array();
+
+	foreach ( $desired_order as $slug ) {
+		$key = array_search( $slug, $menu_order, true );
+		if ( false !== $key ) {
+			$ordered[] = $menu_order[ $key ];
+			unset( $menu_order[ $key ] );
+		}
+	}
+
+	return array_merge( $ordered, $menu_order );
+}
+
+/**
+ * Filtre la liste des tracts pour n'afficher que les contenus privés lorsque demandé.
+ */
+add_action( 'load-edit.php', 'cgt_maybe_filter_private_tracts_list' );
+function cgt_maybe_filter_private_tracts_list() {
+	$screen = get_current_screen();
+	if ( ! $screen || 'edit-tracts' !== $screen->id ) {
+		return;
+	}
+
+	if ( isset( $_GET['cgt_private'] ) && '1' === $_GET['cgt_private'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		add_filter( 'pre_get_posts', 'cgt_filter_admin_private_tracts' );
+	}
+}
+
+function cgt_filter_admin_private_tracts( $query ) {
+	if ( ! is_admin() || ! $query->is_main_query() ) {
+		return $query;
+	}
+
+	$meta_query = (array) $query->get( 'meta_query', array() );
+	$meta_query[] = array(
+		'key'   => 'cgt_visibilite',
+		'value' => 'prive',
+	);
+
+	$query->set( 'post_status', array( 'private' ) );
+	$query->set( 'meta_query', $meta_query );
+
+	return $query;
+}
+
+/**
+ * Gestion du formulaire "Ma branche" pour l'espace adhérent.
  */
 add_action( 'admin_post_cgt_select_user_branch', 'cgt_handle_user_branch_selection' );
 add_action( 'admin_post_nopriv_cgt_select_user_branch', 'cgt_handle_user_branch_selection' );
 
 function cgt_handle_user_branch_selection() {
 	if ( ! is_user_logged_in() ) {
-		wp_die( esc_html__( 'Vous devez être connecté.', 'cgt' ) );
+	wp_die( esc_html__( 'Vous devez être connecté.', 'cgt' ) );
 	}
 
 	check_admin_referer( 'cgt_select_branch', 'cgt_branch_nonce' );
 
-	$user_id = get_current_user_id();
+	$user_id   = get_current_user_id();
 	$branch_id = isset( $_POST['user_branch'] ) ? absint( $_POST['user_branch'] ) : 0;
 
 	if ( ! $branch_id ) {

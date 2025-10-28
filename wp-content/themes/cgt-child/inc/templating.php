@@ -150,8 +150,13 @@ function cgt_setup_pages_and_menus() {
 			'_wp_page_template' => 'templates/page-federation.php',
 		),
 		'materiels'           => array(
-			'post_title'   => __( 'Matériels', 'cgt' ),
+			'post_title'   => __( 'Ressources', 'cgt' ),
 			'post_content' => '<p>' . esc_html__( 'Supports militants, visuels et ressources à télécharger.', 'cgt' ) . '</p>',
+		),
+		'classes'            => array(
+			'post_title'        => __( 'Classes', 'cgt' ),
+			'_wp_page_template' => 'templates/page-classes.php',
+			'post_status'       => 'publish',
 		),
 		'branches'            => array(
 			'post_title'   => __( 'Branches', 'cgt' ),
@@ -385,6 +390,36 @@ function cgt_ensure_actualites_page_exists() {
 add_action( 'init', 'cgt_ensure_actualites_page_exists', 15 );
 
 /**
+ * Garantit l'existence de la page Classes (filtres).
+ */
+function cgt_ensure_classes_page_exists() {
+	$page = get_page_by_path( 'classes', OBJECT, 'page' );
+
+	if ( ! $page ) {
+		$page_id = wp_insert_post(
+			array(
+				'post_type'      => 'page',
+				'post_title'     => __( 'Classes', 'cgt' ),
+				'post_name'      => 'classes',
+				'post_status'    => 'publish',
+				'comment_status' => 'closed',
+			)
+		);
+
+		if ( is_wp_error( $page_id ) ) {
+			return;
+		}
+
+		$page = get_post( $page_id );
+	}
+
+	if ( $page && 'templates/page-classes.php' !== get_page_template_slug( $page->ID ) ) {
+		update_post_meta( $page->ID, '_wp_page_template', 'templates/page-classes.php' );
+	}
+}
+add_action( 'init', 'cgt_ensure_classes_page_exists', 16 );
+
+/**
  * Ensure critical pages (connexion, etc.) exist even après activation.
  */
 function cgt_ensure_login_page_exists() {
@@ -446,10 +481,6 @@ function cgt_seed_demo_content() {
 		'branche' => array(
 			array( 'slug' => 'enseignement-superieur', 'name' => __( 'Enseignement supérieur', 'cgt' ) ),
 			array( 'slug' => 'recherche', 'name' => __( 'Recherche', 'cgt' ) ),
-		),
-		'thematique' => array(
-			array( 'slug' => 'droits-sociaux', 'name' => __( 'Droits sociaux', 'cgt' ) ),
-			array( 'slug' => 'negociation', 'name' => __( 'Négociation', 'cgt' ) ),
 		),
 		'zone_internationale' => array(
 			array( 'slug' => 'europe', 'name' => __( 'Europe', 'cgt' ) ),
@@ -788,3 +819,124 @@ function cgt_seed_communique_demo_posts_once() {
 	update_option( 'cgt_communique_demo_version', $current_version );
 }
 add_action( 'init', 'cgt_seed_communique_demo_posts_once', 26 );
+
+/**
+ * Seed hierarchical "Classes" taxonomy terms.
+ */
+function cgt_seed_classes_terms_once() {
+	$version = '20241021';
+	$taxonomy = 'thematique';
+
+	if ( get_option( 'cgt_classes_seed_version' ) === $version ) {
+		return;
+	}
+
+	if ( ! taxonomy_exists( $taxonomy ) ) {
+		return;
+	}
+
+	$structure = array(
+		'la-federation' => array(
+			'label'    => __( 'La Fédération', 'cgt' ),
+			'children' => array(
+				'presentation-vie-federale' => __( 'Présentation / Vie fédérale', 'cgt' ),
+				'communication-federale'    => __( 'Communication fédérale', 'cgt' ),
+				'commissions-executives'    => __( 'Commissions exécutives', 'cgt' ),
+				'congres'                   => __( 'Congrès', 'cgt' ),
+			),
+		),
+		'publications' => array(
+			'label'    => __( 'Publications', 'cgt' ),
+			'children' => array(
+				'actualites'         => __( 'Actualités', 'cgt' ),
+				'le-lien-syndical'   => __( 'Le Lien Syndical', 'cgt' ),
+				'brochures-analyses' => __( 'Brochures & Analyses', 'cgt' ),
+				'dossiers-thematiques'=> __( 'Dossiers thématiques', 'cgt' ),
+			),
+		),
+		'actualites-des-branches' => array(
+			'label'    => __( 'Actualités des branches', 'cgt' ),
+			'children' => array(
+				'bulletins'               => __( 'Bulletins', 'cgt' ),
+				'conventions-collectives' => __( 'Conventions collectives', 'cgt' ),
+				'tracts-entreprise'       => __( 'Tracts d’entreprise', 'cgt' ),
+				'tracts-federation'       => __( 'Tracts de la fédération', 'cgt' ),
+			),
+		),
+		'engagement' => array(
+			'label'    => __( 'Engagement', 'cgt' ),
+			'children' => array(
+				'syndicalisation'         => __( 'Syndicalisation', 'cgt' ),
+				'creer-un-syndicat'       => __( 'Créer un syndicat', 'cgt' ),
+				'elections-professionnelles' => __( 'Élections professionnelles', 'cgt' ),
+				'formation-syndicale'     => __( 'Formation syndicale', 'cgt' ),
+			),
+		),
+		'nos-outils-ressources' => array(
+			'label'    => __( 'Nos outils & ressources', 'cgt' ),
+			'children' => array(
+				'agenda-social'    => __( 'Agenda social', 'cgt' ),
+				'modeles-lettre'   => __( 'Modèles de lettre', 'cgt' ),
+				'guides'           => __( 'Guides', 'cgt' ),
+				'adresses-utiles'  => __( 'Adresses utiles', 'cgt' ),
+				'simulateur-calcul'=> __( 'Simulateur de calcul', 'cgt' ),
+			),
+		),
+		'espace-presse' => array(
+			'label'    => __( 'Espace presse', 'cgt' ),
+			'children' => array(
+				'communiques-de-presse' => __( 'Communiqués de presse', 'cgt' ),
+				'revues-de-presse'      => __( 'Revues de presse', 'cgt' ),
+				'international'         => __( 'International', 'cgt' ),
+			),
+		),
+	);
+
+	foreach ( $structure as $parent_slug => $parent_data ) {
+		$parent_term = get_term_by( 'slug', $parent_slug, $taxonomy );
+
+		if ( $parent_term && $parent_term instanceof WP_Term ) {
+			$parent_id = (int) $parent_term->term_id;
+			if ( $parent_term->name !== $parent_data['label'] ) {
+				wp_update_term( $parent_id, $taxonomy, array( 'name' => $parent_data['label'] ) );
+			}
+		} else {
+			$result = wp_insert_term( $parent_data['label'], $taxonomy, array( 'slug' => $parent_slug ) );
+			$parent_id = is_wp_error( $result ) ? 0 : (int) $result['term_id'];
+		}
+
+		if ( ! $parent_id || empty( $parent_data['children'] ) ) {
+			continue;
+		}
+
+		foreach ( $parent_data['children'] as $child_slug => $child_label ) {
+			$child_term = get_term_by( 'slug', $child_slug, $taxonomy );
+
+			if ( $child_term && $child_term instanceof WP_Term ) {
+				$args_update = array();
+				if ( $child_term->name !== $child_label ) {
+					$args_update['name'] = $child_label;
+				}
+				if ( (int) $child_term->parent !== $parent_id ) {
+					$args_update['parent'] = $parent_id;
+				}
+
+				if ( ! empty( $args_update ) ) {
+					wp_update_term( (int) $child_term->term_id, $taxonomy, $args_update );
+				}
+			} else {
+				wp_insert_term(
+					$child_label,
+					$taxonomy,
+					array(
+						'slug'   => $child_slug,
+						'parent' => $parent_id,
+					)
+				);
+			}
+		}
+	}
+
+	update_option( 'cgt_classes_seed_version', $version );
+}
+add_action( 'init', 'cgt_seed_classes_terms_once', 27 );
