@@ -370,7 +370,6 @@ function cgt_render_add_article_page() {
 	$keywords    = '';
 	$sources     = '';
 	$featured_id = 0;
-	$visibility  = 'public';
 
 	// Charger les données existantes si en mode édition
 	if ( $is_edit ) {
@@ -381,8 +380,6 @@ function cgt_render_add_article_page() {
 			$excerpt     = $post->post_excerpt;
 			$featured_id = get_post_thumbnail_id( $post->ID );
 			$sources     = get_post_meta( $post->ID, 'cgt_submission_sources', true );
-			$visibility  = get_post_meta( $post->ID, 'cgt_article_visibility', true );
-			$visibility  = $visibility ? $visibility : 'public';
 
 			// Catégorie
 			$categories = wp_get_post_categories( $post->ID );
@@ -415,7 +412,6 @@ function cgt_render_add_article_page() {
 			$keywords    = isset( $_POST['cgt_article_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_keywords'] ) ) : '';
 			$sources     = isset( $_POST['cgt_article_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_article_sources'] ) ) : '';
 			$featured_id = isset( $_POST['cgt_article_featured_id'] ) ? absint( $_POST['cgt_article_featured_id'] ) : 0;
-			$visibility  = isset( $_POST['cgt_article_visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_visibility'] ) ) : 'public';
 			$edit_id_post = isset( $_POST['cgt_article_edit_id'] ) ? absint( $_POST['cgt_article_edit_id'] ) : 0;
 
 			// Validation
@@ -479,8 +475,6 @@ function cgt_render_add_article_page() {
 						delete_post_thumbnail( $post_id );
 					}
 
-					// Sauvegarder la visibilité
-					update_post_meta( $post_id, 'cgt_article_visibility', $visibility );
 
 					// Message de succès
 					$view_link = get_permalink( $post_id );
@@ -509,7 +503,7 @@ function cgt_render_add_article_page() {
 		'article',
 		$message,
 		$errors,
-		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'visibility', 'categories', 'branches', 'is_edit', 'edit_id' )
+		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'categories', 'branches', 'is_edit', 'edit_id' )
 	);
 }
 
@@ -534,7 +528,6 @@ function cgt_render_add_tract_page() {
 	$sources     = '';
 	$featured_id = 0;
 	$pdf_id      = 0;
-	$visibility  = 'public';
 
 	// Charger les données existantes si en mode édition
 	if ( $is_edit ) {
@@ -545,8 +538,6 @@ function cgt_render_add_tract_page() {
 			$excerpt     = $post->post_excerpt;
 			$featured_id = get_post_thumbnail_id( $post->ID );
 			$sources     = get_post_meta( $post->ID, 'cgt_submission_sources', true );
-			$visibility  = get_post_meta( $post->ID, 'cgt_visibilite', true );
-			$visibility  = $visibility ? $visibility : 'public';
 
 			// Thématique
 			$category_terms = wp_get_post_terms( $post->ID, 'thematique' );
@@ -584,7 +575,6 @@ function cgt_render_add_tract_page() {
 			$sources      = isset( $_POST['cgt_tract_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_tract_sources'] ) ) : '';
 			$featured_id  = isset( $_POST['cgt_tract_featured_id'] ) ? absint( $_POST['cgt_tract_featured_id'] ) : 0;
 			$pdf_id       = isset( $_POST['cgt_tract_pdf_id'] ) ? absint( $_POST['cgt_tract_pdf_id'] ) : 0;
-			$visibility   = isset( $_POST['cgt_tract_visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_tract_visibility'] ) ) : 'public';
 			$edit_id_post = isset( $_POST['cgt_tract_edit_id'] ) ? absint( $_POST['cgt_tract_edit_id'] ) : 0;
 
 			// Validation
@@ -662,8 +652,6 @@ function cgt_render_add_tract_page() {
 						delete_post_meta( $post_id, 'cgt_fichier_pdf' );
 					}
 
-					// Sauvegarder la visibilité
-					update_post_meta( $post_id, 'cgt_visibilite', $visibility );
 
 					// Message de succès
 					$view_link = get_permalink( $post_id );
@@ -718,7 +706,6 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 	$sources     = isset( $data['sources'] ) ? $data['sources'] : '';
 	$featured_id = isset( $data['featured_id'] ) ? $data['featured_id'] : 0;
 	$pdf_id      = isset( $data['pdf_id'] ) ? $data['pdf_id'] : 0;
-	$visibility  = isset( $data['visibility'] ) ? $data['visibility'] : 'public';
 	$categories  = isset( $data['categories'] ) ? $data['categories'] : array();
 	$branches    = isset( $data['branches'] ) ? $data['branches'] : array();
 	$is_edit     = isset( $data['is_edit'] ) ? $data['is_edit'] : false;
@@ -825,21 +812,6 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 							><?php echo esc_textarea( $excerpt ); ?></textarea>
 						</div>
 
-						<!-- Visibilité -->
-						<div class="form-group">
-							<label>
-								<?php esc_html_e( 'Visibilité', 'cgt' ); ?> <span class="required">*</span>
-								<span class="hint"><?php echo esc_html( sprintf( __( 'Définir si %s est public ou réservé aux adhérents', 'cgt' ), $is_article ? 'l\'article' : 'le tract' ) ); ?></span>
-							</label>
-							<select name="cgt_<?php echo esc_attr( $field_prefix ); ?>_visibility" class="form-control" required>
-								<option value="public" <?php selected( $visibility, 'public' ); ?>>
-									<?php esc_html_e( '📢 Public - Affiché sur la page d\'accueil du site', 'cgt' ); ?>
-								</option>
-								<option value="<?php echo $is_article ? 'private' : 'prive'; ?>" <?php selected( $visibility, $is_article ? 'private' : 'prive' ); ?>>
-									<?php esc_html_e( '🔒 Privé - Réservé aux adhérents de la branche', 'cgt' ); ?>
-								</option>
-							</select>
-						</div>
 
 						<div class="form-row">
 							<!-- Branche -->
