@@ -100,12 +100,13 @@ function cgt_reorder_submenus() {
 }
 
 /**
- * Rediriger les accès directs à post-new.php vers nos pages personnalisées
+ * Rediriger les accès directs à post-new.php et post.php vers nos pages personnalisées
  */
 add_action( 'admin_init', 'cgt_redirect_new_post_pages' );
 function cgt_redirect_new_post_pages() {
 	global $pagenow;
 
+	// Redirection création
 	if ( 'post-new.php' === $pagenow ) {
 		$post_type = isset( $_GET['post_type'] ) ? sanitize_key( $_GET['post_type'] ) : 'post';
 
@@ -115,6 +116,22 @@ function cgt_redirect_new_post_pages() {
 		} elseif ( 'tracts' === $post_type ) {
 			wp_safe_redirect( admin_url( 'edit.php?post_type=tracts&page=cgt-add-tract' ) );
 			exit;
+		}
+	}
+
+	// Redirection édition
+	if ( 'post.php' === $pagenow && isset( $_GET['action'] ) && 'edit' === $_GET['action'] && isset( $_GET['post'] ) ) {
+		$post_id = absint( $_GET['post'] );
+		$post    = get_post( $post_id );
+
+		if ( $post ) {
+			if ( 'post' === $post->post_type ) {
+				wp_safe_redirect( admin_url( 'edit.php?page=cgt-add-article&edit_id=' . $post_id ) );
+				exit;
+			} elseif ( 'tracts' === $post->post_type ) {
+				wp_safe_redirect( admin_url( 'edit.php?post_type=tracts&page=cgt-add-tract&edit_id=' . $post_id ) );
+				exit;
+			}
 		}
 	}
 }
@@ -334,11 +351,15 @@ function cgt_enqueue_custom_post_creation_assets( $hook ) {
 }
 
 /**
- * Render page Ajouter un article
+ * Render page Ajouter/Modifier un article
  */
 function cgt_render_add_article_page() {
 	$message = '';
 	$errors  = array();
+
+	// Détecter le mode édition
+	$edit_id  = isset( $_GET['edit_id'] ) ? absint( $_GET['edit_id'] ) : 0;
+	$is_edit  = $edit_id > 0;
 
 	// Valeurs par défaut
 	$title       = '';
@@ -350,6 +371,35 @@ function cgt_render_add_article_page() {
 	$sources     = '';
 	$featured_id = 0;
 	$visibility  = 'public';
+
+	// Charger les données existantes si en mode édition
+	if ( $is_edit ) {
+		$post = get_post( $edit_id );
+		if ( $post && 'post' === $post->post_type ) {
+			$title       = $post->post_title;
+			$content     = $post->post_content;
+			$excerpt     = $post->post_excerpt;
+			$featured_id = get_post_thumbnail_id( $post->ID );
+			$sources     = get_post_meta( $post->ID, 'cgt_submission_sources', true );
+			$visibility  = get_post_meta( $post->ID, 'cgt_article_visibility', true );
+			$visibility  = $visibility ? $visibility : 'public';
+
+			// Catégorie
+			$categories = wp_get_post_categories( $post->ID );
+			$category   = ! empty( $categories ) ? $categories[0] : 0;
+
+			// Branche
+			$branche_terms = wp_get_post_terms( $post->ID, 'branche' );
+			$branche       = ! empty( $branche_terms ) ? $branche_terms[0]->term_id : 0;
+
+			// Mots-clés
+			$tags     = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+			$keywords = implode( ', ', $tags );
+		} else {
+			$errors[] = __( 'Article introuvable.', 'cgt' );
+			$is_edit  = false;
+		}
+	}
 
 	// Traitement du formulaire
 	if ( isset( $_POST['cgt_add_article_submit'] ) ) {
@@ -366,6 +416,7 @@ function cgt_render_add_article_page() {
 			$sources     = isset( $_POST['cgt_article_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_article_sources'] ) ) : '';
 			$featured_id = isset( $_POST['cgt_article_featured_id'] ) ? absint( $_POST['cgt_article_featured_id'] ) : 0;
 			$visibility  = isset( $_POST['cgt_article_visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_visibility'] ) ) : 'public';
+			$edit_id_post = isset( $_POST['cgt_article_edit_id'] ) ? absint( $_POST['cgt_article_edit_id'] ) : 0;
 
 			// Validation
 			if ( empty( $title ) ) {
@@ -377,58 +428,73 @@ function cgt_render_add_article_page() {
 			}
 
 			if ( empty( $errors ) ) {
-				// Créer l'article
+				// Créer ou mettre à jour l'article
 				$post_args = array(
 					'post_type'     => 'post',
 					'post_title'    => $title,
 					'post_content'  => $content,
 					'post_excerpt'  => $excerpt,
 					'post_status'   => 'publish',
-					'post_author'   => get_current_user_id(),
 					'post_category' => $category ? array( $category ) : array(),
 				);
 
-				$post_id = wp_insert_post( $post_args );
+				// Édition ou création
+				if ( $edit_id_post > 0 ) {
+					$post_args['ID'] = $edit_id_post;
+					$post_id         = wp_update_post( $post_args );
+					$success_message = __( 'Article modifié avec succès ! %s', 'cgt' );
+				} else {
+					$post_args['post_author'] = get_current_user_id();
+					$post_id                  = wp_insert_post( $post_args );
+					$success_message          = __( 'Article créé avec succès ! %s', 'cgt' );
+				}
 
 				if ( $post_id && ! is_wp_error( $post_id ) ) {
 					// Ajouter la branche
 					if ( $branche ) {
 						wp_set_post_terms( $post_id, array( $branche ), 'branche', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'branche', false );
 					}
 
 					// Ajouter les mots-clés
 					if ( $keywords ) {
 						$tags = array_map( 'trim', explode( ',', $keywords ) );
 						wp_set_post_terms( $post_id, $tags, 'post_tag', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'post_tag', false );
 					}
 
 					// Ajouter les sources
 					if ( $sources ) {
 						update_post_meta( $post_id, 'cgt_submission_sources', $sources );
+					} else {
+						delete_post_meta( $post_id, 'cgt_submission_sources' );
 					}
 
 					// Ajouter l'image mise en avant
 					if ( $featured_id ) {
 						set_post_thumbnail( $post_id, $featured_id );
+					} else {
+						delete_post_thumbnail( $post_id );
 					}
 
 					// Sauvegarder la visibilité
 					update_post_meta( $post_id, 'cgt_article_visibility', $visibility );
 
 					// Message de succès
-					$edit_link = get_edit_post_link( $post_id );
 					$view_link = get_permalink( $post_id );
+					$edit_link = admin_url( 'edit.php?page=cgt-add-article&edit_id=' . $post_id );
 					$message   = sprintf(
-						__( 'Article créé avec succès ! %s', 'cgt' ),
+						$success_message,
 						'<a href="' . esc_url( $view_link ) . '" target="_blank">' . __( 'Voir l\'article', 'cgt' ) . '</a> | <a href="' . esc_url( $edit_link ) . '">' . __( 'Modifier', 'cgt' ) . '</a>'
 					);
 
-					// Réinitialiser les champs
-					$title = $content = $excerpt = $keywords = $sources = '';
-					$category = $branche = $featured_id = 0;
-					$visibility = 'public';
+					// Recharger les données pour l'affichage
+					$edit_id = $post_id;
+					$is_edit = true;
 				} else {
-					$errors[] = __( 'Erreur lors de la création de l\'article.', 'cgt' );
+					$errors[] = $edit_id_post > 0 ? __( 'Erreur lors de la modification de l\'article.', 'cgt' ) : __( 'Erreur lors de la création de l\'article.', 'cgt' );
 				}
 			}
 		}
@@ -443,16 +509,20 @@ function cgt_render_add_article_page() {
 		'article',
 		$message,
 		$errors,
-		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'visibility', 'categories', 'branches' )
+		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'visibility', 'categories', 'branches', 'is_edit', 'edit_id' )
 	);
 }
 
 /**
- * Render page Ajouter un tract
+ * Render page Ajouter/Modifier un tract
  */
 function cgt_render_add_tract_page() {
 	$message = '';
 	$errors  = array();
+
+	// Détecter le mode édition
+	$edit_id  = isset( $_GET['edit_id'] ) ? absint( $_GET['edit_id'] ) : 0;
+	$is_edit  = $edit_id > 0;
 
 	// Valeurs par défaut
 	$title       = '';
@@ -465,21 +535,53 @@ function cgt_render_add_tract_page() {
 	$featured_id = 0;
 	$pdf_id      = 0;
 
+	// Charger les données existantes si en mode édition
+	if ( $is_edit ) {
+		$post = get_post( $edit_id );
+		if ( $post && 'tracts' === $post->post_type ) {
+			$title       = $post->post_title;
+			$content     = $post->post_content;
+			$excerpt     = $post->post_excerpt;
+			$featured_id = get_post_thumbnail_id( $post->ID );
+			$sources     = get_post_meta( $post->ID, 'cgt_submission_sources', true );
+
+			// Thématique
+			$category_terms = wp_get_post_terms( $post->ID, 'thematique' );
+			$category       = ! empty( $category_terms ) ? $category_terms[0]->term_id : 0;
+
+			// Branche
+			$branche_terms = wp_get_post_terms( $post->ID, 'branche' );
+			$branche       = ! empty( $branche_terms ) ? $branche_terms[0]->term_id : 0;
+
+			// Mots-clés
+			$tags     = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+			$keywords = implode( ', ', $tags );
+
+			// PDF
+			$pdf_url = get_post_meta( $post->ID, 'cgt_fichier_pdf', true );
+			$pdf_id  = $pdf_url ? attachment_url_to_postid( $pdf_url ) : 0;
+		} else {
+			$errors[] = __( 'Tract introuvable.', 'cgt' );
+			$is_edit  = false;
+		}
+	}
+
 	// Traitement du formulaire
 	if ( isset( $_POST['cgt_add_tract_submit'] ) ) {
 		if ( ! isset( $_POST['cgt_add_tract_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['cgt_add_tract_nonce'] ), 'cgt_add_tract' ) ) {
 			$errors[] = __( 'Erreur de sécurité. Veuillez réessayer.', 'cgt' );
 		} else {
 			// Récupération des données
-			$title       = isset( $_POST['cgt_tract_title'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_tract_title'] ) ) : '';
-			$content     = isset( $_POST['cgt_tract_content'] ) ? wp_kses_post( wp_unslash( $_POST['cgt_tract_content'] ) ) : '';
-			$excerpt     = isset( $_POST['cgt_tract_excerpt'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_tract_excerpt'] ) ) : '';
-			$category    = isset( $_POST['cgt_tract_category'] ) ? absint( $_POST['cgt_tract_category'] ) : 0;
-			$branche     = isset( $_POST['cgt_tract_branche'] ) ? absint( $_POST['cgt_tract_branche'] ) : 0;
-			$keywords    = isset( $_POST['cgt_tract_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_tract_keywords'] ) ) : '';
-			$sources     = isset( $_POST['cgt_tract_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_tract_sources'] ) ) : '';
-			$featured_id = isset( $_POST['cgt_tract_featured_id'] ) ? absint( $_POST['cgt_tract_featured_id'] ) : 0;
-			$pdf_id      = isset( $_POST['cgt_tract_pdf_id'] ) ? absint( $_POST['cgt_tract_pdf_id'] ) : 0;
+			$title        = isset( $_POST['cgt_tract_title'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_tract_title'] ) ) : '';
+			$content      = isset( $_POST['cgt_tract_content'] ) ? wp_kses_post( wp_unslash( $_POST['cgt_tract_content'] ) ) : '';
+			$excerpt      = isset( $_POST['cgt_tract_excerpt'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_tract_excerpt'] ) ) : '';
+			$category     = isset( $_POST['cgt_tract_category'] ) ? absint( $_POST['cgt_tract_category'] ) : 0;
+			$branche      = isset( $_POST['cgt_tract_branche'] ) ? absint( $_POST['cgt_tract_branche'] ) : 0;
+			$keywords     = isset( $_POST['cgt_tract_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_tract_keywords'] ) ) : '';
+			$sources      = isset( $_POST['cgt_tract_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_tract_sources'] ) ) : '';
+			$featured_id  = isset( $_POST['cgt_tract_featured_id'] ) ? absint( $_POST['cgt_tract_featured_id'] ) : 0;
+			$pdf_id       = isset( $_POST['cgt_tract_pdf_id'] ) ? absint( $_POST['cgt_tract_pdf_id'] ) : 0;
+			$edit_id_post = isset( $_POST['cgt_tract_edit_id'] ) ? absint( $_POST['cgt_tract_edit_id'] ) : 0;
 
 			// Validation
 			if ( empty( $title ) ) {
@@ -491,67 +593,89 @@ function cgt_render_add_tract_page() {
 			}
 
 			if ( empty( $errors ) ) {
-				// Créer le tract
+				// Créer ou mettre à jour le tract
 				$post_args = array(
 					'post_type'    => 'tracts',
 					'post_title'   => $title,
 					'post_content' => $content,
 					'post_excerpt' => $excerpt,
 					'post_status'  => 'publish',
-					'post_author'  => get_current_user_id(),
 				);
 
-				$post_id = wp_insert_post( $post_args );
+				// Édition ou création
+				if ( $edit_id_post > 0 ) {
+					$post_args['ID'] = $edit_id_post;
+					$post_id         = wp_update_post( $post_args );
+					$success_message = __( 'Tract modifié avec succès ! %s', 'cgt' );
+				} else {
+					$post_args['post_author'] = get_current_user_id();
+					$post_id                  = wp_insert_post( $post_args );
+					$success_message          = __( 'Tract créé avec succès ! %s', 'cgt' );
+				}
 
 				if ( $post_id && ! is_wp_error( $post_id ) ) {
 					// Ajouter la catégorie (thématique)
 					if ( $category ) {
 						wp_set_post_terms( $post_id, array( $category ), 'thematique', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'thematique', false );
 					}
 
 					// Ajouter la branche
 					if ( $branche ) {
 						wp_set_post_terms( $post_id, array( $branche ), 'branche', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'branche', false );
 					}
 
 					// Ajouter les mots-clés
 					if ( $keywords ) {
 						$tags = array_map( 'trim', explode( ',', $keywords ) );
 						wp_set_post_terms( $post_id, $tags, 'post_tag', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'post_tag', false );
 					}
 
 					// Ajouter les sources
 					if ( $sources ) {
 						update_post_meta( $post_id, 'cgt_submission_sources', $sources );
+					} else {
+						delete_post_meta( $post_id, 'cgt_submission_sources' );
 					}
 
 					// Ajouter l'image mise en avant
 					if ( $featured_id ) {
 						set_post_thumbnail( $post_id, $featured_id );
+					} else {
+						delete_post_thumbnail( $post_id );
 					}
 
 					// Ajouter le PDF
 					if ( $pdf_id ) {
 						$pdf_url = wp_get_attachment_url( $pdf_id );
 						update_post_meta( $post_id, 'cgt_fichier_pdf', $pdf_url );
+					} else {
+						delete_post_meta( $post_id, 'cgt_fichier_pdf' );
 					}
 
-					// Visibilité par défaut : public
-					update_post_meta( $post_id, 'cgt_visibilite', 'public' );
+					// Visibilité par défaut : public (seulement pour les nouveaux)
+					if ( ! $edit_id_post ) {
+						update_post_meta( $post_id, 'cgt_visibilite', 'public' );
+					}
 
 					// Message de succès
-					$edit_link = get_edit_post_link( $post_id );
 					$view_link = get_permalink( $post_id );
+					$edit_link = admin_url( 'edit.php?post_type=tracts&page=cgt-add-tract&edit_id=' . $post_id );
 					$message   = sprintf(
-						__( 'Tract créé avec succès ! %s', 'cgt' ),
+						$success_message,
 						'<a href="' . esc_url( $view_link ) . '" target="_blank">' . __( 'Voir le tract', 'cgt' ) . '</a> | <a href="' . esc_url( $edit_link ) . '">' . __( 'Modifier', 'cgt' ) . '</a>'
 					);
 
-					// Réinitialiser les champs
-					$title = $content = $excerpt = $keywords = $sources = '';
-					$category = $branche = $featured_id = $pdf_id = 0;
+					// Recharger les données pour l'affichage
+					$edit_id = $post_id;
+					$is_edit = true;
 				} else {
-					$errors[] = __( 'Erreur lors de la création du tract.', 'cgt' );
+					$errors[] = $edit_id_post > 0 ? __( 'Erreur lors de la modification du tract.', 'cgt' ) : __( 'Erreur lors de la création du tract.', 'cgt' );
 				}
 			}
 		}
@@ -566,7 +690,7 @@ function cgt_render_add_tract_page() {
 		'tract',
 		$message,
 		$errors,
-		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'pdf_id', 'categories', 'branches' )
+		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'pdf_id', 'categories', 'branches', 'is_edit', 'edit_id' )
 	);
 }
 
@@ -595,6 +719,13 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 	$visibility  = isset( $data['visibility'] ) ? $data['visibility'] : 'public';
 	$categories  = isset( $data['categories'] ) ? $data['categories'] : array();
 	$branches    = isset( $data['branches'] ) ? $data['branches'] : array();
+	$is_edit     = isset( $data['is_edit'] ) ? $data['is_edit'] : false;
+	$edit_id     = isset( $data['edit_id'] ) ? $data['edit_id'] : 0;
+
+	// Titres et descriptions selon le mode
+	$page_title       = $is_edit ? sprintf( __( 'Modifier %s', 'cgt' ), strtolower( $post_type_label ) ) : sprintf( __( 'Créer un nouveau %s', 'cgt' ), strtolower( $post_type_label ) );
+	$page_description = $is_edit ? sprintf( __( 'Modifiez les informations de votre %s ci-dessous.', 'cgt' ), strtolower( $post_type_label ) ) : sprintf( __( 'Remplissez le formulaire ci-dessous pour publier votre %s sur le site CGT.', 'cgt' ), strtolower( $post_type_label ) );
+	$button_text      = $is_edit ? sprintf( __( 'Mettre à jour le %s', 'cgt' ), strtolower( $post_type_label ) ) : sprintf( __( 'Publier le %s', 'cgt' ), strtolower( $post_type_label ) );
 
 	?>
 	<div class="wrap cgt-custom-editor-page">
@@ -604,9 +735,9 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 				<header class="submit-article-header">
 					<h1>
 						<span class="icon"><?php echo esc_html( $icon ); ?></span>
-						<?php echo esc_html( sprintf( __( 'Créer un nouveau %s', 'cgt' ), strtolower( $post_type_label ) ) ); ?>
+						<?php echo esc_html( $page_title ); ?>
 					</h1>
-					<p><?php echo esc_html( sprintf( __( 'Remplissez le formulaire ci-dessous pour publier votre %s sur le site CGT.', 'cgt' ), strtolower( $post_type_label ) ) ); ?></p>
+					<p><?php echo esc_html( $page_description ); ?></p>
 				</header>
 
 				<?php if ( ! empty( $message ) ) : ?>
@@ -635,6 +766,9 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 				<!-- Form -->
 				<form class="cgt-submit-article" method="post" enctype="multipart/form-data">
 					<?php wp_nonce_field( $nonce_action, $nonce_name ); ?>
+					<?php if ( $is_edit && $edit_id > 0 ) : ?>
+						<input type="hidden" name="cgt_<?php echo esc_attr( $field_prefix ); ?>_edit_id" value="<?php echo esc_attr( $edit_id ); ?>">
+					<?php endif; ?>
 
 					<div class="form-step active">
 						<!-- Titre -->
@@ -828,7 +962,7 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 								</a>
 							</div>
 							<button type="submit" name="<?php echo esc_attr( $submit_name ); ?>" class="button button-primary button-hero">
-								✓ <?php echo esc_html( sprintf( __( 'Publier le %s', 'cgt' ), strtolower( $post_type_label ) ) ); ?>
+								✓ <?php echo esc_html( $button_text ); ?>
 							</button>
 						</div>
 					</div>
