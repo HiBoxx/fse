@@ -1,6 +1,6 @@
 <?php
 /**
- * Template pour afficher un article individuel
+ * Template pour afficher un tract individuel
  *
  * @package CGT_Child
  */
@@ -10,22 +10,23 @@ get_header();
 while ( have_posts() ) :
 	the_post();
 
-	// R√©cup√©rer les m√©tadonn√©es
-	$sources    = get_post_meta( get_the_ID(), 'cgt_submission_sources', true );
-	$visibility = get_post_meta( get_the_ID(), 'cgt_article_visibility', true );
+	// RÈcupÈrer les mÈtadonnÈes
+	$sources     = get_post_meta( get_the_ID(), 'cgt_submission_sources', true );
+	$pdf_url     = get_post_meta( get_the_ID(), 'cgt_fichier_pdf', true );
+	$visibility  = get_post_meta( get_the_ID(), 'cgt_visibilite', true );
 	?>
 
-	<article id="post-<?php the_ID(); ?>" <?php post_class( 'cgt-single-article' ); ?>>
-		<div class="article-container">
-			<!-- Header de l'article -->
-			<header class="article-header">
-				<div class="article-meta">
+	<article id="post-<?php the_ID(); ?>" <?php post_class( 'cgt-single-tract' ); ?>>
+		<div class="tract-container">
+			<!-- Header du tract -->
+			<header class="tract-header">
+				<div class="tract-meta">
 					<?php
-					// Cat√©gories
-					$categories = get_the_category();
-					if ( ! empty( $categories ) ) {
-						foreach ( $categories as $category ) {
-							echo '<span class="article-category">' . esc_html( $category->name ) . '</span>';
+					// ThÈmatiques
+					$thematiques = wp_get_post_terms( get_the_ID(), 'thematique' );
+					if ( ! empty( $thematiques ) ) {
+						foreach ( $thematiques as $thematique ) {
+							echo '<span class="tract-category">' . esc_html( $thematique->name ) . '</span>';
 						}
 					}
 
@@ -33,19 +34,19 @@ while ( have_posts() ) :
 					$branches = wp_get_post_terms( get_the_ID(), 'branche' );
 					if ( ! empty( $branches ) ) {
 						foreach ( $branches as $branch ) {
-							echo '<span class="article-branch">' . esc_html( $branch->name ) . '</span>';
+							echo '<span class="tract-branch">' . esc_html( $branch->name ) . '</span>';
 						}
 					}
 					?>
-					<span class="article-date">üìÖ <?php echo get_the_date( 'd/m/Y' ); ?></span>
-					<?php if ( 'private' === $visibility ) : ?>
-						<span class="article-visibility">üîí R√©serv√© adh√©rents</span>
+					<span class="tract-date">=≈ <?php echo get_the_date( 'd/m/Y' ); ?></span>
+					<?php if ( 'prive' === $visibility ) : ?>
+						<span class="tract-visibility">= RÈservÈ adhÈrents</span>
 					<?php endif; ?>
 				</div>
 
-				<h1 class="article-title"><?php the_title(); ?></h1>
+				<h1 class="tract-title"><?php the_title(); ?></h1>
 
-				<div class="article-author">
+				<div class="tract-author">
 					<?php
 					printf(
 						/* translators: %s: post author. */
@@ -58,15 +59,15 @@ while ( have_posts() ) :
 
 			<!-- Image mise en avant -->
 			<?php if ( has_post_thumbnail() ) : ?>
-				<div class="article-featured-image">
+				<div class="tract-featured-image">
 					<?php the_post_thumbnail( 'large', array( 'class' => 'featured-img' ) ); ?>
 				</div>
 			<?php endif; ?>
 
 			<!-- Extrait -->
 			<?php if ( has_excerpt() ) : ?>
-				<div class="article-excerpt">
-					<div class="excerpt-icon">üí¨</div>
+				<div class="tract-excerpt">
+					<div class="excerpt-icon">=¨</div>
 					<div class="excerpt-content">
 						<?php the_excerpt(); ?>
 					</div>
@@ -74,14 +75,28 @@ while ( have_posts() ) :
 			<?php endif; ?>
 
 			<!-- Contenu principal -->
-			<div class="article-content">
+			<div class="tract-content">
 				<?php the_content(); ?>
 			</div>
 
-			<!-- Sources et r√©f√©rences -->
+			<!-- PDF ‡ tÈlÈcharger -->
+			<?php if ( $pdf_url ) : ?>
+				<div class="tract-pdf-download">
+					<div class="pdf-icon">=ƒ</div>
+					<div class="pdf-info">
+						<h3 class="pdf-title">TÈlÈcharger le tract en PDF</h3>
+						<p class="pdf-description">TÈlÈchargez la version PDF de ce tract pour l'imprimer ou la partager</p>
+						<a href="<?php echo esc_url( $pdf_url ); ?>" class="pdf-download-button" download>
+							 TÈlÈcharger le PDF
+						</a>
+					</div>
+				</div>
+			<?php endif; ?>
+
+			<!-- Sources et rÈfÈrences -->
 			<?php if ( $sources ) : ?>
-				<div class="article-sources">
-					<h3 class="sources-title">üìö Sources et r√©f√©rences</h3>
+				<div class="tract-sources">
+					<h3 class="sources-title">=⁄ Sources et rÈfÈrences</h3>
 					<div class="sources-content">
 						<?php echo nl2br( esc_html( $sources ) ); ?>
 					</div>
@@ -93,8 +108,8 @@ while ( have_posts() ) :
 			$tags = get_the_tags();
 			if ( $tags ) :
 				?>
-				<div class="article-tags">
-					<span class="tags-label">üè∑Ô∏è Mots-cl√©s :</span>
+				<div class="tract-tags">
+					<span class="tags-label"><˜ Mots-clÈs :</span>
 					<?php
 					foreach ( $tags as $tag ) {
 						echo '<span class="tag">' . esc_html( $tag->name ) . '</span>';
@@ -104,14 +119,14 @@ while ( have_posts() ) :
 			<?php endif; ?>
 
 			<!-- Navigation -->
-			<nav class="article-navigation">
+			<nav class="tract-navigation">
 				<div class="nav-previous">
 					<?php
 					$prev_post = get_previous_post();
 					if ( $prev_post ) :
 						?>
 						<a href="<?php echo esc_url( get_permalink( $prev_post->ID ) ); ?>" rel="prev">
-							<span class="nav-arrow">‚Üê</span>
+							<span class="nav-arrow">ê</span>
 							<span class="nav-title"><?php echo esc_html( $prev_post->post_title ); ?></span>
 						</a>
 					<?php endif; ?>
@@ -123,50 +138,50 @@ while ( have_posts() ) :
 						?>
 						<a href="<?php echo esc_url( get_permalink( $next_post->ID ) ); ?>" rel="next">
 							<span class="nav-title"><?php echo esc_html( $next_post->post_title ); ?></span>
-							<span class="nav-arrow">‚Üí</span>
+							<span class="nav-arrow">í</span>
 						</a>
 					<?php endif; ?>
 				</div>
 			</nav>
 
 			<!-- Retour -->
-			<div class="article-back">
+			<div class="tract-back">
 				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="back-button">
-					‚Üê Retour √† l'accueil
+					ê Retour ‡ l'accueil
 				</a>
 			</div>
 		</div>
 	</article>
 
 	<style>
-		.cgt-single-article {
+		.cgt-single-tract {
 			background: #fff;
 			max-width: 900px;
 			margin: 40px auto;
 			padding: 0;
 		}
 
-		.article-container {
+		.tract-container {
 			padding: 40px;
 		}
 
-		.article-header {
+		.tract-header {
 			margin-bottom: 30px;
 			padding-bottom: 25px;
 			border-bottom: 3px solid #c8102e;
 		}
 
-		.article-meta {
+		.tract-meta {
 			display: flex;
 			flex-wrap: wrap;
 			gap: 12px;
 			margin-bottom: 20px;
 		}
 
-		.article-category,
-		.article-branch,
-		.article-date,
-		.article-visibility {
+		.tract-category,
+		.tract-branch,
+		.tract-date,
+		.tract-visibility {
 			display: inline-block;
 			padding: 6px 14px;
 			border-radius: 20px;
@@ -176,22 +191,22 @@ while ( have_posts() ) :
 			color: #374151;
 		}
 
-		.article-category {
+		.tract-category {
 			background: #dbeafe;
 			color: #1e40af;
 		}
 
-		.article-branch {
+		.tract-branch {
 			background: #fef3c7;
 			color: #92400e;
 		}
 
-		.article-visibility {
+		.tract-visibility {
 			background: #fee2e2;
 			color: #991b1b;
 		}
 
-		.article-title {
+		.tract-title {
 			font-size: 38px;
 			font-weight: 700;
 			line-height: 1.2;
@@ -199,7 +214,7 @@ while ( have_posts() ) :
 			color: #1f2937;
 		}
 
-		.article-author {
+		.tract-author {
 			font-size: 15px;
 			color: #6b7280;
 		}
@@ -209,7 +224,7 @@ while ( have_posts() ) :
 			color: #c8102e;
 		}
 
-		.article-featured-image {
+		.tract-featured-image {
 			margin-bottom: 35px;
 			border-radius: 12px;
 			overflow: hidden;
@@ -222,7 +237,7 @@ while ( have_posts() ) :
 			display: block;
 		}
 
-		.article-excerpt {
+		.tract-excerpt {
 			background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
 			border-left: 4px solid #3b82f6;
 			border-radius: 8px;
@@ -250,56 +265,110 @@ while ( have_posts() ) :
 			margin: 0;
 		}
 
-		.article-content {
+		.tract-content {
 			font-size: 17px;
 			line-height: 1.8;
 			color: #374151;
 			margin-bottom: 35px;
 		}
 
-		.article-content p {
+		.tract-content p {
 			margin-bottom: 20px;
 		}
 
-		.article-content h2,
-		.article-content h3 {
+		.tract-content h2,
+		.tract-content h3 {
 			color: #1f2937;
 			margin-top: 35px;
 			margin-bottom: 18px;
 			font-weight: 700;
 		}
 
-		.article-content h2 {
+		.tract-content h2 {
 			font-size: 28px;
 			border-bottom: 2px solid #e5e7eb;
 			padding-bottom: 10px;
 		}
 
-		.article-content h3 {
+		.tract-content h3 {
 			font-size: 22px;
 		}
 
-		.article-content ul,
-		.article-content ol {
+		.tract-content ul,
+		.tract-content ol {
 			margin-bottom: 20px;
 			padding-left: 30px;
 		}
 
-		.article-content li {
+		.tract-content li {
 			margin-bottom: 10px;
 		}
 
-		.article-content a {
+		.tract-content a {
 			color: #c8102e;
 			text-decoration: underline;
 			font-weight: 600;
 		}
 
-		.article-content a:hover {
+		.tract-content a:hover {
 			color: #a00d26;
 		}
 
-		.article-sources {
+		.tract-pdf-download {
+			background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+			color: white;
+			border-radius: 12px;
+			padding: 30px;
+			margin-bottom: 35px;
+			display: flex;
+			gap: 25px;
+			align-items: center;
+			box-shadow: 0 10px 15px -3px rgba(200, 16, 46, 0.3);
+		}
+
+		.pdf-icon {
+			font-size: 60px;
+			flex-shrink: 0;
+		}
+
+		.pdf-info {
+			flex: 1;
+		}
+
+		.pdf-title {
+			font-size: 22px;
+			font-weight: 700;
+			margin: 0 0 10px 0;
+			color: white;
+		}
+
+		.pdf-description {
+			margin: 0 0 20px 0;
+			color: rgba(255, 255, 255, 0.9);
+			font-size: 15px;
+			line-height: 1.6;
+		}
+
+		.pdf-download-button {
+			display: inline-block;
+			padding: 12px 28px;
+			background: white;
+			color: #c8102e;
+			text-decoration: none;
+			border-radius: 6px;
+			font-weight: 700;
+			font-size: 16px;
+			transition: all 0.2s;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		.pdf-download-button:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+			background: #f9fafb;
+		}
+
+		.tract-sources {
 			background: #f9fafb;
 			border: 2px solid #e5e7eb;
 			border-radius: 8px;
@@ -320,7 +389,7 @@ while ( have_posts() ) :
 			color: #4b5563;
 		}
 
-		.article-tags {
+		.tract-tags {
 			display: flex;
 			flex-wrap: wrap;
 			gap: 10px;
@@ -353,7 +422,7 @@ while ( have_posts() ) :
 			border-color: #9ca3af;
 		}
 
-		.article-navigation {
+		.tract-navigation {
 			display: flex;
 			justify-content: space-between;
 			gap: 20px;
@@ -402,7 +471,7 @@ while ( have_posts() ) :
 			line-height: 1.4;
 		}
 
-		.article-back {
+		.tract-back {
 			text-align: center;
 			padding-top: 20px;
 		}
@@ -426,20 +495,30 @@ while ( have_posts() ) :
 		}
 
 		@media (max-width: 768px) {
-			.article-container {
+			.tract-container {
 				padding: 25px;
 			}
 
-			.article-title {
+			.tract-title {
 				font-size: 28px;
 			}
 
-			.article-excerpt {
+			.tract-excerpt {
 				flex-direction: column;
 				padding: 20px;
 			}
 
-			.article-navigation {
+			.tract-pdf-download {
+				flex-direction: column;
+				text-align: center;
+				padding: 25px;
+			}
+
+			.pdf-icon {
+				font-size: 50px;
+			}
+
+			.tract-navigation {
 				flex-direction: column;
 			}
 
