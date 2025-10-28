@@ -10,11 +10,148 @@ get_header();
 while ( have_posts() ) :
 	the_post();
 
-	// Récupérer les métadonnées
+	// RÃ©cupÃ©rer les mÃ©tadonnÃ©es
 	$sources     = get_post_meta( get_the_ID(), 'cgt_submission_sources', true );
 	$pdf_url     = get_post_meta( get_the_ID(), 'cgt_fichier_pdf', true );
 	$visibility  = get_post_meta( get_the_ID(), 'cgt_visibilite', true );
-	?>
+
+	// VÃ©rifier si le tract est privÃ© et l'utilisateur n'est pas connectÃ©
+	if ( 'prive' === $visibility && ! is_user_logged_in() ) :
+		?>
+		<article id="post-<?php the_ID(); ?>" <?php post_class( 'cgt-single-tract cgt-access-restricted' ); ?>>
+			<div class="tract-container">
+				<div class="access-restricted-notice">
+					<div class="restricted-icon">ğŸ”’</div>
+					<h1 class="restricted-title">Contenu rÃ©servÃ© aux adhÃ©rents</h1>
+					<p class="restricted-message">
+						Ce tract est exclusivement accessible aux membres adhÃ©rents de la CGT.
+						Pour consulter ce contenu, veuillez vous connecter Ã  votre espace adhÃ©rent.
+					</p>
+					<div class="restricted-actions">
+						<a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="btn-login">
+							ğŸ”‘ Se connecter
+						</a>
+						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="btn-home">
+							â† Retour Ã  l'accueil
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<style>
+				.cgt-access-restricted {
+					background: #f8f9fa;
+					min-height: 70vh;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					padding: 40px 20px;
+				}
+
+				.access-restricted-notice {
+					background: white;
+					border-radius: 16px;
+					padding: 60px 40px;
+					max-width: 600px;
+					text-align: center;
+					box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+					border: 3px solid #c8102e;
+				}
+
+				.restricted-icon {
+					font-size: 80px;
+					margin-bottom: 20px;
+					animation: pulse 2s infinite;
+				}
+
+				@keyframes pulse {
+					0%, 100% { transform: scale(1); }
+					50% { transform: scale(1.1); }
+				}
+
+				.restricted-title {
+					color: #c8102e;
+					font-size: 32px;
+					font-weight: 700;
+					margin: 0 0 20px 0;
+					line-height: 1.2;
+				}
+
+				.restricted-message {
+					color: #4b5563;
+					font-size: 18px;
+					line-height: 1.6;
+					margin: 0 0 40px 0;
+				}
+
+				.restricted-actions {
+					display: flex;
+					gap: 15px;
+					justify-content: center;
+					flex-wrap: wrap;
+				}
+
+				.btn-login, .btn-home {
+					display: inline-block;
+					padding: 15px 40px;
+					border-radius: 8px;
+					font-size: 16px;
+					font-weight: 600;
+					text-decoration: none;
+					transition: all 0.3s ease;
+					cursor: pointer;
+				}
+
+				.btn-login {
+					background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+					color: white;
+					box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
+				}
+
+				.btn-login:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+					color: white;
+				}
+
+				.btn-home {
+					background: #f3f4f6;
+					color: #4b5563;
+					border: 2px solid #e5e7eb;
+				}
+
+				.btn-home:hover {
+					background: #e5e7eb;
+					border-color: #d1d5db;
+					color: #1f2937;
+				}
+
+				@media (max-width: 768px) {
+					.access-restricted-notice {
+						padding: 40px 30px;
+					}
+
+					.restricted-title {
+						font-size: 26px;
+					}
+
+					.restricted-message {
+						font-size: 16px;
+					}
+
+					.restricted-actions {
+						flex-direction: column;
+					}
+
+					.btn-login, .btn-home {
+						width: 100%;
+					}
+				}
+			</style>
+		</article>
+		<?php
+	else :
+		?>
 
 	<article id="post-<?php the_ID(); ?>" <?php post_class( 'cgt-single-tract' ); ?>>
 		<div class="tract-container">
@@ -22,7 +159,7 @@ while ( have_posts() ) :
 			<header class="tract-header">
 				<div class="tract-meta">
 					<?php
-					// Thématiques
+					// Thï¿½matiques
 					$thematiques = wp_get_post_terms( get_the_ID(), 'thematique' );
 					if ( ! empty( $thematiques ) ) {
 						foreach ( $thematiques as $thematique ) {
@@ -38,9 +175,9 @@ while ( have_posts() ) :
 						}
 					}
 					?>
-					<span class="tract-date">=Å <?php echo get_the_date( 'd/m/Y' ); ?></span>
+					<span class="tract-date">=ï¿½ <?php echo get_the_date( 'd/m/Y' ); ?></span>
 					<?php if ( 'prive' === $visibility ) : ?>
-						<span class="tract-visibility">= Réservé adhérents</span>
+						<span class="tract-visibility">= Rï¿½servï¿½ adhï¿½rents</span>
 					<?php endif; ?>
 				</div>
 
@@ -67,7 +204,7 @@ while ( have_posts() ) :
 			<!-- Extrait -->
 			<?php if ( has_excerpt() ) : ?>
 				<div class="tract-excerpt">
-					<div class="excerpt-icon">=¬</div>
+					<div class="excerpt-icon">=ï¿½</div>
 					<div class="excerpt-content">
 						<?php the_excerpt(); ?>
 					</div>
@@ -79,24 +216,24 @@ while ( have_posts() ) :
 				<?php the_content(); ?>
 			</div>
 
-			<!-- PDF à télécharger -->
+			<!-- PDF ï¿½ tï¿½lï¿½charger -->
 			<?php if ( $pdf_url ) : ?>
 				<div class="tract-pdf-download">
-					<div class="pdf-icon">=Ä</div>
+					<div class="pdf-icon">=ï¿½</div>
 					<div class="pdf-info">
-						<h3 class="pdf-title">Télécharger le tract en PDF</h3>
-						<p class="pdf-description">Téléchargez la version PDF de ce tract pour l'imprimer ou la partager</p>
+						<h3 class="pdf-title">Tï¿½lï¿½charger le tract en PDF</h3>
+						<p class="pdf-description">Tï¿½lï¿½chargez la version PDF de ce tract pour l'imprimer ou la partager</p>
 						<a href="<?php echo esc_url( $pdf_url ); ?>" class="pdf-download-button" download>
-							 Télécharger le PDF
+							 Tï¿½lï¿½charger le PDF
 						</a>
 					</div>
 				</div>
 			<?php endif; ?>
 
-			<!-- Sources et références -->
+			<!-- Sources et rï¿½fï¿½rences -->
 			<?php if ( $sources ) : ?>
 				<div class="tract-sources">
-					<h3 class="sources-title">=Ú Sources et références</h3>
+					<h3 class="sources-title">=ï¿½ Sources et rï¿½fï¿½rences</h3>
 					<div class="sources-content">
 						<?php echo nl2br( esc_html( $sources ) ); ?>
 					</div>
@@ -109,7 +246,7 @@ while ( have_posts() ) :
 			if ( $tags ) :
 				?>
 				<div class="tract-tags">
-					<span class="tags-label"><÷ Mots-clés :</span>
+					<span class="tags-label"><ï¿½ Mots-clï¿½s :</span>
 					<?php
 					foreach ( $tags as $tag ) {
 						echo '<span class="tag">' . esc_html( $tag->name ) . '</span>';
@@ -126,7 +263,7 @@ while ( have_posts() ) :
 					if ( $prev_post ) :
 						?>
 						<a href="<?php echo esc_url( get_permalink( $prev_post->ID ) ); ?>" rel="prev">
-							<span class="nav-arrow"></span>
+							<span class="nav-arrow">ï¿½</span>
 							<span class="nav-title"><?php echo esc_html( $prev_post->post_title ); ?></span>
 						</a>
 					<?php endif; ?>
@@ -138,7 +275,7 @@ while ( have_posts() ) :
 						?>
 						<a href="<?php echo esc_url( get_permalink( $next_post->ID ) ); ?>" rel="next">
 							<span class="nav-title"><?php echo esc_html( $next_post->post_title ); ?></span>
-							<span class="nav-arrow">’</span>
+							<span class="nav-arrow">ï¿½</span>
 						</a>
 					<?php endif; ?>
 				</div>
@@ -147,7 +284,7 @@ while ( have_posts() ) :
 			<!-- Retour -->
 			<div class="tract-back">
 				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="back-button">
-					 Retour à l'accueil
+					ï¿½ Retour ï¿½ l'accueil
 				</a>
 			</div>
 		</div>
@@ -530,6 +667,7 @@ while ( have_posts() ) :
 	</style>
 
 	<?php
+	endif; // Fin du else pour la vÃ©rification d'accÃ¨s
 endwhile;
 
 get_footer();

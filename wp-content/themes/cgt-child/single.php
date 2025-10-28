@@ -13,7 +13,144 @@ while ( have_posts() ) :
 	// Récupérer les métadonnées
 	$sources    = get_post_meta( get_the_ID(), 'cgt_submission_sources', true );
 	$visibility = get_post_meta( get_the_ID(), 'cgt_article_visibility', true );
-	?>
+
+	// Vérifier si l'article est privé et l'utilisateur n'est pas connecté
+	if ( 'private' === $visibility && ! is_user_logged_in() ) :
+		?>
+		<article id="post-<?php the_ID(); ?>" <?php post_class( 'cgt-single-article cgt-access-restricted' ); ?>>
+			<div class="article-container">
+				<div class="access-restricted-notice">
+					<div class="restricted-icon">🔒</div>
+					<h1 class="restricted-title">Contenu réservé aux adhérents</h1>
+					<p class="restricted-message">
+						Cet article est exclusivement accessible aux membres adhérents de la CGT.
+						Pour consulter ce contenu, veuillez vous connecter à votre espace adhérent.
+					</p>
+					<div class="restricted-actions">
+						<a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="btn-login">
+							🔑 Se connecter
+						</a>
+						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="btn-home">
+							← Retour à l'accueil
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<style>
+				.cgt-access-restricted {
+					background: #f8f9fa;
+					min-height: 70vh;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					padding: 40px 20px;
+				}
+
+				.access-restricted-notice {
+					background: white;
+					border-radius: 16px;
+					padding: 60px 40px;
+					max-width: 600px;
+					text-align: center;
+					box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+					border: 3px solid #c8102e;
+				}
+
+				.restricted-icon {
+					font-size: 80px;
+					margin-bottom: 20px;
+					animation: pulse 2s infinite;
+				}
+
+				@keyframes pulse {
+					0%, 100% { transform: scale(1); }
+					50% { transform: scale(1.1); }
+				}
+
+				.restricted-title {
+					color: #c8102e;
+					font-size: 32px;
+					font-weight: 700;
+					margin: 0 0 20px 0;
+					line-height: 1.2;
+				}
+
+				.restricted-message {
+					color: #4b5563;
+					font-size: 18px;
+					line-height: 1.6;
+					margin: 0 0 40px 0;
+				}
+
+				.restricted-actions {
+					display: flex;
+					gap: 15px;
+					justify-content: center;
+					flex-wrap: wrap;
+				}
+
+				.btn-login, .btn-home {
+					display: inline-block;
+					padding: 15px 40px;
+					border-radius: 8px;
+					font-size: 16px;
+					font-weight: 600;
+					text-decoration: none;
+					transition: all 0.3s ease;
+					cursor: pointer;
+				}
+
+				.btn-login {
+					background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+					color: white;
+					box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
+				}
+
+				.btn-login:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+					color: white;
+				}
+
+				.btn-home {
+					background: #f3f4f6;
+					color: #4b5563;
+					border: 2px solid #e5e7eb;
+				}
+
+				.btn-home:hover {
+					background: #e5e7eb;
+					border-color: #d1d5db;
+					color: #1f2937;
+				}
+
+				@media (max-width: 768px) {
+					.access-restricted-notice {
+						padding: 40px 30px;
+					}
+
+					.restricted-title {
+						font-size: 26px;
+					}
+
+					.restricted-message {
+						font-size: 16px;
+					}
+
+					.restricted-actions {
+						flex-direction: column;
+					}
+
+					.btn-login, .btn-home {
+						width: 100%;
+					}
+				}
+			</style>
+		</article>
+		<?php
+	else :
+		?>
 
 	<article id="post-<?php the_ID(); ?>" <?php post_class( 'cgt-single-article' ); ?>>
 		<div class="article-container">
@@ -451,6 +588,7 @@ while ( have_posts() ) :
 	</style>
 
 	<?php
+	endif; // Fin du else pour la vérification d'accès
 endwhile;
 
 get_footer();
