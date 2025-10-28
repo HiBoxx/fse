@@ -9,7 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Cacher les liens "Ajouter nouveau" par défaut de WordPress
+ * Cacher les liens "Ajouter nouveau" par défaut de WordPress et réorganiser
  */
 add_action( 'admin_menu', 'cgt_customize_admin_menu', 999 );
 function cgt_customize_admin_menu() {
@@ -33,14 +33,15 @@ function cgt_customize_admin_menu() {
 		}
 	}
 
-	// Ajouter nos pages personnalisées
+	// Ajouter nos pages personnalisées EN PREMIER (position 0)
 	add_submenu_page(
 		'edit.php',
 		__( 'Ajouter un article', 'cgt' ),
 		__( 'Ajouter nouveau', 'cgt' ),
 		'edit_posts',
 		'cgt-add-article',
-		'cgt_render_add_article_page'
+		'cgt_render_add_article_page',
+		0
 	);
 
 	add_submenu_page(
@@ -49,8 +50,53 @@ function cgt_customize_admin_menu() {
 		__( 'Ajouter nouveau', 'cgt' ),
 		'edit_posts',
 		'cgt-add-tract',
-		'cgt_render_add_tract_page'
+		'cgt_render_add_tract_page',
+		0
 	);
+}
+
+/**
+ * Réorganiser l'ordre des sous-menus pour mettre "Ajouter nouveau" en premier
+ */
+add_action( 'admin_menu', 'cgt_reorder_submenus', 999 );
+function cgt_reorder_submenus() {
+	global $submenu;
+
+	// Réorganiser pour Articles
+	if ( isset( $submenu['edit.php'] ) ) {
+		$new_order = array();
+		$add_new   = null;
+
+		foreach ( $submenu['edit.php'] as $key => $item ) {
+			if ( $item[2] === 'cgt-add-article' ) {
+				$add_new = $item;
+			} else {
+				$new_order[ $key ] = $item;
+			}
+		}
+
+		if ( $add_new ) {
+			$submenu['edit.php'] = array_merge( array( 1 => $add_new ), $new_order );
+		}
+	}
+
+	// Réorganiser pour Tracts
+	if ( isset( $submenu['edit.php?post_type=tracts'] ) ) {
+		$new_order = array();
+		$add_new   = null;
+
+		foreach ( $submenu['edit.php?post_type=tracts'] as $key => $item ) {
+			if ( $item[2] === 'cgt-add-tract' ) {
+				$add_new = $item;
+			} else {
+				$new_order[ $key ] = $item;
+			}
+		}
+
+		if ( $add_new ) {
+			$submenu['edit.php?post_type=tracts'] = array_merge( array( 1 => $add_new ), $new_order );
+		}
+	}
 }
 
 /**
@@ -136,8 +182,9 @@ function cgt_enqueue_custom_post_creation_assets( $hook ) {
 		}
 		.submit-article-header p {
 			margin: 0;
-			opacity: 0.95;
+			opacity: 1;
 			font-size: 16px;
+			color: #ffffff;
 		}
 		.cgt-submit-article {
 			padding: 30px;
@@ -302,6 +349,7 @@ function cgt_render_add_article_page() {
 	$keywords    = '';
 	$sources     = '';
 	$featured_id = 0;
+	$visibility  = 'public';
 
 	// Traitement du formulaire
 	if ( isset( $_POST['cgt_add_article_submit'] ) ) {
@@ -317,6 +365,7 @@ function cgt_render_add_article_page() {
 			$keywords    = isset( $_POST['cgt_article_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_keywords'] ) ) : '';
 			$sources     = isset( $_POST['cgt_article_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_article_sources'] ) ) : '';
 			$featured_id = isset( $_POST['cgt_article_featured_id'] ) ? absint( $_POST['cgt_article_featured_id'] ) : 0;
+			$visibility  = isset( $_POST['cgt_article_visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_visibility'] ) ) : 'public';
 
 			// Validation
 			if ( empty( $title ) ) {
@@ -363,6 +412,9 @@ function cgt_render_add_article_page() {
 						set_post_thumbnail( $post_id, $featured_id );
 					}
 
+					// Sauvegarder la visibilité
+					update_post_meta( $post_id, 'cgt_article_visibility', $visibility );
+
 					// Message de succès
 					$edit_link = get_edit_post_link( $post_id );
 					$view_link = get_permalink( $post_id );
@@ -374,6 +426,7 @@ function cgt_render_add_article_page() {
 					// Réinitialiser les champs
 					$title = $content = $excerpt = $keywords = $sources = '';
 					$category = $branche = $featured_id = 0;
+					$visibility = 'public';
 				} else {
 					$errors[] = __( 'Erreur lors de la création de l\'article.', 'cgt' );
 				}
@@ -390,7 +443,7 @@ function cgt_render_add_article_page() {
 		'article',
 		$message,
 		$errors,
-		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'categories', 'branches' )
+		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'visibility', 'categories', 'branches' )
 	);
 }
 
@@ -539,6 +592,7 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 	$sources     = isset( $data['sources'] ) ? $data['sources'] : '';
 	$featured_id = isset( $data['featured_id'] ) ? $data['featured_id'] : 0;
 	$pdf_id      = isset( $data['pdf_id'] ) ? $data['pdf_id'] : 0;
+	$visibility  = isset( $data['visibility'] ) ? $data['visibility'] : 'public';
 	$categories  = isset( $data['categories'] ) ? $data['categories'] : array();
 	$branches    = isset( $data['branches'] ) ? $data['branches'] : array();
 
@@ -634,6 +688,24 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 								placeholder="<?php esc_attr_e( 'Résumé en quelques phrases...', 'cgt' ); ?>"
 							><?php echo esc_textarea( $excerpt ); ?></textarea>
 						</div>
+
+						<?php if ( $is_article ) : ?>
+						<!-- Visibilité (uniquement pour les articles) -->
+						<div class="form-group">
+							<label>
+								<?php esc_html_e( 'Visibilité', 'cgt' ); ?> <span class="required">*</span>
+								<span class="hint"><?php esc_html_e( 'Définir si l\'article est public ou réservé aux adhérents', 'cgt' ); ?></span>
+							</label>
+							<select name="cgt_article_visibility" class="form-control" required>
+								<option value="public" <?php selected( $visibility, 'public' ); ?>>
+									<?php esc_html_e( '📢 Public - Affiché sur la page d\'accueil du site', 'cgt' ); ?>
+								</option>
+								<option value="private" <?php selected( $visibility, 'private' ); ?>>
+									<?php esc_html_e( '🔒 Privé - Réservé aux adhérents de la branche', 'cgt' ); ?>
+								</option>
+							</select>
+						</div>
+						<?php endif; ?>
 
 						<div class="form-row">
 							<!-- Branche -->
