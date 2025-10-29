@@ -142,6 +142,16 @@ add_action(
 			);
 		}
 
+		// Charger les styles de la page archive des tracts
+		if ( is_post_type_archive( 'tracts' ) || is_tax( 'branche' ) ) {
+			wp_enqueue_style(
+				'cgt-tracts-archive',
+				get_stylesheet_directory_uri() . '/assets/css/tracts-archive.css',
+				array( 'cgt-child' ),
+				CGT_CHILD_VERSION
+			);
+		}
+
 		// Charger les styles et scripts de la page de connexion
 		if ( is_page_template( 'page-connexion.php' ) ) {
 			wp_enqueue_style(
