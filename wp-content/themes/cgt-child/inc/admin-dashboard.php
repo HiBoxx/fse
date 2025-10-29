@@ -20,7 +20,8 @@ function cgt_register_private_content_submenus() {
 
     $primary_slug = 'edit.php?post_type=articles_adherents';
 
-	$submenu[ $primary_slug ] = array();
+	// Ajouter les sous-menus personnalisés
+	// Note: WordPress ajoute automatiquement "Tous les articles adhérents" comme premier sous-menu
 
 	add_submenu_page(
 		$primary_slug,
@@ -42,72 +43,64 @@ function cgt_register_private_content_submenus() {
 
 	add_submenu_page(
 		$primary_slug,
-		__( 'Articles privés', 'cgt' ),
-		__( 'Articles privés', 'cgt' ),
-		'edit_posts',
-		'cgt-list-private-articles',
-		'cgt_redirect_private_articles_list'
-	);
-
-	add_submenu_page(
-		$primary_slug,
 		__( 'Tracts privés', 'cgt' ),
 		__( 'Tracts privés', 'cgt' ),
 		'edit_posts',
-		'cgt-list-private-tracts',
-        'cgt_redirect_private_tracts_list'
+		'edit.php?post_type=tracts&cgt_private=1'
     );
 
-    add_submenu_page(
-        $primary_slug,
-        __( 'Branches', 'cgt' ),
-        __( 'Branches', 'cgt' ),
-        'edit_posts',
-        'cgt-manage-branches',
-        'cgt_redirect_branches_admin'
-    );
-
-    add_submenu_page(
-        $primary_slug,
-        __( 'Classes', 'cgt' ),
-        __( 'Classes', 'cgt' ),
-        'edit_posts',
-		'cgt-manage-classes',
-		'cgt_redirect_classes_admin'
-	);
+	// Note: Branches et Classes sont ajoutés automatiquement par WordPress via les taxonomies
 }
 
 /**
- * Redirige vers la liste des articles adhérents privés.
+ * Supprimer les doublons et réorganiser les sous-menus
  */
-function cgt_redirect_private_articles_list() {
-	wp_safe_redirect( admin_url( 'edit.php?post_type=articles_adherents' ) );
-	exit;
+add_action( 'admin_menu', 'cgt_cleanup_articles_adherents_submenu', 999 );
+function cgt_cleanup_articles_adherents_submenu() {
+	global $submenu;
+
+	$primary_slug = 'edit.php?post_type=articles_adherents';
+
+	if ( ! isset( $submenu[ $primary_slug ] ) ) {
+		return;
+	}
+
+	// Parcourir et identifier les éléments à garder
+	$new_submenu = array();
+	$seen_branches = false;
+	$seen_classes = false;
+
+	foreach ( $submenu[ $primary_slug ] as $item ) {
+		$title = $item[0];
+		$slug = $item[2];
+
+		// Garder uniquement le premier "Branches"
+		if ( stripos( $title, 'branche' ) !== false ) {
+			if ( ! $seen_branches ) {
+				$new_submenu[] = $item;
+				$seen_branches = true;
+			}
+			continue;
+		}
+
+		// Garder uniquement le premier "Classes" (ou thématique)
+		if ( stripos( $title, 'classe' ) !== false || stripos( $title, 'thematique' ) !== false || stripos( $title, 'thématique' ) !== false ) {
+			if ( ! $seen_classes ) {
+				$new_submenu[] = $item;
+				$seen_classes = true;
+			}
+			continue;
+		}
+
+		// Garder tous les autres éléments
+		$new_submenu[] = $item;
+	}
+
+	$submenu[ $primary_slug ] = $new_submenu;
 }
 
-/**
- * Redirige vers la liste des tracts privés.
- */
-function cgt_redirect_private_tracts_list() {
-	wp_safe_redirect( admin_url( 'edit.php?post_type=tracts&cgt_private=1' ) );
-	exit;
-}
-
-/**
- * Redirige vers l'administration des branches.
- */
-function cgt_redirect_branches_admin() {
-	wp_safe_redirect( admin_url( 'edit-tags.php?taxonomy=branche&post_type=articles_adherents' ) );
-	exit;
-}
-
-/**
- * Redirige vers l'administration des classes.
- */
-function cgt_redirect_classes_admin() {
-	wp_safe_redirect( admin_url( 'edit-tags.php?taxonomy=thematique&post_type=articles_adherents' ) );
-	exit;
-}
+// Fonctions de redirection supprimées - remplacées par des liens directs dans les sous-menus
+// pour éviter l'erreur "headers already sent"
 
 /**
  * Définit l'ordre personnalisé du menu principal de l'administration.
