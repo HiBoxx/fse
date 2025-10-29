@@ -211,9 +211,11 @@ class CGT_PDF_Library {
 
 		$args = array(
 			'post_type'      => self::CPT,
+			'post_status'    => array( 'publish', 'private', 'pending', 'draft' ),
 			'posts_per_page' => -1,
 			'orderby'        => 'date',
 			'order'          => 'DESC',
+			'no_found_rows'  => false,
 		);
 
 		if ( $selected_cat ) {
@@ -227,7 +229,33 @@ class CGT_PDF_Library {
 		}
 
 		$query      = new WP_Query( $args );
-		$categories = get_categories( array( 'hide_empty' => false ) );
+		$categories = get_categories(
+			array(
+				'hide_empty' => false,
+				'taxonomy'   => 'category',
+			)
+		);
+
+		$category_counts = array();
+		foreach ( $categories as $cat ) {
+			$count_query = new WP_Query(
+				array(
+					'post_type'      => self::CPT,
+					'post_status'    => array( 'publish', 'private', 'pending', 'draft' ),
+					'posts_per_page' => 1,
+					'no_found_rows'  => true,
+					'tax_query'      => array(
+						array(
+							'taxonomy' => 'category',
+							'field'    => 'term_id',
+							'terms'    => $cat->term_id,
+						),
+					),
+				)
+			);
+			$category_counts[ $cat->term_id ] = (int) $count_query->found_posts;
+			wp_reset_postdata();
+		}
 		?>
 		<div class="wrap cgt-library-page">
 
@@ -265,8 +293,8 @@ class CGT_PDF_Library {
 						<?php foreach ( $categories as $cat ) : ?>
 							<li>
 								<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'cgt-library', 'cgt_cat' => $cat->term_id ), admin_url( 'admin.php' ) ) ); ?>"<?php echo $selected_cat === $cat->term_id ? ' class="current"' : ''; ?>>
-									<?php echo esc_html( $cat->name ); ?>
-									<span class="count"><?php echo (int) $cat->count; ?></span>
+								<?php echo esc_html( $cat->name ); ?>
+								<span class="count"><?php echo isset( $category_counts[ $cat->term_id ] ) ? (int) $category_counts[ $cat->term_id ] : 0; ?></span>
 								</a>
 							</li>
 						<?php endforeach; ?>

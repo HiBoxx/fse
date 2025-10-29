@@ -8,26 +8,66 @@
 get_header();
 
 $latest_communiques = new WP_Query(
-    array(
-        'post_type'      => 'communiques_de_presse',
-        'posts_per_page' => 5,
-    )
+	array(
+		'post_type'      => 'communiques_de_presse',
+		'posts_per_page' => 5,
+	)
 );
 
 $resource_args = array(
-	'post_type'      => array( 'tracts', 'dossiers_de_presse' ),
+	'post_type'      => 'tracts',
 	'posts_per_page' => 4,
 );
 
 if ( ! cgt_user_can_read_private() ) {
-	$resource_args['meta_query'][] = array(
-		'key'     => 'cgt_visibilite',
-		'value'   => 'prive',
-		'compare' => '!=',
+	$resource_args['meta_query'] = array(
+		'relation' => 'OR',
+		array(
+			'key'     => 'cgt_visibilite',
+			'value'   => array( 'prive', 'privé' ),
+			'compare' => 'NOT IN',
+		),
+		array(
+			'key'     => 'cgt_visibilite',
+			'compare' => 'NOT EXISTS',
+		),
 	);
 }
 
 $latest_resources = new WP_Query( $resource_args );
+
+$agenda_events = new WP_Query(
+	array(
+		'post_type'      => 'cgt_agenda',
+		'posts_per_page' => 6,
+		'orderby'        => 'meta_value',
+		'order'          => 'ASC',
+		'meta_key'       => 'cgt_event_date',
+		'meta_type'      => 'DATETIME',
+		'meta_query'     => array(
+			array(
+				'key'     => 'cgt_event_date',
+				'value'   => gmdate( 'Y-m-d H:i:s' ),
+				'compare' => '>=',
+				'type'    => 'DATETIME',
+			),
+		),
+	)
+);
+
+if ( ! $agenda_events->have_posts() ) {
+	wp_reset_postdata();
+	$agenda_events = new WP_Query(
+		array(
+			'post_type'      => 'cgt_agenda',
+			'posts_per_page' => 6,
+			'orderby'        => 'meta_value',
+			'order'          => 'DESC',
+			'meta_key'       => 'cgt_event_date',
+			'meta_type'      => 'DATETIME',
+		)
+	);
+}
 
 $branches = get_terms(
 	array(
@@ -70,13 +110,13 @@ $mediatheque_link = $mediatheque_page ? get_permalink( $mediatheque_page ) : hom
 		<div class="container">
 			<ul class="home-nav__grid" aria-label="<?php esc_attr_e( 'Navigation rapide', 'cgt' ); ?>">
 				<li>
-					<a href="<?php echo esc_url( home_url( '/la-federation' ) ); ?>" class="home-nav__card">
-						<span class="home-nav__icon" aria-hidden="true">⚙️</span>
+					<button type="button" class="home-nav__card home-nav__card--agenda" data-open-agenda>
+						<span class="home-nav__icon" aria-hidden="true">🗓️</span>
 						<span>
-							<strong><?php esc_html_e( 'La Fédération', 'cgt' ); ?></strong>
-							<small><?php esc_html_e( 'Nos priorités et nos élus', 'cgt' ); ?></small>
+							<strong><?php esc_html_e( 'Agenda', 'cgt' ); ?></strong>
+							<small><?php esc_html_e( 'Événements syndicaux', 'cgt' ); ?></small>
 						</span>
-					</a>
+					</button>
 				</li>
 				<li>
 					<a href="<?php echo esc_url( $actualites_link ); ?>" class="home-nav__card">
@@ -109,23 +149,81 @@ $mediatheque_link = $mediatheque_page ? get_permalink( $mediatheque_page ) : hom
 		</div>
 	</section>
 
+	<div class="agenda-modal" id="agendaModal" aria-hidden="true" hidden>
+		<div class="agenda-modal__overlay" data-close-agenda></div>
+		<div class="agenda-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="agendaModalTitle">
+			<button type="button" class="agenda-modal__close" data-close-agenda aria-label="<?php esc_attr_e( 'Fermer l’agenda', 'cgt' ); ?>">×</button>
+			<header class="agenda-modal__header">
+				<h2 id="agendaModalTitle"><?php esc_html_e( 'Agenda militant', 'cgt' ); ?></h2>
+				<p><?php esc_html_e( 'Retrouvez les rendez-vous de la fédération et des branches.', 'cgt' ); ?></p>
+			</header>
+			<div class="agenda-modal__body">
+				<?php if ( $agenda_events->have_posts() ) : ?>
+					<ul class="agenda-modal__list">
+						<?php
+						while ( $agenda_events->have_posts() ) :
+							$agenda_events->the_post();
+							$raw_date   = get_post_meta( get_the_ID(), 'cgt_event_date', true );
+							$timestamp  = $raw_date ? strtotime( $raw_date ) : false;
+							$event_date = $timestamp ? wp_date( 'd F Y \à H\hi', $timestamp ) : '';
+							$address    = get_post_meta( get_the_ID(), 'cgt_event_address', true );
+							$document   = get_post_meta( get_the_ID(), 'cgt_event_document', true );
+							$document_url = $document ? wp_get_attachment_url( $document ) : '';
+							?>
+							<li class="agenda-item">
+								<div class="agenda-item__date">
+									<span class="agenda-item__day"><?php echo esc_html( $timestamp ? wp_date( 'd', $timestamp ) : '--' ); ?></span>
+									<span class="agenda-item__month"><?php echo esc_html( $timestamp ? wp_date( 'M', $timestamp ) : '--' ); ?></span>
+								</div>
+								<div class="agenda-item__content">
+									<h3 class="agenda-item__title"><?php the_title(); ?></h3>
+									<?php if ( $event_date ) : ?>
+										<p class="agenda-item__meta"><?php echo esc_html( $event_date ); ?></p>
+									<?php endif; ?>
+									<?php if ( $address ) : ?>
+										<p class="agenda-item__address"><?php echo esc_html( $address ); ?></p>
+									<?php endif; ?>
+									<div class="agenda-item__actions">
+										<a class="btn btn-compact" href="<?php the_permalink(); ?>">
+											<?php esc_html_e( 'Voir l’événement', 'cgt' ); ?>
+										</a>
+										<?php if ( $document_url ) : ?>
+											<a class="btn btn-compact btn-light" href="<?php echo esc_url( $document_url ); ?>" target="_blank" rel="noopener">
+												<?php esc_html_e( 'Télécharger le document', 'cgt' ); ?>
+											</a>
+										<?php endif; ?>
+									</div>
+								</div>
+							</li>
+							<?php
+						endwhile;
+						wp_reset_postdata();
+						?>
+					</ul>
+				<?php else : ?>
+					<p><?php esc_html_e( 'Aucun événement enregistré pour le moment. Revenez bientôt.', 'cgt' ); ?></p>
+				<?php endif; ?>
+			</div>
+		</div>
+	</div>
+
 	<?php
 $communiques_tabs = array(
-	'actualites'       => array(
+	'tout'           => array(
+		'label' => __( 'Tout', 'cgt' ),
+		'terms' => null,
+	),
+	'actualites'     => array(
 		'label' => __( 'Actualités', 'cgt' ),
-		'term'  => 'actualites',
+		'terms' => array( 'actualites' ),
 	),
-	'bulletins'        => array(
+	'bulletins'      => array(
 		'label' => __( 'Bulletins', 'cgt' ),
-		'term'  => 'bulletins',
+		'terms' => array( 'bulletins' ),
 	),
-	'tracts'           => array(
-		'label' => __( 'Tracts d’entreprise', 'cgt' ),
-		'term'  => 'tracts-de-la-federation',
-	),
-	'presse'           => array(
-		'label' => __( 'Presse', 'cgt' ),
-		'term'  => 'presse',
+	'communications' => array(
+		'label' => __( 'Communications', 'cgt' ),
+		'terms' => array( 'communication-federale' ),
 	),
 );
 	?>
@@ -165,18 +263,18 @@ $communiques_tabs = array(
 				foreach ( $communiques_tabs as $slug => $tab ) :
 					$query_args = array(
 						'post_type'      => 'post',
+						'post_status'    => 'publish',
 						'posts_per_page' => 4,
-						'tax_query'      => array(
+					);
+
+					if ( ! empty( $tab['terms'] ) ) {
+						$query_args['tax_query'] = array(
 							array(
 								'taxonomy' => 'category',
 								'field'    => 'slug',
-								'terms'    => $tab['term'],
+								'terms'    => (array) $tab['terms'],
 							),
-						),
-					);
-
-					if ( empty( $tab['term'] ) ) {
-						unset( $query_args['tax_query'] );
+						);
 					}
 
 					$tab_query = new WP_Query( $query_args );

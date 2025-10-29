@@ -1,0 +1,87 @@
+/*
+ * Typographic scale extracted from Twenty Twenty-Five (v1.3).
+ * Not enqueued by default. Import this file when the parent theme is removed
+ * to preserve the original text rendering.
+ *
+ * Requires the Manrope variable font. Enqueue for example:
+ * https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap
+ */
+
+:root {
+	--cgt-type-body-font-family: "Manrope", sans-serif;
+	--cgt-type-body-font-weight: 300;
+	--cgt-type-body-font-size: clamp(1rem, 0.5vw + 0.92rem, 1.125rem);
+	--cgt-type-body-line-height: 1.4;
+	--cgt-type-body-letter-spacing: -0.1px;
+
+	--cgt-type-heading-font-family: "Manrope", sans-serif;
+	--cgt-type-heading-font-weight: 400;
+	--cgt-type-heading-line-height: 1.125;
+	--cgt-type-heading-letter-spacing: -0.1px;
+
+	--cgt-type-h1: clamp(2.15rem, 4.2vw + 1.3rem, 3rem);
+	--cgt-type-h2: clamp(1.75rem, 3vw + 1.05rem, 2rem);
+	--cgt-type-h3: clamp(1.38rem, 1.9vw + 0.95rem, 1.56rem);
+	--cgt-type-h4: clamp(1.125rem, 1vw + 0.9rem, 1.25rem);
+	--cgt-type-h5: 0.875rem;
+	--cgt-type-h6: 0.875rem;
+}
+
+body {
+	font-family: var(--cgt-type-body-font-family);
+	font-weight: var(--cgt-type-body-font-weight);
+	font-size: var(--cgt-type-body-font-size);
+	line-height: var(--cgt-type-body-line-height);
+	letter-spacing: var(--cgt-type-body-letter-spacing);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--cgt-type-heading-font-family);
+	font-weight: var(--cgt-type-heading-font-weight);
+	line-height: var(--cgt-type-heading-line-height);
+	letter-spacing: var(--cgt-type-heading-letter-spacing);
+	margin: 0;
+}
+
+h1 {
+	font-size: var(--cgt-type-h1);
+}
+
+h2 {
+	font-size: var(--cgt-type-h2);
+}
+
+h3 {
+	font-size: var(--cgt-type-h3);
+}
+
+h4 {
+	font-size: var(--cgt-type-h4);
+}
+
+h5 {
+	font-size: var(--cgt-type-h5);
+	letter-spacing: 0.5px;
+}
+
+h6 {
+	font-size: var(--cgt-type-h6);
+	font-weight: 700;
+	letter-spacing: 1.4px;
+	text-transform: uppercase;
+}
+
+p {
+	margin: 0 0 1.2em;
+}
+
+blockquote,
+figcaption,
+caption {
+	text-wrap: pretty;
+}

@@ -53,6 +53,26 @@ function cgt_register_private_content_submenus() {
 }
 
 /**
+ * Ajoute les sous-menus pour les messages.
+ */
+add_action( 'admin_menu', 'cgt_register_contact_submenus', 21 );
+function cgt_register_contact_submenus() {
+	if ( ! current_user_can( 'edit_posts' ) ) {
+		return;
+	}
+
+	$parent_slug = 'edit.php?post_type=cgt_contact';
+
+	add_submenu_page(
+		$parent_slug,
+		__( 'Questions adhérents', 'cgt' ),
+		__( 'Questions adhérents', 'cgt' ),
+		'edit_posts',
+		add_query_arg( 'cgt_contact_type', 'question', $parent_slug )
+	);
+}
+
+/**
  * Supprimer les doublons et réorganiser les sous-menus
  */
 add_action( 'admin_menu', 'cgt_cleanup_articles_adherents_submenu', 999 );
@@ -185,6 +205,82 @@ function cgt_custom_menu_order( $menu_order ) {
 	}
 
 	return array_merge( $ordered, $menu_order );
+}
+
+/**
+ * Ajoute des vues personnalisées dans la liste des messages.
+ *
+ * @param array $views Vues existantes.
+ * @return array
+ */
+add_filter( 'views_edit-cgt_contact', 'cgt_contact_custom_views' );
+function cgt_contact_custom_views( $views ) {
+	$question_count = new WP_Query(
+		array(
+			'post_type'      => 'cgt_contact',
+			'post_status'    => array( 'private', 'publish', 'pending' ),
+			'posts_per_page' => 1,
+			'meta_query'     => array(
+				array(
+					'key'   => 'cgt_contact_type',
+					'value' => 'question',
+				),
+			),
+		)
+	);
+
+	$count = (int) $question_count->found_posts;
+
+	$url = add_query_arg(
+		array(
+			'post_type'          => 'cgt_contact',
+			'cgt_contact_type'   => 'question',
+		),
+		admin_url( 'edit.php' )
+	);
+
+	$views['questions'] = sprintf(
+		'<a href="%1$s">%2$s</a>',
+		esc_url( $url ),
+		sprintf(
+			/* translators: %s: count */
+			esc_html__( 'Questions adhérents (%s)', 'cgt' ),
+			number_format_i18n( $count )
+		)
+	);
+
+	return $views;
+}
+
+/**
+ * Filtre la liste des messages selon le type.
+ */
+add_action( 'load-edit.php', 'cgt_maybe_filter_contact_type' );
+function cgt_maybe_filter_contact_type() {
+	$screen = get_current_screen();
+	if ( ! $screen || 'edit-cgt_contact' !== $screen->id ) {
+		return;
+	}
+
+	if ( isset( $_GET['cgt_contact_type'] ) && in_array( $_GET['cgt_contact_type'], array( 'contact', 'question' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		add_action(
+			'pre_get_posts',
+			static function ( $query ) {
+				if ( ! is_admin() || ! $query->is_main_query() ) {
+					return;
+				}
+
+				$type = sanitize_key( wp_unslash( $_GET['cgt_contact_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$meta_query = (array) $query->get( 'meta_query', array() );
+				$meta_query[] = array(
+					'key'   => 'cgt_contact_type',
+					'value' => $type,
+				);
+				$query->set( 'meta_query', $meta_query );
+			},
+			10
+		);
+	}
 }
 
 /**

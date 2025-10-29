@@ -215,17 +215,29 @@ function cgt_shortcode_questions() {
 			if ( empty( $question ) ) {
 				$message = __( 'Merci de détailler votre question.', 'cgt' );
 			} else {
-				$post_id = wp_insert_post(
+				$current_user = wp_get_current_user();
+				$post_id      = wp_insert_post(
 					array(
-						'post_type'   => 'cgt_question',
-						'post_status' => 'pending',
+						'post_type'   => 'cgt_contact',
+						'post_status' => 'private',
 						'post_title'  => $subject ? $subject : wp_trim_words( wp_strip_all_tags( $question ), 8, '…' ),
 						'post_content'=> $question,
 						'post_author' => get_current_user_id(),
 					)
 				);
 
-				if ( $post_id && 0 !== $post_id ) {
+				if ( $post_id && 0 !== $post_id && ! is_wp_error( $post_id ) ) {
+					$name  = $current_user ? $current_user->display_name : '';
+					$email = $current_user ? $current_user->user_email : '';
+
+					update_post_meta( $post_id, 'cgt_submission_name', $name );
+					update_post_meta( $post_id, 'cgt_submission_email', $email );
+					update_post_meta( $post_id, 'cgt_submission_phone', '' );
+					update_post_meta( $post_id, 'cgt_submission_subject', $subject );
+					update_post_meta( $post_id, 'cgt_submission_message', $question );
+					update_post_meta( $post_id, 'cgt_contact_type', 'question' );
+					update_post_meta( $post_id, 'cgt_contact_user', get_current_user_id() );
+
 					$message = __( 'Merci ! Votre question est en attente de modération.', 'cgt' );
 					wp_mail(
 						get_option( 'admin_email' ),
@@ -297,6 +309,12 @@ function cgt_shortcode_submit_article() {
 	$errors  = array();
 
 	if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['cgt_submit_article_nonce'] ) ) {
+		if ( ! function_exists( 'media_handle_upload' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/media.php';
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+		}
+
 		if ( ! wp_verify_nonce( sanitize_key( $_POST['cgt_submit_article_nonce'] ), 'cgt_submit_article' ) ) {
 			$errors[] = __( 'Jeton de sécurité invalide. Merci de recharger la page.', 'cgt' );
 		} elseif ( ! cgt_check_honeypot( 'cgt_hp_article' ) ) {
@@ -705,10 +723,11 @@ function cgt_contact_form_shortcode() {
 			if ( empty( $errors ) ) {
 				$post_id = wp_insert_post(
 					array(
-						'post_type'    => 'cgt_question',
-						'post_title'   => sprintf( '%1$s – %2$s', $subject, $name ),
-						'post_content' => $content . '\n\n' . sprintf( 'Téléphone : %s', $phone ? $phone : __( 'non fourni', 'cgt' ) ),
-						'post_status'  => 'pending',
+						'post_type'    => 'cgt_contact',
+						'post_title'   => $subject ? $subject : wp_trim_words( wp_strip_all_tags( $content ), 8, '…' ),
+						'post_content' => $content,
+						'post_status'  => 'private',
+						'post_author'  => is_user_logged_in() ? get_current_user_id() : 0,
 					)
 				);
 
@@ -717,6 +736,11 @@ function cgt_contact_form_shortcode() {
 					update_post_meta( $post_id, 'cgt_submission_email', $email );
 					update_post_meta( $post_id, 'cgt_submission_phone', $phone );
 					update_post_meta( $post_id, 'cgt_submission_subject', $subject );
+					update_post_meta( $post_id, 'cgt_submission_message', $content );
+					update_post_meta( $post_id, 'cgt_contact_type', 'contact' );
+					if ( is_user_logged_in() ) {
+						update_post_meta( $post_id, 'cgt_contact_user', get_current_user_id() );
+					}
 
 					wp_mail(
 						get_option( 'admin_email' ),

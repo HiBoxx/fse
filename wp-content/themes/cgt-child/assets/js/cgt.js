@@ -110,6 +110,70 @@
 			} );
 		}
 
+		const agendaModal = document.getElementById( 'agendaModal' );
+		const agendaOpeners = document.querySelectorAll( '[data-open-agenda]' );
+		const agendaClosers = document.querySelectorAll( '[data-close-agenda]' );
+		let agendaLastFocus = null;
+
+		const toggleAgenda = ( shouldOpen ) => {
+			if ( ! agendaModal ) {
+				return;
+			}
+
+			const isHidden = agendaModal.getAttribute( 'aria-hidden' ) === 'true' || agendaModal.hasAttribute( 'hidden' );
+			const willOpen = 'boolean' === typeof shouldOpen ? shouldOpen : isHidden;
+
+			if ( willOpen === ! isHidden ) {
+				return;
+			}
+
+			if ( willOpen ) {
+				agendaLastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+				agendaModal.removeAttribute( 'hidden' );
+				agendaModal.setAttribute( 'aria-hidden', 'false' );
+				const firstFocusable = agendaModal.querySelector( 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])' );
+				if ( firstFocusable instanceof HTMLElement ) {
+					firstFocusable.focus();
+				}
+				document.documentElement.classList.add( 'has-modal-open' );
+				document.body.classList.add( 'has-modal-open' );
+			} else {
+				agendaModal.setAttribute( 'aria-hidden', 'true' );
+				agendaModal.setAttribute( 'hidden', 'hidden' );
+				if ( agendaLastFocus ) {
+					agendaLastFocus.focus();
+				}
+				document.documentElement.classList.remove( 'has-modal-open' );
+				document.body.classList.remove( 'has-modal-open' );
+			}
+		};
+
+		agendaOpeners.forEach( ( trigger ) => {
+			trigger.addEventListener( 'click', () => {
+				toggleAgenda( true );
+			} );
+		} );
+
+		agendaClosers.forEach( ( trigger ) => {
+			trigger.addEventListener( 'click', () => {
+				toggleAgenda( false );
+			} );
+		} );
+
+		document.addEventListener( 'keydown', ( event ) => {
+			if ( event.key === 'Escape' ) {
+				toggleAgenda( false );
+			}
+		} );
+
+		if ( agendaModal ) {
+			agendaModal.addEventListener( 'click', ( event ) => {
+				if ( event.target instanceof HTMLElement && event.target.dataset.closeAgenda !== undefined ) {
+					toggleAgenda( false );
+				}
+			} );
+		}
+
 		const homeTabs = document.querySelectorAll( '.home-tab' );
 		const homePanels = document.querySelectorAll( '.home-tab-panel' );
 

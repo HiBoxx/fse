@@ -35,13 +35,24 @@ if ( $user_branch_id ) {
 
 $private_tracts_args = array(
 	'post_type'      => 'tracts',
-	'post_status'    => 'publish',
-	'posts_per_page' => 4,
+	'post_status'    => array( 'publish', 'private' ),
+	'posts_per_page' => 2,
 	'no_found_rows'  => true,
 	'meta_query'     => array(
+		'relation' => 'OR',
 		array(
-			'key'   => 'cgt_visibilite',
-			'value' => 'prive',
+			'key'     => 'cgt_visibilite',
+			'value'   => array( 'prive', 'privé' ),
+			'compare' => 'IN',
+		),
+		array(
+			'key'     => 'cgt_visibilite',
+			'compare' => 'NOT EXISTS',
+		),
+		array(
+			'key'     => 'cgt_visibilite',
+			'value'   => '',
+			'compare' => '=',
 		),
 	),
 );
@@ -52,18 +63,19 @@ if ( $branch_tax_query ) {
 
 $private_tracts = new WP_Query( $private_tracts_args );
 
-$recent_communiques_args = array(
-	'post_type'      => 'communiques_de_presse',
-	'post_status'    => 'publish',
-	'posts_per_page' => 3,
+$all_articles_page = get_page_by_path( 'actualites', OBJECT, 'page' );
+$all_articles_link = $all_articles_page ? get_permalink( $all_articles_page ) : get_post_type_archive_link( 'post' );
+
+$federal_articles_args = array(
+	'post_type'      => array( 'post', 'articles_adherents' ),
+	'post_status'    => array( 'publish', 'private' ),
+	'posts_per_page' => 2,
 	'no_found_rows'  => true,
+	'orderby'        => 'date',
+	'order'          => 'DESC',
 );
 
-if ( $branch_tax_query ) {
-	$recent_communiques_args['tax_query'] = $branch_tax_query;
-}
-
-$recent_communiques = new WP_Query( $recent_communiques_args );
+$federal_articles = new WP_Query( $federal_articles_args );
 
 $agenda_events = new WP_Query(
 	array(
@@ -123,16 +135,17 @@ if ( ! is_wp_error( $branch_terms ) ) {
 	}
 }
 
-$bulletins_term = get_term_by( 'slug', 'bulletins', 'thematique' );
-$bulletins_link = ( $bulletins_term && ! is_wp_error( $bulletins_term ) ) ? get_term_link( $bulletins_term ) : get_post_type_archive_link( 'communiques_de_presse' );
+$bulletins_link_base = $all_articles_link ? $all_articles_link : get_post_type_archive_link( 'post' );
+$bulletins_link_args = array( 'thematique' => 'bulletins' );
 
-// Add branch filter to bulletins link if user has selected a branch
-if ( $user_branch_id && $bulletins_link ) {
+if ( $user_branch_id ) {
 	$user_branch = get_term( $user_branch_id, 'branche' );
 	if ( $user_branch && ! is_wp_error( $user_branch ) ) {
-		$bulletins_link = add_query_arg( 'branche', $user_branch->slug, $bulletins_link );
+		$bulletins_link_args['branche'] = $user_branch->slug;
 	}
 }
+
+$bulletins_link = add_query_arg( array_filter( $bulletins_link_args ), $bulletins_link_base ) . '#tab=bulletins';
 
 $agenda_term = get_term_by( 'slug', 'agenda', 'thematique' );
 $agenda_link = ( $agenda_term && ! is_wp_error( $agenda_term ) ) ? get_term_link( $agenda_term ) : '#';
@@ -205,11 +218,12 @@ $library_options = array(
 $library_selected = isset( $_GET['library_term'] ) ? sanitize_text_field( wp_unslash( $_GET['library_term'] ) ) : '';
 $library_search   = isset( $_GET['library_search'] ) ? sanitize_text_field( wp_unslash( $_GET['library_search'] ) ) : '';
 
+$library_per_page = 6;
 $library_query_args = array(
 	'post_type'      => array( 'post', 'communiques_de_presse', 'dossiers_de_presse', 'tracts' ),
 	'post_status'    => 'publish',
-	'posts_per_page' => 6,
-	'no_found_rows'  => true,
+	'posts_per_page' => $library_per_page,
+	'no_found_rows'  => false,
 );
 
 // Initialize tax_query array
@@ -354,9 +368,9 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 
 			<div class="member-panel member-panel--news">
 				<h2><?php esc_html_e( 'Actualités fédérales', 'cgt' ); ?></h2>
-				<?php if ( $recent_communiques->have_posts() ) : ?>
+				<?php if ( $federal_articles->have_posts() ) : ?>
 					<ul class="member-list">
-						<?php while ( $recent_communiques->have_posts() ) : $recent_communiques->the_post(); ?>
+						<?php while ( $federal_articles->have_posts() ) : $federal_articles->the_post(); ?>
 							<li>
 								<a href="<?php the_permalink(); ?>" class="member-list__link">
 									<span class="member-list__title"><?php the_title(); ?></span>
@@ -367,6 +381,9 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 					</ul>
 				<?php else : ?>
 					<p><?php esc_html_e( 'Aucune actualité récente pour vos secteurs.', 'cgt' ); ?></p>
+				<?php endif; ?>
+				<?php if ( $all_articles_link ) : ?>
+					<a class="btn btn-compact" href="<?php echo esc_url( $all_articles_link ); ?>"><?php esc_html_e( 'Voir tous les articles', 'cgt' ); ?></a>
 				<?php endif; ?>
 			</div>
 
@@ -446,6 +463,13 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 						wp_reset_postdata();
 						?>
 					</div>
+					<?php if ( $library_query->found_posts > $library_per_page ) : ?>
+						<p class="member-library-more">
+							<a class="btn btn-compact" href="<?php echo esc_url( home_url( '/mediatheque' ) ); ?>">
+								<?php esc_html_e( 'Voir la bibliothèque complète', 'cgt' ); ?>
+							</a>
+						</p>
+					<?php endif; ?>
 				<?php else : ?>
 					<p><?php esc_html_e( 'Aucun document trouvé pour cette sélection.', 'cgt' ); ?></p>
 				<?php endif; ?>
