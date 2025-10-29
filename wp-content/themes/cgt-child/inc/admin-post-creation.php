@@ -33,6 +33,15 @@ function cgt_customize_admin_menu() {
 		}
 	}
 
+	// Retirer "Ajouter" sous Articles adhérents.
+	if ( isset( $submenu['edit.php?post_type=articles_adherents'] ) ) {
+		foreach ( $submenu['edit.php?post_type=articles_adherents'] as $key => $item ) {
+			if ( in_array( $item[2], array( 'post-new.php?post_type=articles_adherents', 'post-new.php?post_type=articles_adherents&from=top' ), true ) ) {
+				unset( $submenu['edit.php?post_type=articles_adherents'][ $key ] );
+			}
+		}
+	}
+
 	// Ajouter nos pages personnalisées EN PREMIER (position 0)
 	add_submenu_page(
 		'edit.php',

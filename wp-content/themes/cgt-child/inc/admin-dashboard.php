@@ -96,7 +96,49 @@ function cgt_cleanup_articles_adherents_submenu() {
 		$new_submenu[] = $item;
 	}
 
-	$submenu[ $primary_slug ] = $new_submenu;
+	// Recomposer avec l'ordre demandé.
+	$unordered_items = array();
+	foreach ( $new_submenu as $item ) {
+		if ( isset( $item[2] ) ) {
+			$unordered_items[ $item[2] ] = $item;
+		}
+	}
+
+	$desired_order = array(
+		'cgt-add-private-article',
+		'cgt-add-private-tract',
+		'edit.php?post_type=articles_adherents',
+		'edit.php?post_type=tracts&cgt_private=1',
+		'edit-tags.php?taxonomy=branche&post_type=articles_adherents',
+		'edit-tags.php?taxonomy=thematique&post_type=articles_adherents',
+	);
+
+	$ordered_menu = array();
+
+	foreach ( $desired_order as $slug ) {
+		if ( ! isset( $unordered_items[ $slug ] ) ) {
+			continue;
+		}
+
+		$item = $unordered_items[ $slug ];
+
+		if ( 'edit.php?post_type=articles_adherents' === $slug ) {
+			$item[0] = __( 'Articles adhérents', 'cgt' );
+			if ( isset( $item[3] ) ) {
+				$item[3] = __( 'Articles adhérents', 'cgt' );
+			}
+		}
+
+		$ordered_menu[] = $item;
+		unset( $unordered_items[ $slug ] );
+	}
+
+	// Ajouter les éléments restants, le cas échéant.
+	foreach ( $unordered_items as $item ) {
+		$ordered_menu[] = $item;
+	}
+
+	$submenu[ $primary_slug ] = $ordered_menu;
 }
 
 // Fonctions de redirection supprimées - remplacées par des liens directs dans les sous-menus
