@@ -166,6 +166,17 @@ class CGT_Petitions_Plugin {
 			25
 		);
 
+		// Renommer le premier sous-menu automatique
+		add_submenu_page(
+			'cgt-petitions',
+			__( 'Nos pétitions', 'cgt' ),
+			__( 'Nos pétitions', 'cgt' ),
+			'edit_posts',
+			'cgt-petitions',
+			array( $this, 'render_petitions_page' )
+		);
+
+		// Ajouter une pétition
 		add_submenu_page(
 			'cgt-petitions',
 			__( 'Ajouter une pétition', 'cgt' ),
@@ -174,6 +185,7 @@ class CGT_Petitions_Plugin {
 			'post-new.php?post_type=' . self::CPT
 		);
 
+		// Signatures
 		add_submenu_page(
 			'cgt-petitions',
 			__( 'Signatures', 'cgt' ),
