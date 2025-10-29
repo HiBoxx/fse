@@ -129,34 +129,32 @@ function cgt_redirect_private_single() {
 	if ( is_singular( 'tracts' ) ) {
 		$visibility = get_post_meta( get_queried_object_id(), 'cgt_visibilite', true );
 		if ( 'prive' === $visibility && ! cgt_user_can_read_private() ) {
-			// Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+			// Afficher un message d'erreur avec lien de connexion
+			$login_url = cgt_get_login_page_url() ? cgt_get_login_page_url() : wp_login_url( get_permalink() );
+			$message = '<h1>Accès refusé</h1>';
 			if ( ! is_user_logged_in() ) {
-				auth_redirect();
+				$message .= '<p>Ce contenu est réservé aux adhérents de la CGT.</p>';
+				$message .= '<p><a href="' . esc_url( $login_url ) . '" class="button button-primary">Se connecter</a></p>';
+			} else {
+				$message .= '<p>Votre compte n\'a pas les droits nécessaires pour accéder à ce contenu. Veuillez contacter un administrateur.</p>';
 			}
-
-			// Si l'utilisateur est connecté mais n'a pas les droits, afficher 403
-			wp_die(
-				'<h1>Accès refusé</h1><p>Ce contenu est réservé aux adhérents de la CGT. Veuillez vous connecter avec un compte adhérent valide.</p>',
-				'Accès refusé',
-				array( 'response' => 403 )
-			);
+			wp_die( $message, 'Accès refusé', array( 'response' => 403 ) );
 		}
 	}
 
 	// Vérifier les articles réservés aux membres
 	if ( is_singular( 'articles_adherents' ) ) {
 		if ( ! cgt_user_can_read_private() ) {
-			// Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+			// Afficher un message d'erreur avec lien de connexion
+			$login_url = cgt_get_login_page_url() ? cgt_get_login_page_url() : wp_login_url( get_permalink() );
+			$message = '<h1>Accès refusé</h1>';
 			if ( ! is_user_logged_in() ) {
-				auth_redirect();
+				$message .= '<p>Ce contenu est réservé aux adhérents de la CGT.</p>';
+				$message .= '<p><a href="' . esc_url( $login_url ) . '" class="button button-primary">Se connecter</a></p>';
+			} else {
+				$message .= '<p>Votre compte n\'a pas les droits nécessaires pour accéder à ce contenu. Veuillez contacter un administrateur.</p>';
 			}
-
-			// Si l'utilisateur est connecté mais n'a pas les droits, afficher 403
-			wp_die(
-				'<h1>Accès refusé</h1><p>Ce contenu est réservé aux adhérents de la CGT. Veuillez vous connecter avec un compte adhérent valide.</p>',
-				'Accès refusé',
-				array( 'response' => 403 )
-			);
+			wp_die( $message, 'Accès refusé', array( 'response' => 403 ) );
 		}
 	}
 }
