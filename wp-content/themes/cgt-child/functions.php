@@ -31,7 +31,7 @@ $cgt_inc_files = array(
 	'home-slider.php',
 	'newsletter.php',
 	'admin-post-creation.php',
-	'admin-menu-reorganization.php',
+	// 'admin-menu-reorganization.php', // Temporairement désactivé pour debug
 );
 
 foreach ( $cgt_inc_files as $cgt_inc_file ) {
