@@ -43,6 +43,9 @@ if ( mb_strlen( $title ) > $title_limit ) {
 // Récupérer et tronquer l'extrait
 $excerpt = get_the_excerpt();
 $excerpt_trimmed = wp_trim_words( $excerpt, $description_limit, '...' );
+$has_thumbnail = has_post_thumbnail( $post_id );
+$image_html    = $has_thumbnail ? get_the_post_thumbnail( $post_id, 'medium_large', array( 'class' => 'card-media__img', 'loading' => 'lazy' ) ) : '';
+
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( $card_classes ); ?>>

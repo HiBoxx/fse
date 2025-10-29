@@ -13,7 +13,7 @@
 body {
 	color: var(--cgt-black);
 	background: var(--cgt-white);
-	font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+	font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
 	margin: 0;
 	font-size: 0.95rem;
 	line-height: 1.55;
@@ -217,14 +217,6 @@ a:focus {
 
 .card:hover .card-arrow {
 	transform: translateX(4px);
-}
-
-.placeholder {
-	background: var(--cgt-gray);
-	border-radius: var(--radius);
-	width: 100%;
-	aspect-ratio: 16 / 9;
-	display: block;
 }
 
 .header-bar {
@@ -825,6 +817,8 @@ a:focus {
 	color: inherit;
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
 	text-decoration: none;
+	font: inherit;
+	text-align: left;
 }
 
 .home-nav__card:focus-visible,
@@ -859,6 +853,169 @@ a:focus {
 	display: grid;
 	place-items: center;
 	font-size: 1.2rem;
+}
+
+.home-nav__card--agenda {
+	cursor: pointer;
+	width: 98%;
+}
+
+.agenda-modal[aria-hidden="true"] {
+	display: none;
+}
+
+.agenda-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: grid;
+	place-items: center;
+}
+
+html.has-modal-open,
+body.has-modal-open {
+	overflow: hidden;
+}
+
+.agenda-modal__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(17, 17, 17, 0.55);
+	backdrop-filter: blur(2px);
+}
+
+.agenda-modal__dialog {
+	position: relative;
+	background: var(--cgt-white);
+	color: var(--cgt-black);
+	border-radius: calc(var(--radius) * 1.1);
+	box-shadow: 0 24px 48px rgba(17, 17, 17, 0.25);
+	padding: 1.8rem clamp(1.5rem, 4vw, 2.4rem);
+	width: min(720px, 92vw);
+	max-height: 86vh;
+	overflow: hidden;
+	display: grid;
+	gap: 1.4rem;
+}
+
+.agenda-modal__header h2 {
+	margin: 0;
+	font-size: clamp(1.5rem, 2.8vw, 2rem);
+}
+
+.agenda-modal__header p {
+	margin: 0.35rem 0 0;
+	color: rgba(17, 17, 17, 0.68);
+}
+
+.agenda-modal__close {
+	position: absolute;
+	top: 1rem;
+	right: 1rem;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	border: 0;
+	background: rgba(229, 231, 235, 0.8);
+	color: var(--cgt-black);
+	font-size: 1.4rem;
+	cursor: pointer;
+	display: grid;
+	place-items: center;
+	transition: background 0.2s ease;
+}
+
+.agenda-modal__close:hover,
+.agenda-modal__close:focus-visible {
+	background: rgba(208, 0, 0, 0.15);
+	color: var(--cgt-red);
+}
+
+.agenda-modal__body {
+	overflow-y: auto;
+	padding-right: 0.5rem;
+}
+
+.agenda-modal__list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: 1.1rem;
+}
+
+.agenda-item {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 1rem;
+	border: 1px solid rgba(17, 17, 17, 0.08);
+	border-radius: var(--radius);
+	padding: 1rem;
+	align-items: center;
+	background: rgba(229, 231, 235, 0.35);
+}
+
+.agenda-item__date {
+	display: grid;
+	place-items: center;
+	width: 72px;
+	height: 72px;
+	background: var(--cgt-red);
+	color: var(--cgt-white);
+	border-radius: var(--radius);
+	text-transform: uppercase;
+	font-weight: 600;
+}
+
+.agenda-item__day {
+	font-size: 1.6rem;
+	line-height: 1;
+}
+
+.agenda-item__month {
+	font-size: 0.85rem;
+	letter-spacing: 0.08em;
+}
+
+.agenda-item__content {
+	display: grid;
+	gap: 0.4rem;
+}
+
+.agenda-item__title {
+	margin: 0;
+	font-size: 1.2rem;
+}
+
+.agenda-item__meta,
+.agenda-item__address {
+	margin: 0;
+	color: rgba(17, 17, 17, 0.65);
+}
+
+.agenda-item__actions {
+	display: flex;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+	margin-top: 0.4rem;
+}
+
+@media (max-width: 640px) {
+	.agenda-modal__dialog {
+		padding: 1.4rem 1.2rem;
+		gap: 1rem;
+	}
+
+	.agenda-item {
+		grid-template-columns: 1fr;
+		text-align: left;
+	}
+
+	.agenda-item__date {
+		width: 56px;
+		height: 56px;
+		font-size: 0.8rem;
+	}
 }
 
 .post-grid {
@@ -1424,6 +1581,11 @@ a:focus {
 .member-library-card p {
 	margin: 0;
 	font-size: 0.95rem;
+}
+
+.member-library-more {
+	margin-top: 1.2rem;
+	text-align: center;
 }
 
 .member-faq details {

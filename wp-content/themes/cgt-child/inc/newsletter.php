@@ -31,6 +31,28 @@ function cgt_create_newsletter_table() {
 add_action( 'after_switch_theme', 'cgt_create_newsletter_table' );
 
 /**
+ * Ensure table exists on init (useful after restores/imports).
+ */
+add_action(
+	'init',
+	function () {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'cgt_newsletter';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				'SHOW TABLES LIKE %s',
+				$wpdb->esc_like( $table_name )
+			)
+		);
+		if ( $exists !== $table_name ) {
+			cgt_create_newsletter_table();
+		}
+	}
+);
+
+/**
  * Add newsletter management page to admin menu
  */
 add_action( 'admin_menu', 'cgt_add_newsletter_admin_page' );
@@ -89,8 +111,10 @@ function cgt_render_newsletter_admin_page() {
 	}
 
 	// Get all subscriptions
-	$subscriptions = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i ORDER BY date_inscription DESC", $table_name ) );
-	$total_count   = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i", $table_name ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$subscriptions = $wpdb->get_results( "SELECT * FROM {$table_name} ORDER BY date_inscription DESC" );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$total_count   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
 
 	?>
 	<div class="wrap">
@@ -268,7 +292,7 @@ function cgt_handle_newsletter_subscription() {
 	$table_name = $wpdb->prefix . 'cgt_newsletter';
 
 	// Check if email already exists
-	$existing = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $table_name WHERE email = %s", $email ) );
+	$existing = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE email = %s", $email ) );
 
 	if ( $existing ) {
 		wp_send_json_error( array( 'message' => __( 'Cette adresse email est déjà inscrite.', 'cgt' ) ) );
@@ -288,6 +312,10 @@ function cgt_handle_newsletter_subscription() {
 	if ( $inserted ) {
 		wp_send_json_success( array( 'message' => __( 'Inscription réussie ! Merci de vous être inscrit·e à notre liste de diffusion.', 'cgt' ) ) );
 	} else {
-		wp_send_json_error( array( 'message' => __( 'Une erreur est survenue. Veuillez réessayer.', 'cgt' ) ) );
+		wp_send_json_error(
+			array(
+				'message' => __( 'Une erreur est survenue. Veuillez réessayer.', 'cgt' ),
+			)
+		);
 	}
 }

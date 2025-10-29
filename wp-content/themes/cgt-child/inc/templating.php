@@ -75,7 +75,6 @@ function cgt_after_switch_theme() { // phpcs:ignore Generic.CodeAnalysis.UnusedF
 	cgt_register_adherent_role();
 	cgt_create_demo_adherent_user();
 	cgt_setup_pages_and_menus();
-	cgt_seed_demo_content();
 	flush_rewrite_rules();
 }
 
@@ -208,6 +207,11 @@ function cgt_setup_pages_and_menus() {
 		'politique-de-confidentialite' => array(
 			'post_title'        => __( 'Politique de confidentialité', 'cgt' ),
 			'_wp_page_template' => 'templates/page-politique-confidentialite.php',
+		),
+		'rgpd'                 => array(
+			'post_title'        => __( 'Protection des données (RGPD)', 'cgt' ),
+			'_wp_page_template' => 'templates/page-rgpd.php',
+			'post_status'       => 'publish',
 		),
 	'categories' => array(
 		'post_title'   => __( 'Catégories', 'cgt' ),
@@ -675,6 +679,49 @@ function cgt_seed_demo_content() {
 }
 
 /**
+ * Ensure RGPD page exists even si la fonction de setup n'a pas tourné.
+ */
+add_action(
+	'init',
+	static function () {
+		$rgpd_page = get_page_by_path( 'rgpd', OBJECT, 'page' );
+
+		if ( ! $rgpd_page ) {
+			$page_id = wp_insert_post(
+				array(
+					'post_type'      => 'page',
+					'post_status'    => 'publish',
+					'post_title'     => __( 'Protection des données (RGPD)', 'cgt' ),
+					'post_name'      => 'rgpd',
+					'post_content'   => '',
+					'comment_status' => 'closed',
+				)
+			);
+
+			if ( $page_id && ! is_wp_error( $page_id ) ) {
+				update_post_meta( $page_id, '_wp_page_template', 'templates/page-rgpd.php' );
+			}
+
+			return;
+		}
+
+		if ( 'publish' !== $rgpd_page->post_status ) {
+			wp_update_post(
+				array(
+					'ID'          => $rgpd_page->ID,
+					'post_status' => 'publish',
+				)
+			);
+		}
+
+		if ( 'templates/page-rgpd.php' !== get_page_template_slug( $rgpd_page->ID ) ) {
+			update_post_meta( $rgpd_page->ID, '_wp_page_template', 'templates/page-rgpd.php' );
+		}
+	},
+	30
+);
+
+/**
  * Remove legacy demo events that might avoir été créés avant la mise à jour.
  */
 function cgt_cleanup_legacy_agenda_events() {
@@ -690,9 +737,6 @@ function cgt_cleanup_legacy_agenda_events() {
 	update_option( 'cgt_cleanup_agenda_done', 1 );
 }
 add_action( 'init', 'cgt_cleanup_legacy_agenda_events', 40 );
-
-// Ensure demo content exists even après synchronisations depuis GitHub.
-add_action( 'init', 'cgt_seed_demo_content', 12 );
 
 /**
  * Ensure primary menu matches the new specification.

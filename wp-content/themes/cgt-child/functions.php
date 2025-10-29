@@ -32,6 +32,7 @@ $cgt_inc_files = array(
 	'newsletter.php',
 	'admin-post-creation.php',
 	'admin-menu-reorganization.php',
+	'content-reset.php',
 );
 
 foreach ( $cgt_inc_files as $cgt_inc_file ) {
@@ -81,12 +82,21 @@ add_action(
 add_action(
 	'wp_enqueue_scripts',
 	function () {
-		$parent_version = wp_get_theme( get_template() )->get( 'Version' );
+		$parent       = wp_get_theme( get_template() );
+		$parent_ver   = $parent ? $parent->get( 'Version' ) : null;
+
+		wp_enqueue_style(
+			'cgt-fonts',
+			'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+			array(),
+			null
+		);
+
 		wp_enqueue_style(
 			'cgt-parent',
 			get_template_directory_uri() . '/style.css',
-			array(),
-			$parent_version
+			array( 'cgt-fonts' ),
+			$parent_ver
 		);
 
 		wp_enqueue_style(
