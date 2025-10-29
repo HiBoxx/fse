@@ -29,13 +29,24 @@ switch ( $post_type ) {
 		$cta_label = __( 'Consulter le dossier', 'cgt' );
 		break;
 }
+$has_thumbnail = has_post_thumbnail( $post_id );
+$image_html    = $has_thumbnail ? get_the_post_thumbnail( $post_id, 'medium_large', array( 'class' => 'card-media__img', 'loading' => 'lazy' ) ) : '';
+
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( $card_classes ); ?>>
 	<?php if ( $permalink ) : ?>
 	<a class="card-link" href="<?php echo esc_url( $permalink ); ?>">
 	<?php endif; ?>
-		<div class="placeholder" aria-hidden="true"></div>
+		<div class="card-media">
+			<?php
+			if ( $image_html ) {
+				echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			} else {
+				echo '<span class="card-media__placeholder" aria-hidden="true"></span>';
+			}
+			?>
+		</div>
 		<header class="card-header">
 			<span class="card-meta"><?php echo esc_html( get_the_date() ); ?></span>
 			<h3 class="card-title"><?php the_title(); ?></h3>
