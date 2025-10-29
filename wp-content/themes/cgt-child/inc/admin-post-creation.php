@@ -142,7 +142,14 @@ function cgt_redirect_new_post_pages() {
 add_action( 'admin_enqueue_scripts', 'cgt_enqueue_custom_post_creation_assets' );
 function cgt_enqueue_custom_post_creation_assets( $hook ) {
 	// Charger uniquement sur nos pages
-	if ( ! in_array( $hook, array( 'posts_page_cgt-add-article', 'tracts_page_cgt-add-tract' ), true ) ) {
+	$allowed_hooks = array(
+		'posts_page_cgt-add-article',
+		'tracts_page_cgt-add-tract',
+		'articles-adherents_page_cgt-add-private-article',
+		'articles-adherents_page_cgt-add-private-tract',
+	);
+
+	if ( ! in_array( $hook, $allowed_hooks, true ) ) {
 		return;
 	}
 
@@ -508,6 +515,169 @@ function cgt_render_add_article_page() {
 }
 
 /**
+ * Render page Créer/Modifier un article adhérent privé.
+ */
+function cgt_render_add_private_article_page() {
+	$message = '';
+	$errors  = array();
+
+	$edit_id  = isset( $_GET['edit_id'] ) ? absint( $_GET['edit_id'] ) : 0;
+	$is_edit  = $edit_id > 0;
+
+	$title       = '';
+	$content     = '';
+	$excerpt     = '';
+	$classe      = 0;
+	$branche     = 0;
+	$keywords    = '';
+	$sources     = '';
+	$featured_id = 0;
+
+	if ( $is_edit ) {
+		$post = get_post( $edit_id );
+		if ( $post && 'articles_adherents' === $post->post_type ) {
+			$title       = $post->post_title;
+			$content     = $post->post_content;
+			$excerpt     = $post->post_excerpt;
+			$featured_id = get_post_thumbnail_id( $post->ID );
+			$sources     = get_post_meta( $post->ID, 'cgt_submission_sources', true );
+
+			$classe_terms = wp_get_post_terms( $post->ID, 'thematique' );
+			$classe       = ! empty( $classe_terms ) ? $classe_terms[0]->term_id : 0;
+
+			$branche_terms = wp_get_post_terms( $post->ID, 'branche' );
+			$branche       = ! empty( $branche_terms ) ? $branche_terms[0]->term_id : 0;
+
+			$tags     = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+			$keywords = implode( ', ', $tags );
+		} else {
+			$errors[] = __( 'Article privé introuvable.', 'cgt' );
+			$is_edit  = false;
+		}
+	}
+
+	if ( isset( $_POST['cgt_add_private_article_submit'] ) ) {
+		if ( ! isset( $_POST['cgt_add_private_article_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['cgt_add_private_article_nonce'] ), 'cgt_add_private_article' ) ) {
+			$errors[] = __( 'Erreur de sécurité. Veuillez réessayer.', 'cgt' );
+		} else {
+			$title        = isset( $_POST['cgt_private_article_title'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_private_article_title'] ) ) : '';
+			$content      = isset( $_POST['cgt_private_article_content'] ) ? wp_kses_post( wp_unslash( $_POST['cgt_private_article_content'] ) ) : '';
+			$excerpt      = isset( $_POST['cgt_private_article_excerpt'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_private_article_excerpt'] ) ) : '';
+			$classe       = isset( $_POST['cgt_private_article_category'] ) ? absint( $_POST['cgt_private_article_category'] ) : 0;
+			$branche      = isset( $_POST['cgt_private_article_branche'] ) ? absint( $_POST['cgt_private_article_branche'] ) : 0;
+			$keywords     = isset( $_POST['cgt_private_article_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_private_article_keywords'] ) ) : '';
+			$sources      = isset( $_POST['cgt_private_article_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_private_article_sources'] ) ) : '';
+			$featured_id  = isset( $_POST['cgt_private_article_featured_id'] ) ? absint( $_POST['cgt_private_article_featured_id'] ) : 0;
+			$edit_id_post = isset( $_POST['cgt_private_article_edit_id'] ) ? absint( $_POST['cgt_private_article_edit_id'] ) : 0;
+
+			if ( empty( $title ) ) {
+				$errors[] = __( 'Le titre est requis.', 'cgt' );
+			}
+
+			if ( empty( $content ) ) {
+				$errors[] = __( 'Le contenu est requis.', 'cgt' );
+			}
+
+			if ( empty( $errors ) ) {
+				$post_args = array(
+					'post_type'   => 'articles_adherents',
+					'post_title'  => $title,
+					'post_content'=> $content,
+					'post_excerpt'=> $excerpt,
+					'post_status' => 'private',
+				);
+
+				if ( $edit_id_post > 0 ) {
+					$post_args['ID'] = $edit_id_post;
+					$post_id         = wp_update_post( $post_args );
+					$success_message = __( 'Article privé modifié avec succès ! %s', 'cgt' );
+				} else {
+					$post_args['post_author'] = get_current_user_id();
+					$post_id                   = wp_insert_post( $post_args );
+					$success_message           = __( 'Article privé créé avec succès ! %s', 'cgt' );
+				}
+
+				if ( $post_id && ! is_wp_error( $post_id ) ) {
+					if ( $classe ) {
+						wp_set_post_terms( $post_id, array( $classe ), 'thematique', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'thematique', false );
+					}
+
+					if ( $branche ) {
+						wp_set_post_terms( $post_id, array( $branche ), 'branche', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'branche', false );
+					}
+
+					if ( $keywords ) {
+						$tags = array_map( 'trim', explode( ',', $keywords ) );
+						wp_set_post_terms( $post_id, $tags, 'post_tag', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'post_tag', false );
+					}
+
+					if ( $sources ) {
+						update_post_meta( $post_id, 'cgt_submission_sources', $sources );
+					} else {
+						delete_post_meta( $post_id, 'cgt_submission_sources' );
+					}
+
+					if ( $featured_id ) {
+						set_post_thumbnail( $post_id, $featured_id );
+					} else {
+						delete_post_thumbnail( $post_id );
+					}
+
+					$view_link = get_permalink( $post_id );
+					$edit_link = admin_url( 'edit.php?post_type=articles_adherents&page=cgt-add-private-article&edit_id=' . $post_id );
+					$message   = sprintf(
+						$success_message,
+						'<a href="' . esc_url( $view_link ) . '" target="_blank">' . __( 'Voir l’article privé', 'cgt' ) . '</a> | <a href="' . esc_url( $edit_link ) . '">' . __( 'Modifier', 'cgt' ) . '</a>'
+					);
+
+					$edit_id = $post_id;
+					$is_edit = true;
+				} else {
+					$errors[] = $edit_id_post > 0 ? __( 'Erreur lors de la modification de l’article privé.', 'cgt' ) : __( 'Erreur lors de la création de l’article privé.', 'cgt' );
+				}
+			}
+		}
+	}
+
+	$classes  = get_terms( array( 'taxonomy' => 'thematique', 'hide_empty' => false ) );
+	$branches = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
+
+	if ( is_wp_error( $classes ) ) {
+		$classes = array();
+	}
+
+	if ( is_wp_error( $branches ) ) {
+		$branches = array();
+	}
+
+	cgt_render_custom_post_page(
+		'private_article',
+		$message,
+		$errors,
+		array(
+			'title'       => $title,
+			'content'     => $content,
+			'excerpt'     => $excerpt,
+			'category'    => $classe,
+			'branche'     => $branche,
+			'keywords'    => $keywords,
+			'sources'     => $sources,
+			'featured_id' => $featured_id,
+			'categories'  => $classes,
+			'branches'    => $branches,
+			'is_edit'     => $is_edit,
+			'edit_id'     => $edit_id,
+		)
+	);
+}
+
+/**
  * Render page Ajouter/Modifier un tract
  */
 function cgt_render_add_tract_page() {
@@ -685,16 +855,223 @@ function cgt_render_add_tract_page() {
 }
 
 /**
+ * Render page Créer/Modifier un tract privé adhérent.
+ */
+function cgt_render_add_private_tract_page() {
+	$message = '';
+	$errors  = array();
+
+	$edit_id  = isset( $_GET['edit_id'] ) ? absint( $_GET['edit_id'] ) : 0;
+	$is_edit  = $edit_id > 0;
+
+	$title       = '';
+	$content     = '';
+	$excerpt     = '';
+	$classe      = 0;
+	$branche     = 0;
+	$keywords    = '';
+	$sources     = '';
+	$featured_id = 0;
+	$pdf_id      = 0;
+
+	if ( $is_edit ) {
+		$post = get_post( $edit_id );
+		if ( $post && 'tracts' === $post->post_type ) {
+			$title       = $post->post_title;
+			$content     = $post->post_content;
+			$excerpt     = $post->post_excerpt;
+			$featured_id = get_post_thumbnail_id( $post->ID );
+			$sources     = get_post_meta( $post->ID, 'cgt_submission_sources', true );
+
+			$classe_terms = wp_get_post_terms( $post->ID, 'thematique' );
+			$classe       = ! empty( $classe_terms ) ? $classe_terms[0]->term_id : 0;
+
+			$branche_terms = wp_get_post_terms( $post->ID, 'branche' );
+			$branche       = ! empty( $branche_terms ) ? $branche_terms[0]->term_id : 0;
+
+			$tags     = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+			$keywords = implode( ', ', $tags );
+
+			$pdf_url = get_post_meta( $post->ID, 'cgt_fichier_pdf', true );
+			$pdf_id  = $pdf_url ? attachment_url_to_postid( $pdf_url ) : 0;
+		} else {
+			$errors[] = __( 'Tract privé introuvable.', 'cgt' );
+			$is_edit  = false;
+		}
+	}
+
+	if ( isset( $_POST['cgt_add_private_tract_submit'] ) ) {
+		if ( ! isset( $_POST['cgt_add_private_tract_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['cgt_add_private_tract_nonce'] ), 'cgt_add_private_tract' ) ) {
+			$errors[] = __( 'Erreur de sécurité. Veuillez réessayer.', 'cgt' );
+		} else {
+			$title        = isset( $_POST['cgt_private_tract_title'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_private_tract_title'] ) ) : '';
+			$content      = isset( $_POST['cgt_private_tract_content'] ) ? wp_kses_post( wp_unslash( $_POST['cgt_private_tract_content'] ) ) : '';
+			$excerpt      = isset( $_POST['cgt_private_tract_excerpt'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_private_tract_excerpt'] ) ) : '';
+			$classe       = isset( $_POST['cgt_private_tract_category'] ) ? absint( $_POST['cgt_private_tract_category'] ) : 0;
+			$branche      = isset( $_POST['cgt_private_tract_branche'] ) ? absint( $_POST['cgt_private_tract_branche'] ) : 0;
+			$keywords     = isset( $_POST['cgt_private_tract_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_private_tract_keywords'] ) ) : '';
+			$sources      = isset( $_POST['cgt_private_tract_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_private_tract_sources'] ) ) : '';
+			$featured_id  = isset( $_POST['cgt_private_tract_featured_id'] ) ? absint( $_POST['cgt_private_tract_featured_id'] ) : 0;
+			$pdf_id       = isset( $_POST['cgt_private_tract_pdf_id'] ) ? absint( $_POST['cgt_private_tract_pdf_id'] ) : 0;
+			$edit_id_post = isset( $_POST['cgt_private_tract_edit_id'] ) ? absint( $_POST['cgt_private_tract_edit_id'] ) : 0;
+
+			if ( empty( $title ) ) {
+				$errors[] = __( 'Le titre est requis.', 'cgt' );
+			}
+
+			if ( empty( $content ) ) {
+				$errors[] = __( 'Le contenu est requis.', 'cgt' );
+			}
+
+			if ( empty( $errors ) ) {
+				$post_args = array(
+					'post_type'    => 'tracts',
+					'post_title'   => $title,
+					'post_content' => $content,
+					'post_excerpt' => $excerpt,
+					'post_status'  => 'private',
+				);
+
+				if ( $edit_id_post > 0 ) {
+					$post_args['ID'] = $edit_id_post;
+					$post_id         = wp_update_post( $post_args );
+					$success_message = __( 'Tract privé modifié avec succès ! %s', 'cgt' );
+				} else {
+					$post_args['post_author'] = get_current_user_id();
+					$post_id                   = wp_insert_post( $post_args );
+					$success_message           = __( 'Tract privé créé avec succès ! %s', 'cgt' );
+				}
+
+				if ( $post_id && ! is_wp_error( $post_id ) ) {
+					if ( $classe ) {
+						wp_set_post_terms( $post_id, array( $classe ), 'thematique', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'thematique', false );
+					}
+
+					if ( $branche ) {
+						wp_set_post_terms( $post_id, array( $branche ), 'branche', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'branche', false );
+					}
+
+					if ( $keywords ) {
+						$tags = array_map( 'trim', explode( ',', $keywords ) );
+						wp_set_post_terms( $post_id, $tags, 'post_tag', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'post_tag', false );
+					}
+
+					if ( $sources ) {
+						update_post_meta( $post_id, 'cgt_submission_sources', $sources );
+					} else {
+						delete_post_meta( $post_id, 'cgt_submission_sources' );
+					}
+
+					if ( $featured_id ) {
+						set_post_thumbnail( $post_id, $featured_id );
+					} else {
+						delete_post_thumbnail( $post_id );
+					}
+
+					if ( $pdf_id ) {
+						update_post_meta( $post_id, 'cgt_fichier_pdf', wp_get_attachment_url( $pdf_id ) );
+					} else {
+						delete_post_meta( $post_id, 'cgt_fichier_pdf' );
+					}
+
+					update_post_meta( $post_id, 'cgt_visibilite', 'prive' );
+
+					$view_link = get_permalink( $post_id );
+					$edit_link = admin_url( 'edit.php?post_type=articles_adherents&page=cgt-add-private-tract&edit_id=' . $post_id );
+					$message   = sprintf(
+						$success_message,
+						'<a href="' . esc_url( $view_link ) . '" target="_blank">' . __( 'Voir le tract privé', 'cgt' ) . '</a> | <a href="' . esc_url( $edit_link ) . '">' . __( 'Modifier', 'cgt' ) . '</a>'
+					);
+
+					$edit_id = $post_id;
+					$is_edit = true;
+				} else {
+					$errors[] = $edit_id_post > 0 ? __( 'Erreur lors de la modification du tract privé.', 'cgt' ) : __( 'Erreur lors de la création du tract privé.', 'cgt' );
+				}
+			}
+		}
+	}
+
+	$classes  = get_terms( array( 'taxonomy' => 'thematique', 'hide_empty' => false ) );
+	$branches = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
+
+	if ( is_wp_error( $classes ) ) {
+		$classes = array();
+	}
+
+	if ( is_wp_error( $branches ) ) {
+		$branches = array();
+	}
+
+	cgt_render_custom_post_page(
+		'private_tract',
+		$message,
+		$errors,
+		array(
+			'title'       => $title,
+			'content'     => $content,
+			'excerpt'     => $excerpt,
+			'category'    => $classe,
+			'branche'     => $branche,
+			'keywords'    => $keywords,
+			'sources'     => $sources,
+			'featured_id' => $featured_id,
+			'pdf_id'      => $pdf_id,
+			'categories'  => $classes,
+			'branches'    => $branches,
+			'is_edit'     => $is_edit,
+			'edit_id'     => $edit_id,
+		)
+	);
+}
+
+/**
  * Render la page personnalisée complète
  */
 function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
-	$is_article      = ( 'article' === $type );
-	$post_type_label = $is_article ? __( 'Article', 'cgt' ) : __( 'Tract', 'cgt' );
-	$icon            = $is_article ? '✍️' : '📄';
-	$nonce_action    = $is_article ? 'cgt_add_article' : 'cgt_add_tract';
-	$nonce_name      = $is_article ? 'cgt_add_article_nonce' : 'cgt_add_tract_nonce';
-	$submit_name     = $is_article ? 'cgt_add_article_submit' : 'cgt_add_tract_submit';
-	$field_prefix    = $is_article ? 'article' : 'tract';
+	$is_private_article = ( 'private_article' === $type );
+	$is_private_tract   = ( 'private_tract' === $type );
+	$is_article         = in_array( $type, array( 'article', 'private_article' ), true );
+
+	switch ( $type ) {
+		case 'article':
+			$post_type_label = __( 'Article', 'cgt' );
+			$icon            = '✍️';
+			$nonce_action    = 'cgt_add_article';
+			$nonce_name      = 'cgt_add_article_nonce';
+			$submit_name     = 'cgt_add_article_submit';
+			$field_prefix    = 'article';
+			break;
+		case 'private_article':
+			$post_type_label = __( 'Article privé', 'cgt' );
+			$icon            = '🔒';
+			$nonce_action    = 'cgt_add_private_article';
+			$nonce_name      = 'cgt_add_private_article_nonce';
+			$submit_name     = 'cgt_add_private_article_submit';
+			$field_prefix    = 'private_article';
+			break;
+		case 'private_tract':
+			$post_type_label = __( 'Tract privé', 'cgt' );
+			$icon            = '🔒';
+			$nonce_action    = 'cgt_add_private_tract';
+			$nonce_name      = 'cgt_add_private_tract_nonce';
+			$submit_name     = 'cgt_add_private_tract_submit';
+			$field_prefix    = 'private_tract';
+			break;
+		default:
+			$post_type_label = __( 'Tract', 'cgt' );
+			$icon            = '📄';
+			$nonce_action    = 'cgt_add_tract';
+			$nonce_name      = 'cgt_add_tract_nonce';
+			$submit_name     = 'cgt_add_tract_submit';
+			$field_prefix    = 'tract';
+	}
 
 	// Valeurs par défaut
 	$title       = isset( $data['title'] ) ? $data['title'] : '';
@@ -712,9 +1089,27 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 	$edit_id     = isset( $data['edit_id'] ) ? $data['edit_id'] : 0;
 
 	// Titres et descriptions selon le mode
-	$page_title       = $is_edit ? sprintf( __( 'Modifier %s', 'cgt' ), strtolower( $post_type_label ) ) : sprintf( __( 'Créer un nouveau %s', 'cgt' ), strtolower( $post_type_label ) );
-	$page_description = $is_edit ? sprintf( __( 'Modifiez les informations de votre %s ci-dessous.', 'cgt' ), strtolower( $post_type_label ) ) : sprintf( __( 'Remplissez le formulaire ci-dessous pour publier votre %s sur le site CGT.', 'cgt' ), strtolower( $post_type_label ) );
-	$button_text      = $is_edit ? sprintf( __( 'Mettre à jour le %s', 'cgt' ), strtolower( $post_type_label ) ) : sprintf( __( 'Publier le %s', 'cgt' ), strtolower( $post_type_label ) );
+	$page_title  = $is_edit ? sprintf( __( 'Modifier %s', 'cgt' ), strtolower( $post_type_label ) ) : sprintf( __( 'Créer un nouveau %s', 'cgt' ), strtolower( $post_type_label ) );
+	if ( $is_private_article || $is_private_tract ) {
+		$page_description = $is_edit
+			? sprintf( __( 'Modifiez les informations de votre %s réservé aux adhérents.', 'cgt' ), strtolower( $post_type_label ) )
+			: sprintf( __( 'Remplissez le formulaire ci-dessous pour enregistrer votre %s réservé aux adhérents.', 'cgt' ), strtolower( $post_type_label ) );
+		$button_text = $is_edit
+			? sprintf( __( 'Mettre à jour le %s privé', 'cgt' ), strtolower( $post_type_label ) )
+			: sprintf( __( 'Enregistrer le %s privé', 'cgt' ), strtolower( $post_type_label ) );
+	} else {
+		$page_description = $is_edit
+			? sprintf( __( 'Modifiez les informations de votre %s ci-dessous.', 'cgt' ), strtolower( $post_type_label ) )
+			: sprintf( __( 'Remplissez le formulaire ci-dessous pour publier votre %s sur le site CGT.', 'cgt' ), strtolower( $post_type_label ) );
+		$button_text = $is_edit
+			? sprintf( __( 'Mettre à jour le %s', 'cgt' ), strtolower( $post_type_label ) )
+			: sprintf( __( 'Publier le %s', 'cgt' ), strtolower( $post_type_label ) );
+	}
+
+	$category_label = $is_article ? __( 'Catégorie', 'cgt' ) : __( 'Thématique', 'cgt' );
+	if ( $is_private_article || $is_private_tract ) {
+		$category_label = __( 'Classe', 'cgt' );
+	}
 
 	?>
 	<div class="wrap cgt-custom-editor-page">
@@ -832,11 +1227,11 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 
 							<!-- Catégorie/Thématique -->
 							<div class="form-group">
-								<label>
-									<?php echo $is_article ? esc_html__( 'Catégorie', 'cgt' ) : esc_html__( 'Thématique', 'cgt' ); ?>
-									<span class="hint"><?php esc_html_e( 'Sélectionnez la plus pertinente', 'cgt' ); ?></span>
-								</label>
-								<select name="cgt_<?php echo esc_attr( $field_prefix ); ?>_category" class="form-control">
+						<label>
+							<?php echo esc_html( $category_label ); ?>
+							<span class="hint"><?php esc_html_e( 'Sélectionnez la plus pertinente', 'cgt' ); ?></span>
+						</label>
+						<select name="cgt_<?php echo esc_attr( $field_prefix ); ?>_category" class="form-control">
 									<option value=""><?php esc_html_e( '— Choisir —', 'cgt' ); ?></option>
 									<?php foreach ( $categories as $cat ) : ?>
 										<option value="<?php echo esc_attr( $cat->term_id ); ?>" <?php selected( $category, $cat->term_id ); ?>>

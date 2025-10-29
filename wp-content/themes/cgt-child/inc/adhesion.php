@@ -259,7 +259,7 @@ function cgt_register_adhesion_cpt() {
     $labels = array(
         'name'               => 'Adhésions',
         'singular_name'      => 'Adhésion',
-        'menu_name'          => 'Adhésions',
+        'menu_name'          => 'Adhérents',
         'add_new'            => 'Ajouter',
         'add_new_item'       => 'Ajouter une adhésion',
         'edit_item'          => 'Modifier l\'adhésion',

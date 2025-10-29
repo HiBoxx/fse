@@ -151,15 +151,16 @@ function cgt_register_cpts() {
 	register_post_type(
 		'cgt_contact',
 		array(
-			'label'               => __( 'Messages de contact', 'cgt' ),
+			'label'               => __( 'Messages', 'cgt' ),
 			'labels'              => array(
-				'name'          => __( 'Messages de contact', 'cgt' ),
-				'singular_name' => __( 'Message de contact', 'cgt' ),
+				'name'          => __( 'Messages', 'cgt' ),
+				'singular_name' => __( 'Message', 'cgt' ),
 				'all_items'     => __( 'Messages reçus', 'cgt' ),
 				'add_new'       => '',
 				'add_new_item'  => '',
 				'edit_item'     => __( 'Consulter le message', 'cgt' ),
 				'not_found'     => __( 'Aucun message', 'cgt' ),
+				'menu_name'     => __( 'Messages', 'cgt' ),
 			),
 			'public'              => false,
 			'show_ui'             => true,

@@ -29,22 +29,53 @@ function cgt_register_adherent_role() {
 		$role->add_cap( 'read_private_cgt_agendas' );
 	}
 
+	$article_caps = array(
+		'edit_article_adherent',
+		'read_article_adherent',
+		'delete_article_adherent',
+		'edit_articles_adherents',
+		'edit_others_articles_adherents',
+		'publish_articles_adherents',
+		'read_private_articles_adherents',
+		'edit_private_articles_adherents',
+		'edit_published_articles_adherents',
+		'delete_articles_adherents',
+		'delete_others_articles_adherents',
+		'delete_private_articles_adherents',
+		'delete_published_articles_adherents',
+	);
+
 	// Grant capability to editors & admins.
 	foreach ( array( 'administrator', 'editor' ) as $role_key ) {
 		$role_object = get_role( $role_key );
-	if ( $role_object ) {
-		$role_object->add_cap( 'read_private_cgt' );
-		$role_object->add_cap( 'read_private_articles_adherents' );
-		$role_object->add_cap( 'read_private_cgt_agendas' );
-	}
+		if ( $role_object ) {
+			$role_object->add_cap( 'read_private_cgt' );
+			$role_object->add_cap( 'read_private_articles_adherents' );
+			$role_object->add_cap( 'read_private_cgt_agendas' );
+			foreach ( $article_caps as $cap ) {
+				$role_object->add_cap( $cap );
+			}
+		}
 	}
 }
 
 add_action(
 	'init',
 	function () {
-		$role = get_role( 'adherent' );
+		$role            = get_role( 'adherent' );
+		$needs_reapply   = false;
+		$required_cap    = 'edit_article_adherent';
+
 		if ( ! $role || ! $role->has_cap( 'read_private_cgt' ) ) {
+			$needs_reapply = true;
+		}
+
+		$admin_role = get_role( 'administrator' );
+		if ( $admin_role && ! $admin_role->has_cap( $required_cap ) ) {
+			$needs_reapply = true;
+		}
+
+		if ( $needs_reapply ) {
 			cgt_register_adherent_role();
 		}
 	}
