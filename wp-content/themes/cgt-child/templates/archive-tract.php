@@ -181,61 +181,63 @@ $branch_singles = array(
 					}
 					?>
 					<article <?php post_class( 'tract-card' ); ?>>
-						<div class="tract-card__icon">
-							<?php if ( $is_private ) : ?>
-								<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-									<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-								</svg>
-							<?php else : ?>
-								<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-									<polyline points="14 2 14 8 20 8"></polyline>
-									<line x1="16" y1="13" x2="8" y2="13"></line>
-									<line x1="16" y1="17" x2="8" y2="17"></line>
-									<polyline points="10 9 9 9 8 9"></polyline>
-								</svg>
-							<?php endif; ?>
-						</div>
-
-						<div class="tract-card__content">
-							<div class="tract-card__header">
-								<span class="tract-card__date">
-									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-										<line x1="16" y1="2" x2="16" y2="6"></line>
-										<line x1="8" y1="2" x2="8" y2="6"></line>
-										<line x1="3" y1="10" x2="21" y2="10"></line>
-									</svg>
-									<?php echo esc_html( get_the_date() ); ?>
-								</span>
+						<a href="<?php the_permalink(); ?>" class="tract-card__link" aria-label="<?php echo esc_attr( sprintf( __( 'Voir le tract : %s', 'cgt' ), get_the_title() ) ); ?>">
+							<div class="tract-card__icon">
 								<?php if ( $is_private ) : ?>
-									<span class="tract-card__badge tract-card__badge--private">
-										<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-											<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-											<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-										</svg>
-										<?php esc_html_e( 'Adhérents', 'cgt' ); ?>
-									</span>
+									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+										<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+									</svg>
+								<?php else : ?>
+									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+										<polyline points="14 2 14 8 20 8"></polyline>
+										<line x1="16" y1="13" x2="8" y2="13"></line>
+										<line x1="16" y1="17" x2="8" y2="17"></line>
+										<polyline points="10 9 9 9 8 9"></polyline>
+									</svg>
 								<?php endif; ?>
 							</div>
 
-							<h2 class="tract-card__title"><?php echo esc_html( $title ); ?></h2>
-
-							<?php
-							$branches = wp_get_post_terms( get_the_ID(), 'branche' );
-							if ( ! empty( $branches ) && ! is_wp_error( $branches ) ) :
-								?>
-								<div class="tract-card__branches">
-									<?php foreach ( array_slice( $branches, 0, 2 ) as $branch ) : ?>
-										<span class="tract-card__branch-tag"><?php echo esc_html( $branch->name ); ?></span>
-									<?php endforeach; ?>
-									<?php if ( count( $branches ) > 2 ) : ?>
-										<span class="tract-card__branch-tag tract-card__branch-tag--more">+<?php echo esc_html( count( $branches ) - 2 ); ?></span>
+							<div class="tract-card__content">
+								<div class="tract-card__header">
+									<span class="tract-card__date">
+										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+											<line x1="16" y1="2" x2="16" y2="6"></line>
+											<line x1="8" y1="2" x2="8" y2="6"></line>
+											<line x1="3" y1="10" x2="21" y2="10"></line>
+										</svg>
+										<?php echo esc_html( get_the_date() ); ?>
+									</span>
+									<?php if ( $is_private ) : ?>
+										<span class="tract-card__badge tract-card__badge--private">
+											<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+												<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+												<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+											</svg>
+											<?php esc_html_e( 'Adhérents', 'cgt' ); ?>
+										</span>
 									<?php endif; ?>
 								</div>
-							<?php endif; ?>
-						</div>
+
+								<h2 class="tract-card__title"><?php echo esc_html( $title ); ?></h2>
+
+								<?php
+								$branches = wp_get_post_terms( get_the_ID(), 'branche' );
+								if ( ! empty( $branches ) && ! is_wp_error( $branches ) ) :
+									?>
+									<div class="tract-card__branches">
+										<?php foreach ( array_slice( $branches, 0, 2 ) as $branch ) : ?>
+											<span class="tract-card__branch-tag"><?php echo esc_html( $branch->name ); ?></span>
+										<?php endforeach; ?>
+										<?php if ( count( $branches ) > 2 ) : ?>
+											<span class="tract-card__branch-tag tract-card__branch-tag--more">+<?php echo esc_html( count( $branches ) - 2 ); ?></span>
+										<?php endif; ?>
+									</div>
+								<?php endif; ?>
+							</div>
+						</a>
 
 						<div class="tract-card__footer">
 							<?php if ( $pdf_url && $can_access ) : ?>
