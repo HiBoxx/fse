@@ -20,62 +20,87 @@ function cgt_register_private_content_submenus() {
 
 	$primary_slug = 'edit.php?post_type=articles_adherents';
 
-	// S'assurer que le tableau existe pour manipuler les entrées.
-	if ( ! isset( $submenu[ $primary_slug ] ) ) {
-		$submenu[ $primary_slug ] = array();
-	}
+	// Ajouter les sous-menus personnalisés
+	// Note: WordPress ajoute automatiquement "Tous les articles adhérents" comme premier sous-menu
 
 	add_submenu_page(
 		$primary_slug,
 		__( 'Créer un article privé', 'cgt' ),
 		__( 'Créer un article privé', 'cgt' ),
-		'edit_posts',
-		'cgt-add-private-article',
-		'cgt_render_add_private_article_page'
-	);
+        'edit_posts',
+        'cgt-add-private-article',
+        'cgt_render_add_private_article_page'
+    );
 
-	add_submenu_page(
-		$primary_slug,
-		__( 'Créer un tract privé', 'cgt' ),
-		__( 'Créer un tract privé', 'cgt' ),
-		'edit_posts',
+    add_submenu_page(
+        $primary_slug,
+        __( 'Créer un tract privé', 'cgt' ),
+        __( 'Créer un tract privé', 'cgt' ),
+        'edit_posts',
 		'cgt-add-private-tract',
 		'cgt_render_add_private_tract_page'
 	);
 
-	// Entrées pointant vers des écrans natifs.
-	$submenu[ $primary_slug ]['articles'] = array( __( 'Articles privés', 'cgt' ), 'edit_posts', 'edit.php?post_type=articles_adherents' );
-	$submenu[ $primary_slug ]['tracts']   = array( __( 'Tracts privés', 'cgt' ), 'edit_posts', 'edit.php?post_type=tracts&cgt_private=1' );
-	$submenu[ $primary_slug ]['branches'] = array( __( 'Branches', 'cgt' ), 'edit_posts', 'edit-tags.php?taxonomy=branche&post_type=articles_adherents' );
-	$submenu[ $primary_slug ]['classes']  = array( __( 'Classes', 'cgt' ), 'edit_posts', 'edit-tags.php?taxonomy=thematique&post_type=articles_adherents' );
+	add_submenu_page(
+		$primary_slug,
+		__( 'Tracts privés', 'cgt' ),
+		__( 'Tracts privés', 'cgt' ),
+		'edit_posts',
+		'edit.php?post_type=tracts&cgt_private=1'
+    );
 
-	// Recomposer l'ordre souhaité sans doublons.
-	$items = array();
-	foreach ( $submenu[ $primary_slug ] as $item ) {
-		if ( isset( $item[2] ) ) {
-			$items[ $item[2] ] = $item;
-		}
-	}
-
-	$desired_order = array(
-		'cgt-add-private-article',
-		'cgt-add-private-tract',
-		'edit.php?post_type=articles_adherents',
-		'edit.php?post_type=tracts&cgt_private=1',
-		'edit-tags.php?taxonomy=branche&post_type=articles_adherents',
-		'edit-tags.php?taxonomy=thematique&post_type=articles_adherents',
-	);
-
-	$new_menu = array();
-	foreach ( $desired_order as $slug ) {
-		if ( isset( $items[ $slug ] ) ) {
-			$new_menu[] = $items[ $slug ];
-			unset( $items[ $slug ] );
-		}
-	}
-
-	$submenu[ $primary_slug ] = array_merge( $new_menu, array_values( $items ) );
+	// Note: Branches et Classes sont ajoutés automatiquement par WordPress via les taxonomies
 }
+
+/**
+ * Supprimer les doublons et réorganiser les sous-menus
+ */
+add_action( 'admin_menu', 'cgt_cleanup_articles_adherents_submenu', 999 );
+function cgt_cleanup_articles_adherents_submenu() {
+	global $submenu;
+
+	$primary_slug = 'edit.php?post_type=articles_adherents';
+
+	if ( ! isset( $submenu[ $primary_slug ] ) ) {
+		return;
+	}
+
+	// Parcourir et identifier les éléments à garder
+	$new_submenu = array();
+	$seen_branches = false;
+	$seen_classes = false;
+
+	foreach ( $submenu[ $primary_slug ] as $item ) {
+		$title = $item[0];
+		$slug = $item[2];
+
+		// Garder uniquement le premier "Branches"
+		if ( stripos( $title, 'branche' ) !== false ) {
+			if ( ! $seen_branches ) {
+				$new_submenu[] = $item;
+				$seen_branches = true;
+			}
+			continue;
+		}
+
+		// Garder uniquement le premier "Classes" (ou thématique)
+		if ( stripos( $title, 'classe' ) !== false || stripos( $title, 'thematique' ) !== false || stripos( $title, 'thématique' ) !== false ) {
+			if ( ! $seen_classes ) {
+				$new_submenu[] = $item;
+				$seen_classes = true;
+			}
+			continue;
+		}
+
+		// Garder tous les autres éléments
+		$new_submenu[] = $item;
+	}
+
+	$submenu[ $primary_slug ] = $new_submenu;
+}
+
+// Fonctions de redirection supprimées - remplacées par des liens directs dans les sous-menus
+// pour éviter l'erreur "headers already sent"
 
 /**
  * Définit l'ordre personnalisé du menu principal de l'administration.
