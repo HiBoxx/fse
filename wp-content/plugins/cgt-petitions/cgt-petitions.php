@@ -77,6 +77,7 @@ class CGT_Petitions_Plugin {
 			'labels'        => $labels,
 			'public'        => true,
 			'show_in_rest'  => true,
+			'show_in_menu'  => false,
 			'supports'      => array( 'title', 'editor', 'thumbnail' ),
 			'has_archive'   => false,
 			'menu_icon'     => 'dashicons-megaphone',
