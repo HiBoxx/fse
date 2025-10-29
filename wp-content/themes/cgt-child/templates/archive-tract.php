@@ -57,9 +57,9 @@ get_header();
 $current_branch = get_query_var( 'branche' );
 
 $branch_groups = array(
-	__( 'Bureaux d'études techniques et de conseil', 'cgt' ) => array(
-		'associations-agreees-qualite-air'          => __( 'Associations agréées de surveillance de la qualité de l'air', 'cgt' ),
-		'conseil-architecture-urbanisme-environnement' => __( 'Conseil d'Architecture d'Urbanisme et d'Environnement', 'cgt' ),
+	__( 'Bureaux d\'études techniques et de conseil', 'cgt' ) => array(
+		'associations-agreees-qualite-air'          => __( 'Associations agréées de surveillance de la qualité de l\'air', 'cgt' ),
+		'conseil-architecture-urbanisme-environnement' => __( 'Conseil d\'Architecture d\'Urbanisme et d\'Environnement', 'cgt' ),
 		'etudes-conseil'                             => __( 'Études et conseil', 'cgt' ),
 		'foires-salons'                              => __( 'Foires et salons', 'cgt' ),
 		'formation-professionnelle'                  => __( 'Formation professionnelle', 'cgt' ),
@@ -74,7 +74,7 @@ $branch_groups = array(
 	__( 'Officines judiciaires et parajudiciaires', 'cgt' ) => array(
 		'avocats'                               => __( 'Avocats', 'cgt' ),
 		'avocats-salaries'                      => __( 'Avocats salariés', 'cgt' ),
-		'salaries-cabinets-avocats'             => __( 'Salariés des cabinets d'avocats', 'cgt' ),
+		'salaries-cabinets-avocats'             => __( 'Salariés des cabinets d\'avocats', 'cgt' ),
 		'avoues'                                => __( 'Avoués', 'cgt' ),
 		'commissaires-justice'                  => __( 'Commissaires de justice', 'cgt' ),
 		'commissaires-priseurs'                 => __( 'Commissaires priseurs', 'cgt' ),
@@ -82,13 +82,13 @@ $branch_groups = array(
 		'notariat'                              => __( 'Notariat', 'cgt' ),
 		'professions-reglementees-juridictions' => __( 'Professions réglementées auprès des juridictions', 'cgt' ),
 		'administrateurs-mandataires-judiciaires' => __( 'Administrateurs et mandataires judiciaires', 'cgt' ),
-		'avocats-cour-cassation-conseil-etat'   => __( 'Avocats à la Cour de Cassation et au Conseil d'État', 'cgt' ),
+		'avocats-cour-cassation-conseil-etat'   => __( 'Avocats à la Cour de Cassation et au Conseil d\'État', 'cgt' ),
 		'greffes-tribunaux-commerce'            => __( 'Greffes des tribunaux de commerce', 'cgt' ),
 	),
 	__( 'Prestataires de services', 'cgt' ) => array(
 		'accueil-entreprise'        => __( 'Accueil en entreprise', 'cgt' ),
 		'animations-commerciales'    => __( 'Animations commerciales', 'cgt' ),
-		'centres-appels'            => __( 'Centres d'appels', 'cgt' ),
+		'centres-appels'            => __( 'Centres d\'appels', 'cgt' ),
 		'enquete-civile'            => __( 'Enquête civile', 'cgt' ),
 		'location-bureaux-salles'   => __( 'Location de bureaux et de salles', 'cgt' ),
 		'recouvrement-creances'     => __( 'Recouvrement de créances', 'cgt' ),
@@ -98,12 +98,12 @@ $branch_groups = array(
 );
 
 $branch_singles = array(
-	'cooperative-activite-emploi'              => __( 'Coopérative d'activité et d'emploi', 'cgt' ),
-	'expertises-evaluations-industrie-commerce' => __( 'Expertises en matière d'évaluations industrielles et commerciales', 'cgt' ),
+	'cooperative-activite-emploi'              => __( 'Coopérative d\'activité et d\'emploi', 'cgt' ),
+	'expertises-evaluations-industrie-commerce' => __( 'Expertises en matière d\'évaluations industrielles et commerciales', 'cgt' ),
 	'experts-automobiles'                       => __( 'Experts automobiles', 'cgt' ),
 	'organismes-developpement-economique'      => __( 'Organismes de développement économique', 'cgt' ),
 	'portage-salarial'                         => __( 'Portage salarial', 'cgt' ),
-	'snaii'                                    => __( 'Syndicat National des Auteurs d'Invention Indépendants (SNAII)', 'cgt' ),
+	'snaii'                                    => __( 'Syndicat National des Auteurs d\'Invention Indépendants (SNAII)', 'cgt' ),
 );
 ?>
 
