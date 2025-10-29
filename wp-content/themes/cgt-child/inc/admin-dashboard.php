@@ -18,95 +18,63 @@ function cgt_register_private_content_submenus() {
 
     global $submenu;
 
-    $primary_slug = 'edit.php?post_type=articles_adherents';
+	$primary_slug = 'edit.php?post_type=articles_adherents';
 
-	$submenu[ $primary_slug ] = array();
+	// S'assurer que le tableau existe pour manipuler les entrées.
+	if ( ! isset( $submenu[ $primary_slug ] ) ) {
+		$submenu[ $primary_slug ] = array();
+	}
 
 	add_submenu_page(
 		$primary_slug,
 		__( 'Créer un article privé', 'cgt' ),
 		__( 'Créer un article privé', 'cgt' ),
-        'edit_posts',
-        'cgt-add-private-article',
-        'cgt_render_add_private_article_page'
-    );
+		'edit_posts',
+		'cgt-add-private-article',
+		'cgt_render_add_private_article_page'
+	);
 
-    add_submenu_page(
-        $primary_slug,
-        __( 'Créer un tract privé', 'cgt' ),
-        __( 'Créer un tract privé', 'cgt' ),
-        'edit_posts',
+	add_submenu_page(
+		$primary_slug,
+		__( 'Créer un tract privé', 'cgt' ),
+		__( 'Créer un tract privé', 'cgt' ),
+		'edit_posts',
 		'cgt-add-private-tract',
 		'cgt_render_add_private_tract_page'
 	);
 
-	add_submenu_page(
-		$primary_slug,
-		__( 'Articles privés', 'cgt' ),
-		__( 'Articles privés', 'cgt' ),
-		'edit_posts',
-		'cgt-list-private-articles',
-		'cgt_redirect_private_articles_list'
+	// Entrées pointant vers des écrans natifs.
+	$submenu[ $primary_slug ]['articles'] = array( __( 'Articles privés', 'cgt' ), 'edit_posts', 'edit.php?post_type=articles_adherents' );
+	$submenu[ $primary_slug ]['tracts']   = array( __( 'Tracts privés', 'cgt' ), 'edit_posts', 'edit.php?post_type=tracts&cgt_private=1' );
+	$submenu[ $primary_slug ]['branches'] = array( __( 'Branches', 'cgt' ), 'edit_posts', 'edit-tags.php?taxonomy=branche&post_type=articles_adherents' );
+	$submenu[ $primary_slug ]['classes']  = array( __( 'Classes', 'cgt' ), 'edit_posts', 'edit-tags.php?taxonomy=thematique&post_type=articles_adherents' );
+
+	// Recomposer l'ordre souhaité sans doublons.
+	$items = array();
+	foreach ( $submenu[ $primary_slug ] as $item ) {
+		if ( isset( $item[2] ) ) {
+			$items[ $item[2] ] = $item;
+		}
+	}
+
+	$desired_order = array(
+		'cgt-add-private-article',
+		'cgt-add-private-tract',
+		'edit.php?post_type=articles_adherents',
+		'edit.php?post_type=tracts&cgt_private=1',
+		'edit-tags.php?taxonomy=branche&post_type=articles_adherents',
+		'edit-tags.php?taxonomy=thematique&post_type=articles_adherents',
 	);
 
-	add_submenu_page(
-		$primary_slug,
-		__( 'Tracts privés', 'cgt' ),
-		__( 'Tracts privés', 'cgt' ),
-		'edit_posts',
-		'cgt-list-private-tracts',
-        'cgt_redirect_private_tracts_list'
-    );
+	$new_menu = array();
+	foreach ( $desired_order as $slug ) {
+		if ( isset( $items[ $slug ] ) ) {
+			$new_menu[] = $items[ $slug ];
+			unset( $items[ $slug ] );
+		}
+	}
 
-    add_submenu_page(
-        $primary_slug,
-        __( 'Branches', 'cgt' ),
-        __( 'Branches', 'cgt' ),
-        'edit_posts',
-        'cgt-manage-branches',
-        'cgt_redirect_branches_admin'
-    );
-
-    add_submenu_page(
-        $primary_slug,
-        __( 'Classes', 'cgt' ),
-        __( 'Classes', 'cgt' ),
-        'edit_posts',
-		'cgt-manage-classes',
-		'cgt_redirect_classes_admin'
-	);
-}
-
-/**
- * Redirige vers la liste des articles adhérents privés.
- */
-function cgt_redirect_private_articles_list() {
-	wp_safe_redirect( admin_url( 'edit.php?post_type=articles_adherents' ) );
-	exit;
-}
-
-/**
- * Redirige vers la liste des tracts privés.
- */
-function cgt_redirect_private_tracts_list() {
-	wp_safe_redirect( admin_url( 'edit.php?post_type=tracts&cgt_private=1' ) );
-	exit;
-}
-
-/**
- * Redirige vers l'administration des branches.
- */
-function cgt_redirect_branches_admin() {
-	wp_safe_redirect( admin_url( 'edit-tags.php?taxonomy=branche&post_type=articles_adherents' ) );
-	exit;
-}
-
-/**
- * Redirige vers l'administration des classes.
- */
-function cgt_redirect_classes_admin() {
-	wp_safe_redirect( admin_url( 'edit-tags.php?taxonomy=thematique&post_type=articles_adherents' ) );
-	exit;
+	$submenu[ $primary_slug ] = array_merge( $new_menu, array_values( $items ) );
 }
 
 /**
