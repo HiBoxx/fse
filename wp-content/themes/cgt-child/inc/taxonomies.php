@@ -25,7 +25,6 @@ function cgt_register_taxonomies() {
 			'hierarchical'      => true,
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
-			'show_in_menu'      => false,
 			'rewrite'           => array(
 				'slug'       => 'branch',
 				'with_front' => false,
