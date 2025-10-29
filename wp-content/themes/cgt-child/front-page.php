@@ -101,7 +101,12 @@ $mediatheque_link = $mediatheque_page ? get_permalink( $mediatheque_page ) : hom
 				</ul>
 			</div>
 			<div class="home-hero__media" aria-hidden="true">
-				<span class="placeholder"></span>
+				<img
+					class="home-hero__image"
+					src="<?php echo esc_url( 'http://fse.local/wp-content/uploads/2025/10/slider.png' ); ?>"
+					alt="<?php esc_attr_e( 'Visuel illustrant la mobilisation de la Fédération CGT des Sociétés d’Études', 'cgt' ); ?>"
+					loading="lazy"
+				>
 			</div>
 		</div>
 	</section>
