@@ -150,7 +150,7 @@ function cgt_redirect_new_post_pages() {
  */
 add_action( 'admin_enqueue_scripts', 'cgt_enqueue_custom_post_creation_assets' );
 function cgt_enqueue_custom_post_creation_assets( $hook ) {
-	// Charger uniquement sur nos pages
+	// Charger uniquement sur nos pages personnalisées
 	$allowed_hooks = array(
 		'posts_page_cgt-add-article',
 		'tracts_page_cgt-add-tract',
@@ -158,16 +158,23 @@ function cgt_enqueue_custom_post_creation_assets( $hook ) {
 		'articles-adherents_page_cgt-add-private-tract',
 	);
 
-	if ( ! in_array( $hook, $allowed_hooks, true ) ) {
+	// Support pour différentes variations de noms de hooks
+	$is_custom_page = in_array( $hook, $allowed_hooks, true ) ||
+		strpos( $hook, 'cgt-add-article' ) !== false ||
+		strpos( $hook, 'cgt-add-tract' ) !== false ||
+		strpos( $hook, 'cgt-add-private-article' ) !== false ||
+		strpos( $hook, 'cgt-add-private-tract' ) !== false;
+
+	if ( ! $is_custom_page ) {
 		return;
 	}
 
-	// Charger le CSS personnalisé
+	// Charger le CSS personnalisé avec priorité
 	wp_enqueue_style(
 		'cgt-admin-post-creation',
 		get_stylesheet_directory_uri() . '/assets/css/submit-article.css',
 		array(),
-		CGT_CHILD_VERSION
+		CGT_CHILD_VERSION . '-' . time() // Cache busting pour forcer le rechargement
 	);
 
 	// Charger WordPress media uploader
