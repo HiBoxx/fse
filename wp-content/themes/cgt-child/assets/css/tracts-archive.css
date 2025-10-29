@@ -241,10 +241,29 @@
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
 	transition: all 0.3s ease;
 	position: relative;
 	overflow: hidden;
+}
+
+.tract-card__link {
+	text-decoration: none;
+	color: inherit;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	flex: 1;
+	cursor: pointer;
+}
+
+.tract-card__link:hover {
+	color: inherit;
+}
+
+.tract-card__link:focus {
+	outline: 2px solid #c8102e;
+	outline-offset: -2px;
+	border-radius: 12px;
 }
 
 .tract-card::before {
