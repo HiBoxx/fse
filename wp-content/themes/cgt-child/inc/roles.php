@@ -120,14 +120,18 @@ add_action( 'pre_get_posts', 'cgt_filter_private_content' );
  * Restrict access to private tracts and member-only content directly.
  */
 function cgt_redirect_private_single() {
+	// Ne s'exécute que sur le frontend, pas dans l'admin
+	if ( is_admin() ) {
+		return;
+	}
+
 	// Vérifier les tracts privés
 	if ( is_singular( 'tracts' ) ) {
 		$visibility = get_post_meta( get_queried_object_id(), 'cgt_visibilite', true );
 		if ( 'prive' === $visibility && ! cgt_user_can_read_private() ) {
 			// Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
 			if ( ! is_user_logged_in() ) {
-				wp_safe_redirect( wp_login_url( get_permalink() ) );
-				exit;
+				auth_redirect();
 			}
 
 			// Si l'utilisateur est connecté mais n'a pas les droits, afficher 403
@@ -144,8 +148,7 @@ function cgt_redirect_private_single() {
 		if ( ! cgt_user_can_read_private() ) {
 			// Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
 			if ( ! is_user_logged_in() ) {
-				wp_safe_redirect( wp_login_url( get_permalink() ) );
-				exit;
+				auth_redirect();
 			}
 
 			// Si l'utilisateur est connecté mais n'a pas les droits, afficher 403
@@ -157,4 +160,4 @@ function cgt_redirect_private_single() {
 		}
 	}
 }
-add_action( 'template_redirect', 'cgt_redirect_private_single', 1 );
+add_action( 'wp', 'cgt_redirect_private_single', 1 );
