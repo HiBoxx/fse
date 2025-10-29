@@ -18,7 +18,7 @@ function cgt_register_private_content_submenus() {
 
     global $submenu;
 
-    $primary_slug = 'edit.php?post_type=articles_adherents';
+	$primary_slug = 'edit.php?post_type=articles_adherents';
 
 	// Ajouter les sous-menus personnalisés
 	// Note: WordPress ajoute automatiquement "Tous les articles adhérents" comme premier sous-menu
