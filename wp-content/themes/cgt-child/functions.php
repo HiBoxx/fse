@@ -49,7 +49,6 @@ $cgt_inc_files = array(
 	'admin-post-creation.php',
 	'admin-menu-reorganization.php',
 	'content-reset.php',
-	'custom-roles.php',
 );
 
 foreach ( $cgt_inc_files as $cgt_inc_file ) {
