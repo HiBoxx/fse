@@ -24,30 +24,6 @@ get_header();
 				</div>
 				<h1 class="tracts-hero__title"><?php post_type_archive_title(); ?></h1>
 				<p class="tracts-hero__description"><?php esc_html_e( 'Téléchargez les derniers tracts publiés par la CGT. Documents prêts à imprimer et à diffuser dans votre entreprise.', 'cgt' ); ?></p>
-
-				<div class="tracts-hero__stats">
-					<div class="tracts-stat">
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-							<polyline points="14 2 14 8 20 8"></polyline>
-						</svg>
-						<div>
-							<strong><?php echo esc_html( wp_count_posts( 'tracts' )->publish ); ?></strong>
-							<span><?php esc_html_e( 'Tracts disponibles', 'cgt' ); ?></span>
-						</div>
-					</div>
-					<div class="tracts-stat">
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-							<polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-							<line x1="12" y1="22.08" x2="12" y2="12"></line>
-						</svg>
-						<div>
-							<strong><?php echo esc_html( wp_count_terms( 'branche' ) ); ?></strong>
-							<span><?php esc_html_e( 'Branches', 'cgt' ); ?></span>
-						</div>
-					</div>
-				</div>
 			</div>
 		</div>
 	</div>
