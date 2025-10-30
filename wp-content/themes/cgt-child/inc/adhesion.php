@@ -557,8 +557,10 @@ function cgt_generate_adhesion_pdf( $title, $data ) {
 	$col = 0;
 	foreach ( $personal_fields as $field ) {
 		$x = ( $col === 0 ) ? $left_col : $right_col;
-		$pdf_stream .= "BT /F2 9 Tf {$x} {$y} Td (" . cgt_pdf_escape_text( $field[0] . ' :' ) . ") Tj ET\n";
-		$pdf_stream .= "BT /F1 9 Tf " . ( $x + 80 ) . " {$y} Td (" . cgt_pdf_escape_text( $field[1] ) . ") Tj ET\n";
+		// Label in black bold
+		$pdf_stream .= "BT /F2 9 Tf 0 0 0 rg {$x} {$y} Td (" . cgt_pdf_escape_text( $field[0] . ' :' ) . ") Tj ET\n";
+		// Value in black regular
+		$pdf_stream .= "BT /F1 9 Tf 0 0 0 rg " . ( $x + 80 ) . " {$y} Td (" . cgt_pdf_escape_text( $field[1] ) . ") Tj ET\n";
 
 		if ( $col === 1 ) {
 			$y -= $line_height;
@@ -574,9 +576,9 @@ function cgt_generate_adhesion_pdf( $title, $data ) {
 
 	// Adresse (full width)
 	$y -= 5;
-	$pdf_stream .= "BT /F2 9 Tf {$left_col} {$y} Td (" . cgt_pdf_escape_text( 'Adresse :' ) . ") Tj ET\n";
+	$pdf_stream .= "BT /F2 9 Tf 0 0 0 rg {$left_col} {$y} Td (" . cgt_pdf_escape_text( 'Adresse :' ) . ") Tj ET\n";
 	$adresse_complete = trim( ( $data['adresse'] ?? '' ) . ', ' . ( $data['code_postal'] ?? '' ) . ' ' . ( $data['ville'] ?? '' ) );
-	$pdf_stream .= "BT /F1 9 Tf " . ( $left_col + 60 ) . " {$y} Td (" . cgt_pdf_escape_text( $adresse_complete ) . ") Tj ET\n";
+	$pdf_stream .= "BT /F1 9 Tf 0 0 0 rg " . ( $left_col + 60 ) . " {$y} Td (" . cgt_pdf_escape_text( $adresse_complete ) . ") Tj ET\n";
 	$y -= 25;
 
 	// Title: Entreprise
@@ -610,14 +612,16 @@ function cgt_generate_adhesion_pdf( $title, $data ) {
 		}
 
 		$x = ( $col === 0 ) ? $left_col : $right_col;
-		$pdf_stream .= "BT /F2 9 Tf {$x} {$y} Td (" . cgt_pdf_escape_text( $field[0] . ' :' ) . ") Tj ET\n";
+		// Label in black bold
+		$pdf_stream .= "BT /F2 9 Tf 0 0 0 rg {$x} {$y} Td (" . cgt_pdf_escape_text( $field[0] . ' :' ) . ") Tj ET\n";
 
 		// Truncate long text
 		$value = $field[1];
 		if ( strlen( $value ) > 30 ) {
 			$value = substr( $value, 0, 27 ) . '...';
 		}
-		$pdf_stream .= "BT /F1 9 Tf " . ( $x + 80 ) . " {$y} Td (" . cgt_pdf_escape_text( $value ) . ") Tj ET\n";
+		// Value in black regular
+		$pdf_stream .= "BT /F1 9 Tf 0 0 0 rg " . ( $x + 80 ) . " {$y} Td (" . cgt_pdf_escape_text( $value ) . ") Tj ET\n";
 
 		if ( $col === 1 ) {
 			$y -= $line_height;
@@ -634,9 +638,9 @@ function cgt_generate_adhesion_pdf( $title, $data ) {
 	// Adresse entreprise (full width)
 	if ( ! empty( $data['entreprise_adresse'] ) ) {
 		$y -= 5;
-		$pdf_stream .= "BT /F2 9 Tf {$left_col} {$y} Td (" . cgt_pdf_escape_text( 'Adresse :' ) . ") Tj ET\n";
+		$pdf_stream .= "BT /F2 9 Tf 0 0 0 rg {$left_col} {$y} Td (" . cgt_pdf_escape_text( 'Adresse :' ) . ") Tj ET\n";
 		$adresse_ent = trim( ( $data['entreprise_adresse'] ?? '' ) . ', ' . ( $data['entreprise_code_postal'] ?? '' ) . ' ' . ( $data['entreprise_ville'] ?? '' ) );
-		$pdf_stream .= "BT /F1 9 Tf " . ( $left_col + 60 ) . " {$y} Td (" . cgt_pdf_escape_text( $adresse_ent ) . ") Tj ET\n";
+		$pdf_stream .= "BT /F1 9 Tf 0 0 0 rg " . ( $left_col + 60 ) . " {$y} Td (" . cgt_pdf_escape_text( $adresse_ent ) . ") Tj ET\n";
 		$y -= 20;
 	}
 
