@@ -172,6 +172,16 @@ add_action(
 			);
 		}
 
+		// Charger les styles de la page Fédération
+		if ( is_page( 'la-federation' ) || is_page_template( 'page-la-federation.php' ) || is_page_template( 'templates/page-federation.php' ) ) {
+			wp_enqueue_style(
+				'cgt-federation',
+				get_stylesheet_directory_uri() . '/assets/css/federation.css',
+				array( 'cgt-child' ),
+				CGT_CHILD_VERSION
+			);
+		}
+
 		// Charger les styles et scripts de la page de connexion
 		if ( is_page_template( 'page-connexion.php' ) ) {
 			wp_enqueue_style(
