@@ -162,6 +162,16 @@ add_action(
 			);
 		}
 
+		// Charger les styles de la page Contact
+		if ( is_page( 'contact' ) || is_page_template( 'page-contact.php' ) || is_page_template( 'templates/page-contact.php' ) ) {
+			wp_enqueue_style(
+				'cgt-contact',
+				get_stylesheet_directory_uri() . '/assets/css/contact.css',
+				array( 'cgt-child' ),
+				CGT_CHILD_VERSION
+			);
+		}
+
 		// Charger les styles et scripts de la page de connexion
 		if ( is_page_template( 'page-connexion.php' ) ) {
 			wp_enqueue_style(
