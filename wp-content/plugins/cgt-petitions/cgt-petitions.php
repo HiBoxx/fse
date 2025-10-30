@@ -272,10 +272,33 @@ class CGT_Petitions_Plugin {
 		}
 
 		$petition_id = isset( $_GET['petition_id'] ) ? absint( $_GET['petition_id'] ) : 0;
-		$petition    = $petition_id ? get_post( $petition_id ) : null;
+		$petitions   = get_posts(
+			array(
+				'post_type'      => self::CPT,
+				'post_status'    => array( 'publish', 'draft' ),
+				'posts_per_page' => -1,
+				'orderby'        => 'title',
+				'order'          => 'ASC',
+			)
+		);
+
+		if ( ! $petition_id && ! empty( $petitions ) ) {
+			$petition_id = $petitions[0]->ID;
+		}
+
+		$petition = $petition_id ? get_post( $petition_id ) : null;
 
 		if ( ! $petition || self::CPT !== $petition->post_type ) {
-			echo '<div class="wrap"><h1>' . esc_html__( 'Signatures', 'cgt' ) . '</h1><p>' . esc_html__( 'Pétition introuvable.', 'cgt' ) . '</p></div>';
+			echo '<div class="wrap"><h1>' . esc_html__( 'Signatures', 'cgt' ) . '</h1>';
+
+			if ( empty( $petitions ) ) {
+				echo '<p>' . esc_html__( 'Aucune pétition disponible pour le moment.', 'cgt' ) . '</p>';
+			} else {
+				echo '<p>' . esc_html__( 'Sélectionnez une pétition pour afficher les signatures.', 'cgt' ) . '</p>';
+				$this->render_petition_selector( $petitions, 0 );
+			}
+
+			echo '</div>';
 			return;
 		}
 
@@ -286,7 +309,9 @@ class CGT_Petitions_Plugin {
 		$target  = (int) get_post_meta( $petition_id, self::META_TARGET, true );
 		?>
 		<div class="wrap">
-			<h1><?php printf( esc_html__( 'Signatures – %s', 'cgt' ), esc_html( get_the_title( $petition_id ) ) ); ?></h1>
+			<h1><?php esc_html_e( 'Signatures', 'cgt' ); ?></h1>
+			<?php $this->render_petition_selector( $petitions, $petition_id ); ?>
+			<h2><?php printf( esc_html__( 'Pétition : %s', 'cgt' ), esc_html( get_the_title( $petition_id ) ) ); ?></h2>
 			<?php if ( isset( $_GET['deleted'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Signature supprimée.', 'cgt' ); ?></p></div>
 			<?php endif; ?>
@@ -316,6 +341,28 @@ class CGT_Petitions_Plugin {
 				</tbody>
 			</table>
 		</div>
+		<?php
+	}
+
+	private function render_petition_selector( $petitions, $current_id ) {
+		if ( empty( $petitions ) ) {
+			return;
+		}
+		?>
+		<form method="get" class="cgt-petition-selector" style="margin: 1rem 0;">
+			<input type="hidden" name="page" value="cgt-petitions-signatures">
+			<label for="cgt-petition-select" class="screen-reader-text"><?php esc_html_e( 'Choisir une pétition', 'cgt' ); ?></label>
+			<select id="cgt-petition-select" name="petition_id" onchange="this.form.submit();">
+				<?php foreach ( $petitions as $petition_item ) : ?>
+					<option value="<?php echo esc_attr( $petition_item->ID ); ?>" <?php selected( $current_id, $petition_item->ID ); ?>>
+						<?php echo esc_html( get_the_title( $petition_item->ID ) ); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+			<noscript>
+				<button type="submit" class="button"><?php esc_html_e( 'Afficher', 'cgt' ); ?></button>
+			</noscript>
+		</form>
 		<?php
 	}
 
@@ -446,36 +493,36 @@ class CGT_Petitions_Plugin {
 				</div>
 			</div>
 
-			<!-- Content Grid -->
-			<div class="cgt-petition-grid">
+		<!-- Content Section -->
+		<section class="cgt-petition-section cgt-petition-section--content">
+			<div class="cgt-petition-content">
+				<h2><?php esc_html_e( 'Notre demande', 'cgt' ); ?></h2>
 
-				<!-- Left: Content -->
-				<div class="cgt-petition-content">
-					<h2><?php esc_html_e( 'Notre demande', 'cgt' ); ?></h2>
-
-					<div class="cgt-petition-content__text">
-						<?php echo wpautop( wp_kses_post( $petition->post_content ) ); ?>
-					</div>
-
-					<?php if ( has_post_thumbnail( $petition_id ) ) : ?>
-						<div class="cgt-petition-content__thumb">
-							<?php echo get_the_post_thumbnail( $petition_id, 'large' ); ?>
-						</div>
-					<?php endif; ?>
-
-					<?php if ( $pdf_url ) : ?>
-						<div class="cgt-petition-pdf">
-							<div class="cgt-petition-pdf__icon">📄</div>
-							<p><strong><?php esc_html_e( 'Document disponible', 'cgt' ); ?></strong></p>
-							<a href="<?php echo esc_url( $pdf_url ); ?>" target="_blank" rel="noopener" class="cgt-petition-pdf__button">
-								<?php esc_html_e( 'Télécharger le PDF', 'cgt' ); ?>
-							</a>
-						</div>
-					<?php endif; ?>
+				<div class="cgt-petition-content__text">
+					<?php echo wpautop( wp_kses_post( $petition->post_content ) ); ?>
 				</div>
 
-				<!-- Right: Signature Form -->
-				<div class="cgt-petition-form-wrapper">
+			<?php if ( has_post_thumbnail( $petition_id ) ) : ?>
+				<div class="cgt-petition-content__thumb">
+					<?php echo get_the_post_thumbnail( $petition_id, 'large' ); ?>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $pdf_url ) : ?>
+				<div class="cgt-petition-pdf">
+					<div class="cgt-petition-pdf__icon">📄</div>
+					<p><strong><?php esc_html_e( 'Document disponible', 'cgt' ); ?></strong></p>
+					<a href="<?php echo esc_url( $pdf_url ); ?>" target="_blank" rel="noopener" class="cgt-petition-pdf__button">
+						<?php esc_html_e( 'Télécharger le PDF', 'cgt' ); ?>
+					</a>
+				</div>
+			<?php endif; ?>
+			</div>
+		</section>
+
+		<!-- Petition Signature Form -->
+		<section class="cgt-petition-section cgt-petition-section--sign">
+			<div class="cgt-petition-form-wrapper">
 					<div class="cgt-petition-form__header">
 						<div class="cgt-petition-form__icon">✍️</div>
 						<h3 class="cgt-petition-form__title"><?php esc_html_e( 'Signez la pétition', 'cgt' ); ?></h3>
@@ -529,19 +576,16 @@ class CGT_Petitions_Plugin {
 							>
 						</div>
 
-						<button type="submit" class="cgt-petition-form__submit">
-							<?php esc_html_e( 'Signer la pétition', 'cgt' ); ?>
-						</button>
+					<button type="submit" class="cgt-petition-form__submit">
+						<?php esc_html_e( 'Signer la pétition', 'cgt' ); ?>
+					</button>
 
-						<p class="cgt-petition-form__privacy">
-							<?php esc_html_e( 'Vos données sont sécurisées et ne seront jamais partagées avec des tiers.', 'cgt' ); ?>
-						</p>
-					</form>
-				</div>
-
+					<p class="cgt-petition-form__privacy">
+						<?php esc_html_e( 'Vos données sont sécurisées et ne seront jamais partagées avec des tiers.', 'cgt' ); ?>
+					</p>
+				</form>
 			</div>
-
-		</div>
+		</section>
 		<?php
 		return ob_get_clean();
 	}

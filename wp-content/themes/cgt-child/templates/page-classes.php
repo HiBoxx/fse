@@ -92,13 +92,72 @@ $category_terms = get_terms(
 );
 
 $current_url = get_permalink();
+
+$default_title = get_the_title();
+$page_title    = $default_title;
+$default_intro = __( 'Explorez nos contenus publics et privés grâce aux filtres ci-dessous.', 'cgt' );
+$subtitle      = $default_intro;
+$active_filters = array();
+
+$selected_class_term = $selected_class ? get_term_by( 'slug', $selected_class, 'thematique' ) : false;
+if ( $selected_class_term && ! is_wp_error( $selected_class_term ) ) {
+	$page_title = $selected_class_term->name;
+	if ( ! empty( $selected_class_term->description ) ) {
+		$subtitle = $selected_class_term->description;
+	}
+	$active_filters[] = sprintf(
+		/* translators: %s: class label */
+		__( 'Classe : %s', 'cgt' ),
+		$selected_class_term->name
+	);
+}
+
+$selected_branch_term = $selected_branch ? get_term_by( 'slug', $selected_branch, 'branche' ) : false;
+if ( $selected_branch_term && ! is_wp_error( $selected_branch_term ) ) {
+	if ( $page_title === $default_title ) {
+		$page_title = $selected_branch_term->name;
+	}
+	$active_filters[] = sprintf(
+		/* translators: %s: branch label */
+		__( 'Branche : %s', 'cgt' ),
+		$selected_branch_term->name
+	);
+}
+
+$selected_category_term = $selected_category ? get_term_by( 'slug', $selected_category, 'category' ) : false;
+if ( $selected_category_term && ! is_wp_error( $selected_category_term ) ) {
+	if ( $page_title === $default_title ) {
+		$page_title = $selected_category_term->name;
+	}
+	$active_filters[] = sprintf(
+		/* translators: %s: category label */
+		__( 'Catégorie : %s', 'cgt' ),
+		$selected_category_term->name
+	);
+}
+
+if ( empty( $active_filters ) ) {
+	$subtitle = $default_intro;
+}
 ?>
 
 <main id="primary" class="site-main classes-archive">
 	<div class="container">
 		<header class="classes-header">
-			<h1 class="page-title"><?php the_title(); ?></h1>
-			<p><?php esc_html_e( 'Explorez nos contenus publics et privés grâce aux filtres ci-dessous.', 'cgt' ); ?></p>
+			<h1 class="page-title"><?php echo esc_html( $page_title ); ?></h1>
+			<?php if ( ! empty( $subtitle ) ) : ?>
+				<p><?php echo wp_kses_post( $subtitle ); ?></p>
+			<?php endif; ?>
+			<?php if ( ! empty( $active_filters ) ) : ?>
+				<div class="classes-active-filters" aria-live="polite">
+					<span class="classes-active-filters__label"><?php esc_html_e( 'Filtres actifs :', 'cgt' ); ?></span>
+					<ul class="classes-active-filters__list">
+						<?php foreach ( $active_filters as $label ) : ?>
+							<li><?php echo esc_html( $label ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			<?php endif; ?>
 		</header>
 
 		<form class="classes-filters" method="get" action="<?php echo esc_url( $current_url ); ?>">

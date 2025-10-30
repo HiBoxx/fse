@@ -677,3 +677,22 @@ function cgt_generate_adhesion_pdf( $title, $data ) {
 
 	return $pdf;
 }
+
+/**
+ * Render the adhesion PDF HTML template.
+ *
+ * @param array $data Adhesion data.
+ * @return string
+ */
+function cgt_render_adhesion_pdf_template( $data ) {
+	$template = locate_template( array( 'templates/pdf/adhesion-template.php' ) );
+
+	if ( ! $template ) {
+		return '';
+	}
+
+	ob_start();
+	include $template;
+
+	return ob_get_clean();
+}

@@ -270,7 +270,7 @@ while ( have_posts() ) :
 		}
 
 		.article-content a {
-			color: #c8102e;
+			color: #ffffffff;
 			text-decoration: underline;
 			font-weight: 600;
 		}
