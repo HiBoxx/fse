@@ -201,7 +201,7 @@ $years = array_map( 'absint', $years );
 			</form>
 		</div>
 
-		<!-- Results Grid -->
+		<!-- Results List -->
 		<?php if ( $library_query->have_posts() ) : ?>
 			<div class="library-results-info">
 				<p>
@@ -216,7 +216,7 @@ $years = array_map( 'absint', $years );
 				</p>
 			</div>
 
-			<div class="library-grid">
+			<ul class="library-list">
 				<?php
 				while ( $library_query->have_posts() ) :
 					$library_query->the_post();
@@ -228,97 +228,41 @@ $years = array_map( 'absint', $years );
 
 					// Récupérer les catégories
 					$post_categories = get_the_category();
-
-					// Tronquer le titre
-					$title = get_the_title();
-					$title_limit = 80;
-					if ( mb_strlen( $title ) > $title_limit ) {
-						$title = mb_substr( $title, 0, $title_limit ) . '...';
-					}
-
-					// Récupérer l'extrait
-					$excerpt = get_the_excerpt();
-					$excerpt_trimmed = wp_trim_words( $excerpt, 15, '...' );
-
-					// Déterminer l'icône selon le type de post
-					$icon_svg = '';
-					switch ( get_post_type() ) {
-						case 'tracts':
-							$icon_svg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-								<polyline points="14 2 14 8 20 8"></polyline>
-								<line x1="16" y1="13" x2="8" y2="13"></line>
-								<line x1="16" y1="17" x2="8" y2="17"></line>
-							</svg>';
-							break;
-						case 'communiques_de_presse':
-						case 'dossiers_de_presse':
-							$icon_svg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M3 3v18h18"></path>
-								<path d="M18 17V9"></path>
-								<path d="M13 17V5"></path>
-								<path d="M8 17v-3"></path>
-							</svg>';
-							break;
-						default:
-							$icon_svg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-								<polyline points="14 2 14 8 20 8"></polyline>
-							</svg>';
-					}
 					?>
-					<article <?php post_class( 'library-card' ); ?>>
-						<a href="<?php the_permalink(); ?>" class="library-card__link" aria-label="<?php echo esc_attr( sprintf( __( 'Lire : %s', 'cgt' ), get_the_title() ) ); ?>">
-							<div class="library-card__icon">
-								<?php echo wp_kses_post( $icon_svg ); ?>
-							</div>
-
-							<div class="library-card__content">
-								<div class="library-card__header">
-									<span class="library-card__date">
-										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-											<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-											<line x1="16" y1="2" x2="16" y2="6"></line>
-											<line x1="8" y1="2" x2="8" y2="6"></line>
-											<line x1="3" y1="10" x2="21" y2="10"></line>
-										</svg>
-										<?php echo esc_html( get_the_date() ); ?>
-									</span>
+					<li class="library-list-item">
+						<a href="<?php the_permalink(); ?>" class="library-list-item__link">
+							<div class="library-list-item__main">
+								<h2 class="library-list-item__title"><?php the_title(); ?></h2>
+								<div class="library-list-item__meta">
+									<span class="library-list-item__date"><?php echo esc_html( get_the_date( 'd/m/Y' ) ); ?></span>
 									<?php if ( $type_label ) : ?>
-										<span class="library-card__type"><?php echo esc_html( $type_label ); ?></span>
+										<span class="library-list-item__separator">·</span>
+										<span class="library-list-item__type"><?php echo esc_html( $type_label ); ?></span>
+									<?php endif; ?>
+									<?php if ( ! empty( $branches ) && ! is_wp_error( $branches ) ) : ?>
+										<span class="library-list-item__separator">·</span>
+										<span class="library-list-item__branch"><?php echo esc_html( $branches[0]->name ); ?></span>
+										<?php if ( count( $branches ) > 1 ) : ?>
+											<span class="library-list-item__more">+<?php echo esc_html( count( $branches ) - 1 ); ?></span>
+										<?php endif; ?>
+									<?php elseif ( ! empty( $post_categories ) ) : ?>
+										<span class="library-list-item__separator">·</span>
+										<span class="library-list-item__branch"><?php echo esc_html( $post_categories[0]->name ); ?></span>
+										<?php if ( count( $post_categories ) > 1 ) : ?>
+											<span class="library-list-item__more">+<?php echo esc_html( count( $post_categories ) - 1 ); ?></span>
+										<?php endif; ?>
 									<?php endif; ?>
 								</div>
-
-								<h2 class="library-card__title"><?php echo esc_html( $title ); ?></h2>
-
-								<?php if ( $excerpt_trimmed ) : ?>
-									<p class="library-card__excerpt"><?php echo esc_html( $excerpt_trimmed ); ?></p>
-								<?php endif; ?>
-
-								<?php if ( ! empty( $branches ) && ! is_wp_error( $branches ) ) : ?>
-									<div class="library-card__branches">
-										<?php foreach ( array_slice( $branches, 0, 2 ) as $branch ) : ?>
-											<span class="library-card__branch-tag"><?php echo esc_html( $branch->name ); ?></span>
-										<?php endforeach; ?>
-										<?php if ( count( $branches ) > 2 ) : ?>
-											<span class="library-card__branch-tag library-card__branch-tag--more">+<?php echo esc_html( count( $branches ) - 2 ); ?></span>
-										<?php endif; ?>
-									</div>
-								<?php elseif ( ! empty( $post_categories ) ) : ?>
-									<div class="library-card__branches">
-										<?php foreach ( array_slice( $post_categories, 0, 2 ) as $cat ) : ?>
-											<span class="library-card__branch-tag"><?php echo esc_html( $cat->name ); ?></span>
-										<?php endforeach; ?>
-										<?php if ( count( $post_categories ) > 2 ) : ?>
-											<span class="library-card__branch-tag library-card__branch-tag--more">+<?php echo esc_html( count( $post_categories ) - 2 ); ?></span>
-										<?php endif; ?>
-									</div>
-								<?php endif; ?>
+							</div>
+							<div class="library-list-item__arrow">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<polyline points="9 18 15 12 9 6"></polyline>
+								</svg>
 							</div>
 						</a>
-					</article>
+					</li>
 				<?php endwhile; ?>
-			</div>
+			</ul>
 
 			<div class="library-pagination">
 				<?php
