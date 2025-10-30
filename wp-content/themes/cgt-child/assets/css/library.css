@@ -195,178 +195,131 @@
 }
 
 /* ==========================================================================
-   Library Grid
+   Library List
    ========================================================================== */
 
-.library-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-	gap: 24px;
-	margin-bottom: 48px;
-}
-
-/* ==========================================================================
-   Library Card
-   ========================================================================== */
-
-.library-card {
+.library-list {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 48px;
 	background: white;
 	border-radius: 16px;
-	padding: 24px;
 	border: 1px solid #e5e7eb;
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	display: flex;
-	flex-direction: column;
-	transition: all 0.3s ease;
-	position: relative;
 	overflow: hidden;
 }
 
-.library-card::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 4px;
-	background: linear-gradient(90deg, #c8102e 0%, #a00d26 100%);
-	transform: scaleX(0);
-	transform-origin: left;
-	transition: transform 0.3s ease;
+/* ==========================================================================
+   Library List Item
+   ========================================================================== */
+
+.library-list-item {
+	border-bottom: 1px solid #e5e7eb;
+	transition: background-color 0.2s ease;
 }
 
-.library-card:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 12px 24px rgba(200, 16, 46, 0.15);
-	border-color: #c8102e;
+.library-list-item:last-child {
+	border-bottom: none;
 }
 
-.library-card:hover::before {
-	transform: scaleX(1);
+.library-list-item:hover {
+	background-color: #f9fafb;
 }
 
-.library-card__link {
-	text-decoration: none;
-	color: inherit;
-	display: flex;
-	flex-direction: column;
-	gap: 20px;
-	flex: 1;
-	cursor: pointer;
-}
-
-.library-card__link:hover {
-	color: inherit;
-}
-
-.library-card__link:focus {
-	outline: 2px solid #c8102e;
-	outline-offset: -2px;
-	border-radius: 12px;
-}
-
-.library-card__icon {
-	width: 48px;
-	height: 48px;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
-	border-radius: 12px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	flex-shrink: 0;
-	transition: transform 0.3s ease;
-}
-
-.library-card:hover .library-card__icon {
-	transform: scale(1.1) rotate(5deg);
-}
-
-.library-card__content {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-}
-
-.library-card__header {
+.library-list-item__link {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
-	flex-wrap: wrap;
+	gap: 16px;
+	padding: 20px 24px;
+	text-decoration: none;
+	color: inherit;
+	transition: padding-left 0.2s ease;
 }
 
-.library-card__date {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	font-size: 0.8125rem;
-	color: #6b7280;
-	font-weight: 500;
+.library-list-item:hover .library-list-item__link {
+	padding-left: 28px;
 }
 
-.library-card__date svg {
-	width: 14px;
-	height: 14px;
-	flex-shrink: 0;
+.library-list-item__link:focus {
+	outline: 2px solid #c8102e;
+	outline-offset: -2px;
 }
 
-.library-card__type {
-	display: inline-flex;
-	padding: 4px 12px;
-	background: #f3f4f6;
-	border-radius: 50px;
-	font-size: 0.75rem;
-	font-weight: 600;
-	color: #374151;
-	text-transform: uppercase;
-	letter-spacing: 0.025em;
+.library-list-item__main {
+	flex: 1;
+	min-width: 0;
 }
 
-.library-card__title {
-	font-size: 1.125rem;
-	line-height: 1.4;
-	margin: 0;
+.library-list-item__title {
+	font-size: 1rem;
+	line-height: 1.5;
+	margin: 0 0 8px;
 	color: #1a1a1a;
-	font-weight: 700;
+	font-weight: 600;
 	transition: color 0.2s ease;
 }
 
-.library-card:hover .library-card__title {
+.library-list-item:hover .library-list-item__title {
 	color: #c8102e;
 }
 
-.library-card__excerpt {
-	font-size: 0.9375rem;
-	line-height: 1.6;
-	color: #6b7280;
-	margin: 0;
-}
-
-.library-card__branches {
+.library-list-item__meta {
 	display: flex;
+	align-items: center;
 	flex-wrap: wrap;
 	gap: 8px;
-	margin-top: auto;
+	font-size: 0.875rem;
+	color: #6b7280;
 }
 
-.library-card__branch-tag {
+.library-list-item__date {
+	font-weight: 500;
+}
+
+.library-list-item__separator {
+	color: #d1d5db;
+}
+
+.library-list-item__type {
+	font-weight: 500;
+	color: #374151;
+}
+
+.library-list-item__branch {
 	display: inline-flex;
-	padding: 6px 12px;
+	padding: 2px 8px;
 	background: #fef2f2;
-	border: 1px solid #fecaca;
-	border-radius: 6px;
+	border-radius: 4px;
 	font-size: 0.8125rem;
 	font-weight: 600;
 	color: #991b1b;
-	white-space: nowrap;
 }
 
-.library-card__branch-tag--more {
+.library-list-item__more {
+	display: inline-flex;
+	padding: 2px 8px;
 	background: #f3f4f6;
-	border-color: #d1d5db;
+	border-radius: 4px;
+	font-size: 0.8125rem;
+	font-weight: 600;
 	color: #6b7280;
+}
+
+.library-list-item__arrow {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #9ca3af;
+	transition: all 0.2s ease;
+}
+
+.library-list-item:hover .library-list-item__arrow {
+	color: #c8102e;
+	transform: translateX(4px);
 }
 
 /* ==========================================================================
@@ -496,13 +449,20 @@
 		justify-content: center;
 	}
 
-	.library-grid {
-		grid-template-columns: 1fr;
-		gap: 20px;
+	.library-list-item__link {
+		padding: 16px 20px;
 	}
 
-	.library-card {
-		padding: 20px;
+	.library-list-item:hover .library-list-item__link {
+		padding-left: 24px;
+	}
+
+	.library-list-item__title {
+		font-size: 0.9375rem;
+	}
+
+	.library-list-item__meta {
+		font-size: 0.8125rem;
 	}
 
 	.library-results-info {
@@ -524,12 +484,27 @@
 		padding: 20px;
 	}
 
-	.library-card__title {
-		font-size: 1rem;
+	.library-list-item__link {
+		padding: 12px 16px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
 	}
 
-	.library-card__excerpt {
+	.library-list-item:hover .library-list-item__link {
+		padding-left: 20px;
+	}
+
+	.library-list-item__title {
 		font-size: 0.875rem;
+	}
+
+	.library-list-item__meta {
+		font-size: 0.75rem;
+	}
+
+	.library-list-item__arrow {
+		align-self: center;
 	}
 
 	.library-pagination .page-numbers {
