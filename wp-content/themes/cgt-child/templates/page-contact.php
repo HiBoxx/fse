@@ -132,17 +132,17 @@ get_header();
 					</div>
 
 					<div class="contact-info-item">
-						<div class="contact-info-item__icon">
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-								<polyline points="22,6 12,13 2,6"></polyline>
-							</svg>
-						</div>
-						<div class="contact-info-item__content">
-							<strong><?php esc_html_e( 'Email', 'cgt' ); ?></strong>
-							<p><a href="mailto:ccnprest@cgt.fr">ccnprest@cgt.fr</a></p>
-						</div>
+					<div class="contact-info-item__icon">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+							<polyline points="22,6 12,13 2,6"></polyline>
+						</svg>
 					</div>
+					<div class="contact-info-item__content">
+						<strong><?php esc_html_e( 'Email', 'cgt' ); ?></strong>
+						<p><a href="mailto:fsetud@cgt.fr">fsetud@cgt.fr</a></p>
+					</div>
+				</div>
 				</div>
 
 				<!-- Horaires -->
