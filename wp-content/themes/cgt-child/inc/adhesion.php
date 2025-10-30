@@ -499,6 +499,24 @@ function cgt_pdf_escape_text( $text ) {
  * @return string
  */
 function cgt_generate_adhesion_pdf( $title, $data ) {
+    if ( class_exists( '\Dompdf\Dompdf' ) ) {
+        $html = cgt_render_adhesion_pdf_template( $data );
+
+        if ( ! empty( $html ) ) {
+            $dompdf = new \Dompdf\Dompdf(
+                array(
+                    'isRemoteEnabled'      => true,
+                    'isHtml5ParserEnabled' => true,
+                )
+            );
+            $dompdf->loadHtml( $html, 'UTF-8' );
+            $dompdf->setPaper( 'A4', 'portrait' );
+            $dompdf->render();
+
+            return $dompdf->output();
+        }
+    }
+
 	$lines = array(
 		sprintf( 'Nom : %s', $data['nom'] ?? '' ),
 		sprintf( 'Prénom : %s', $data['prenom'] ?? '' ),
@@ -566,4 +584,23 @@ function cgt_generate_adhesion_pdf( $title, $data ) {
 	$pdf .= "trailer\n<< /Size " . ( count( $objects ) + 1 ) . " /Root 1 0 R >>\nstartxref\n" . $xref_pos . "\n%%EOF";
 
 	return $pdf;
+}
+
+/**
+ * Render the adhesion PDF HTML template.
+ *
+ * @param array $data Adhesion data.
+ * @return string
+ */
+function cgt_render_adhesion_pdf_template( $data ) {
+	$template = locate_template( array( 'templates/pdf/adhesion-template.php' ) );
+
+	if ( ! $template ) {
+		return '';
+	}
+
+	ob_start();
+	include $template;
+
+	return ob_get_clean();
 }

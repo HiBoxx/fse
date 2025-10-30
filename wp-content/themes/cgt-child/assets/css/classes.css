@@ -13,6 +13,36 @@
 	font-size: clamp(2rem, 4vw, 2.6rem);
 }
 
+.classes-active-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem 0.8rem;
+	align-items: center;
+	font-size: 0.9rem;
+	color: rgba(17, 17, 17, 0.7);
+}
+
+.classes-active-filters__label {
+	font-weight: 600;
+	color: var(--cgt-red);
+}
+
+.classes-active-filters__list {
+	display: flex;
+	gap: 0.4rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.classes-active-filters__list li {
+	background: rgba(208, 0, 0, 0.1);
+	color: var(--cgt-red);
+	padding: 0.2rem 0.6rem;
+	border-radius: 999px;
+	font-weight: 600;
+}
+
 .classes-filters {
 	display: grid;
 	gap: 1rem;

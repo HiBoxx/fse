@@ -11,6 +11,22 @@ if ( ! defined( 'CGT_CHILD_VERSION' ) ) {
 	define( 'CGT_CHILD_VERSION', '1.0.0' );
 }
 
+// Charge l'autoloader Dompdf si disponible.
+$cgt_child_dompdf_autoloaders = array(
+	get_stylesheet_directory() . '/vendor/dompdf/autoload.inc.php',
+	get_stylesheet_directory() . '/vendor/dompdf/src/Autoloader.php',
+);
+
+foreach ( $cgt_child_dompdf_autoloaders as $dompdf_loader ) {
+	if ( file_exists( $dompdf_loader ) ) {
+		require_once $dompdf_loader;
+		if ( class_exists( '\Dompdf\Autoloader' ) ) {
+			\Dompdf\Autoloader::register();
+		}
+		break;
+	}
+}
+
 /**
  * Load inc files.
  */
