@@ -165,6 +165,98 @@ function cgt_cleanup_articles_adherents_submenu() {
 // pour éviter l'erreur "headers already sent"
 
 /**
+ * Supprime le panneau de bienvenue du tableau de bord.
+ */
+add_action(
+	'admin_init',
+	static function () {
+		remove_action( 'welcome_panel', 'wp_welcome_panel' );
+	}
+);
+
+/**
+ * Retire le logo WordPress de la barre d'administration.
+ *
+ * @param WP_Admin_Bar $wp_admin_bar Barre d'administration.
+ */
+add_action(
+	'admin_bar_menu',
+	static function ( $wp_admin_bar ) {
+		if ( ! is_object( $wp_admin_bar ) ) {
+			return;
+		}
+
+		$wp_admin_bar->remove_node( 'wp-logo' );
+		$wp_admin_bar->remove_node( 'new-content' );
+		$wp_admin_bar->remove_node( 'comments' );
+	},
+	999
+);
+
+/**
+ * Nettoie le pied de page WordPress dans l'administration.
+ */
+add_filter( 'admin_footer_text', '__return_empty_string', 11 );
+add_filter( 'update_footer', '__return_empty_string', 11 );
+
+/**
+ * Supprime les widgets par défaut du tableau de bord.
+ */
+add_action(
+	'wp_dashboard_setup',
+	static function () {
+		$widgets = array(
+			'dashboard_site_health' => 'normal',
+			'dashboard_right_now'   => 'normal',
+			'dashboard_activity'    => 'normal',
+			'dashboard_quick_press' => 'side',
+			'dashboard_primary'     => 'side',
+			'dashboard_secondary'   => 'side',
+			'dashboard_recent_drafts' => 'side',
+		);
+
+		foreach ( $widgets as $widget_id => $context ) {
+			remove_meta_box( $widget_id, 'dashboard', $context );
+		}
+	}
+);
+
+/**
+ * Désactive les options d'écran sur le tableau de bord.
+ *
+ * @param bool $show Indique si l'option doit être affichée.
+ * @return bool
+ */
+add_filter(
+	'screen_options_show_screen',
+	static function ( $show ) {
+		$screen = get_current_screen();
+		if ( $screen && 'dashboard' === $screen->id ) {
+			return false;
+		}
+
+		return $show;
+	}
+);
+
+/**
+ * Retire les onglets d'aide sur le tableau de bord.
+ */
+add_action(
+	'admin_head-index.php',
+	static function () {
+		$screen = get_current_screen();
+		if ( $screen ) {
+			$screen->remove_help_tabs();
+		}
+	}
+);
+
+/**
+ * Enregistre le widget personnalisé du tableau de bord fédéral.
+ */
+
+/**
  * Définit l'ordre personnalisé du menu principal de l'administration.
  */
 add_filter( 'custom_menu_order', '__return_true' );
