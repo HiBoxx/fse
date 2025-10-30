@@ -485,9 +485,50 @@ function cgt_get_adhesion_details( $post_id ) {
  * Escape text for PDF.
  */
 function cgt_pdf_escape_text( $text ) {
+	// Convert UTF-8 to Windows-1252 so accented characters render correctly with core PDF fonts.
+	if ( function_exists( 'iconv' ) ) {
+		$converted = @iconv( 'UTF-8', 'Windows-1252//TRANSLIT', $text );
+		if ( false !== $converted ) {
+			$text = $converted;
+		}
+	} else {
+		$text = utf8_decode( $text ); // Fallback when iconv is unavailable.
+	}
+
 	$text = str_replace( array( '\\', '(', ')' ), array( '\\\\', '\\(', '\\)' ), $text );
 	$text = preg_replace( '/\r?\n/', '\\n', $text );
+
 	return $text;
+}
+
+/**
+ * Generate adhesion PDF using Dompdf when available.
+ *
+ * @param string $title Title.
+ * @param array  $data  Data array.
+ *
+ * @return string
+ */
+function cgt_generate_adhesion_pdf( $title, $data ) {
+		if ( class_exists( '\Dompdf\Dompdf' ) && function_exists( 'cgt_render_adhesion_pdf_template' ) ) {
+			$html = cgt_render_adhesion_pdf_template( $data );
+
+			if ( ! empty( $html ) ) {
+				$options = new \Dompdf\Options();
+				$options->set( 'isRemoteEnabled', true );
+				$options->set( 'isHtml5ParserEnabled', true );
+				$options->setDefaultFont( 'DejaVu Sans' );
+
+				$dompdf = new \Dompdf\Dompdf( $options );
+				$dompdf->loadHtml( $html, 'UTF-8' );
+				$dompdf->setPaper( 'A4', 'portrait' );
+				$dompdf->render();
+
+			return $dompdf->output();
+		}
+	}
+
+	return cgt_generate_adhesion_pdf_fallback( $title, $data );
 }
 
 /**
@@ -498,7 +539,7 @@ function cgt_pdf_escape_text( $text ) {
  *
  * @return string
  */
-function cgt_generate_adhesion_pdf( $title, $data ) {
+function cgt_generate_adhesion_pdf_fallback( $title, $data ) {
 	// PDF content stream with professional layout on 1 page A4 (595x842 points)
 	$pdf_stream = '';
 

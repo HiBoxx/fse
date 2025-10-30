@@ -30,15 +30,15 @@ $submitted_on = ! empty( $data['date_soumission'] ) ? mysql2date( 'd/m/Y', $data
 		* {
 			box-sizing: border-box;
 		}
-		body {
-			margin: 0;
-			padding: 0;
-			font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
-			font-size: 10pt;
-			color: #1f2937;
-			line-height: 1.45;
-		}
-		.wrapper {
+	body {
+		margin: 0;
+		padding: 0;
+		font-family: "DejaVu Sans", "Inter", "Helvetica Neue", Arial, sans-serif;
+		font-size: 10pt;
+		color: #1f2937;
+		line-height: 1.45;
+	}
+	.wrapper {
 			display: flex;
 			flex-direction: column;
 			min-height: 100vh;
@@ -85,35 +85,38 @@ $submitted_on = ! empty( $data['date_soumission'] ) ? mysql2date( 'd/m/Y', $data
 			padding: 14px 16px;
 			background: rgba(229, 231, 235, 0.2);
 		}
-		.grid {
-			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			column-gap: 14px;
-			row-gap: 8px;
+		.info-table {
+			width: 100%;
+			border-collapse: collapse;
 		}
-		.full {
-			grid-column: 1 / -1;
+		.info-table tr + tr {
+			border-top: 6px solid transparent;
 		}
-		.field {
-			display: flex;
-			flex-direction: column;
-			gap: 2px;
-		}
-		.label {
-			font-size: 7.8pt;
+		.info-table th {
+			text-align: left;
+			font-size: 7.6pt;
 			font-weight: 600;
 			text-transform: uppercase;
 			letter-spacing: 0.05em;
 			color: #5b6474;
+			padding: 0 6px 2px 0;
+			width: 22%;
+			vertical-align: top;
 		}
-		.value {
-			padding: 6px 7px;
-			border-radius: 6px;
+		.info-table td {
+			padding: 5px 8px;
 			border: 1px solid rgba(17, 17, 17, 0.18);
+			border-radius: 6px;
 			background: #ffffff;
-			font-size: 9.8pt;
+			font-size: 9.4pt;
 			font-weight: 500;
-			min-height: 14px;
+			color: #1f2937;
+			vertical-align: middle;
+		}
+		.info-table td.value-spacer {
+			border: none;
+			background: transparent;
+			padding: 0;
 		}
 		.signature {
 			display: grid;
@@ -144,90 +147,68 @@ $submitted_on = ! empty( $data['date_soumission'] ) ? mysql2date( 'd/m/Y', $data
 
 		<h2><?php esc_html_e( 'Informations personnelles', 'cgt' ); ?></h2>
 		<div class="section">
-			<div class="grid">
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Nom', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'nom', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Prénom', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'prenom', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Date de naissance', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'date_naissance', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Nationalité', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'nationalite', '—' ); ?></div>
-				</div>
-				<div class="field full">
-					<div class="label"><?php esc_html_e( 'Adresse', 'cgt' ); ?></div>
-					<div class="value"><?php echo ! empty( $formatted_address ) ? esc_html( $formatted_address ) : '—'; ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Code postal', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'code_postal', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Ville', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'ville', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Téléphone', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'tel', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Email', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'email', '—' ); ?></div>
-				</div>
-			</div>
+			<table class="info-table">
+				<tr>
+					<th><?php esc_html_e( 'Nom', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'nom', '—' ); ?></td>
+					<th><?php esc_html_e( 'Prénom', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'prenom', '—' ); ?></td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Sexe', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'sexe', '—' ); ?></td>
+					<th><?php esc_html_e( 'Date de naissance', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'date_naissance', '—' ); ?></td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Nationalité', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'nationalite', '—' ); ?></td>
+					<th><?php esc_html_e( 'Téléphone', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'tel', '—' ); ?></td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Email', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'email', '—' ); ?></td>
+					<th><?php esc_html_e( 'Statut', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'statut', '—' ); ?></td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Catégorie', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'categorie', '—' ); ?></td>
+					<th><?php esc_html_e( 'Adresse postale', 'cgt' ); ?></th>
+					<td><?php echo ! empty( $formatted_address ) ? esc_html( $formatted_address ) : '—'; ?></td>
+				</tr>
+			</table>
 		</div>
 
 		<h2><?php esc_html_e( 'Informations professionnelles', 'cgt' ); ?></h2>
 		<div class="section">
-			<div class="grid">
-				<div class="field full">
-					<div class="label"><?php esc_html_e( 'Entreprise', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'entreprise_nom', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'SIRET', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'entreprise_siret', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Secteur', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'secteur', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Poste / Fonction', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'categorie', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Statut', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'statut', '—' ); ?></div>
-				</div>
-				<div class="field full">
-					<div class="label"><?php esc_html_e( 'Adresse de l’entreprise', 'cgt' ); ?></div>
-					<div class="value"><?php echo ! empty( $formatted_company_address ) ? esc_html( $formatted_company_address ) : '—'; ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Téléphone entreprise', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'entreprise_tel', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Email entreprise', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'entreprise_email', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Union locale', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'union_locale', '—' ); ?></div>
-				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Union départementale', 'cgt' ); ?></div>
-					<div class="value"><?php echo $get_value( 'union_departementale', '—' ); ?></div>
-				</div>
-			</div>
+			<table class="info-table">
+				<tr>
+					<th><?php esc_html_e( 'Entreprise', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'entreprise_nom', '—' ); ?></td>
+					<th><?php esc_html_e( 'SIRET', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'entreprise_siret', '—' ); ?></td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Secteur', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'secteur', '—' ); ?></td>
+					<th><?php esc_html_e( 'Téléphone entreprise', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'entreprise_tel', '—' ); ?></td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Email entreprise', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'entreprise_email', '—' ); ?></td>
+					<th><?php esc_html_e( 'Adresse de l’entreprise', 'cgt' ); ?></th>
+					<td><?php echo ! empty( $formatted_company_address ) ? esc_html( $formatted_company_address ) : '—'; ?></td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Union locale', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'union_locale', '—' ); ?></td>
+					<th><?php esc_html_e( 'Union départementale', 'cgt' ); ?></th>
+					<td><?php echo $get_value( 'union_departementale', '—' ); ?></td>
+				</tr>
+			</table>
 		</div>
 
 		<h2><?php esc_html_e( 'Signature', 'cgt' ); ?></h2>
