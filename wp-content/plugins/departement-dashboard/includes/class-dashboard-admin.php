@@ -96,7 +96,7 @@ class Admin {
 	}
 
 	public function handle_save_mandat() {
-		if ( ! $this->user_has_role( Roles::ROLE_ADMIN ) && ! current_user_can( 'administrator' ) ) {
+		if ( ! current_user_can( 'manage_cgt_adhesions' ) ) {
 			wp_die( esc_html__( 'Accès refusé.', 'departement-dashboard' ) );
 		}
 
@@ -123,14 +123,26 @@ class Admin {
 				)
 			);
 
-			if ( isset( $uploaded['error'] ) ) {
-				wp_die( esc_html( $uploaded['error'] ) );
-			}
+		if ( isset( $uploaded['error'] ) ) {
+			wp_die( esc_html( $uploaded['error'] ) );
+		}
 
-			$dest_dir = ensure_mandat_dir();
-			$filename = wp_basename( $uploaded['file'] );
-			$new_path = trailingslashit( $dest_dir ) . $filename;
-			if ( ! rename( $uploaded['file'], $new_path ) ) {
+		$tmp_path = $uploaded['file'];
+		$finfo    = finfo_open( FILEINFO_MIME_TYPE );
+		$mime     = $finfo ? finfo_file( $finfo, $tmp_path ) : null;
+		if ( $finfo ) {
+			finfo_close( $finfo );
+		}
+
+		if ( 'application/pdf' !== $mime ) {
+			@unlink( $tmp_path );
+			wp_die( esc_html__( 'Seuls les fichiers PDF sont autorisés.', 'departement-dashboard' ) );
+		}
+
+		$dest_dir = ensure_mandat_dir();
+		$filename = wp_basename( $uploaded['file'] );
+		$new_path = trailingslashit( $dest_dir ) . $filename;
+		if ( ! rename( $uploaded['file'], $new_path ) ) {
 				wp_die( esc_html__( 'Impossible de déplacer le fichier téléchargé.', 'departement-dashboard' ) );
 			}
 
@@ -192,9 +204,9 @@ class Admin {
 	}
 
 	public function handle_export_adhesions() {
-		if ( ! ( $this->user_has_role( Roles::ROLE_ASSISTANTE ) || $this->user_has_role( Roles::ROLE_ADMIN ) || current_user_can( 'administrator' ) ) ) {
-			wp_die( esc_html__( 'Accès refusé.', 'departement-dashboard' ) );
-		}
+	if ( ! ( current_user_can( 'manage_cgt_adhesions' ) || $this->user_has_role( Roles::ROLE_ASSISTANTE ) ) ) {
+		wp_die( esc_html__( 'Accès refusé.', 'departement-dashboard' ) );
+	}
 
 		check_admin_referer( 'cgt_dd_export_adhesions' );
 
