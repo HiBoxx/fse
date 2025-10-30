@@ -45,6 +45,8 @@ function cgt_register_adherent_role() {
 		'delete_published_articles_adherents',
 	);
 
+	$adhesion_caps = array( 'manage_cgt_adhesions' );
+
 	// Grant capability to editors & admins.
 	foreach ( array( 'administrator', 'editor' ) as $role_key ) {
 		$role_object = get_role( $role_key );
@@ -55,6 +57,13 @@ function cgt_register_adherent_role() {
 			foreach ( $article_caps as $cap ) {
 				$role_object->add_cap( $cap );
 			}
+
+			// Seuls les administrateurs gèrent les adhésions.
+			if ( 'administrator' === $role_key ) {
+				foreach ( $adhesion_caps as $cap ) {
+					$role_object->add_cap( $cap );
+				}
+			}
 		}
 	}
 }
@@ -62,18 +71,23 @@ function cgt_register_adherent_role() {
 add_action(
 	'init',
 	function () {
-		$role            = get_role( 'adherent' );
-		$needs_reapply   = false;
-		$required_cap    = 'edit_article_adherent';
+	$role            = get_role( 'adherent' );
+	$needs_reapply   = false;
+	$required_caps   = array( 'edit_article_adherent', 'manage_cgt_adhesions' );
 
 		if ( ! $role || ! $role->has_cap( 'read_private_cgt' ) ) {
 			$needs_reapply = true;
 		}
 
-		$admin_role = get_role( 'administrator' );
-		if ( $admin_role && ! $admin_role->has_cap( $required_cap ) ) {
-			$needs_reapply = true;
+	$admin_role = get_role( 'administrator' );
+	if ( $admin_role ) {
+		foreach ( $required_caps as $required_cap ) {
+			if ( ! $admin_role->has_cap( $required_cap ) ) {
+				$needs_reapply = true;
+				break;
+			}
 		}
+	}
 
 		if ( $needs_reapply ) {
 			cgt_register_adherent_role();

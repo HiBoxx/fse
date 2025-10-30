@@ -331,7 +331,7 @@ function cgt_register_adhesion_admin_page() {
 		'edit.php?post_type=cgt_adhesion',
 		__( 'Tableau des adhésions', 'cgt' ),
 		__( 'Tableau des adhésions', 'cgt' ),
-		'edit_posts',
+		'manage_cgt_adhesions',
 		'cgt-adhesions-dashboard',
 		'cgt_render_adhesion_admin_page'
 	);
@@ -341,7 +341,7 @@ function cgt_register_adhesion_admin_page() {
  * Renders the adhésion dashboard page.
  */
 function cgt_render_adhesion_admin_page() {
-	if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( 'manage_cgt_adhesions' ) ) {
 		wp_die( esc_html__( 'Vous n’avez pas les droits suffisants pour accéder à cette page.', 'cgt' ) );
 	}
 
@@ -411,7 +411,7 @@ function cgt_render_adhesion_admin_page() {
 add_action( 'admin_post_cgt_download_adhesion_pdf', 'cgt_download_adhesion_pdf' );
 
 function cgt_download_adhesion_pdf() {
-	if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( 'manage_cgt_adhesions' ) ) {
 		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
 	}
 

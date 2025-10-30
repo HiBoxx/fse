@@ -58,6 +58,17 @@ foreach ( $cgt_inc_files as $cgt_inc_file ) {
 	}
 }
 
+// Clear cached taxonomies when terms change.
+add_action( 'edited_term', 'cgt_child_flush_term_cache' );
+add_action( 'created_term', 'cgt_child_flush_term_cache' );
+add_action( 'delete_term', 'cgt_child_flush_term_cache' );
+
+function cgt_child_flush_term_cache() {
+    foreach ( array( 'cgt_classes_terms', 'cgt_branch_terms', 'cgt_category_terms' ) as $key ) {
+        wp_cache_delete( $key );
+    }
+}
+
 /**
  * Setup theme supports and menus.
  */

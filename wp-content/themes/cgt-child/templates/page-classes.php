@@ -64,32 +64,44 @@ $query_args = array(
 
 $classes_query = new WP_Query( $query_args );
 
-$classes_terms = get_terms(
-	array(
-		'taxonomy'   => 'thematique',
-		'hide_empty' => false,
-		'orderby'    => 'name',
-		'order'      => 'ASC',
-	)
-);
+$classes_terms = wp_cache_get( 'cgt_classes_terms' );
+if ( false === $classes_terms ) {
+    $classes_terms = get_terms(
+        array(
+            'taxonomy'   => 'thematique',
+            'hide_empty' => false,
+            'orderby'    => 'name',
+            'order'      => 'ASC',
+        )
+    );
+    wp_cache_set( 'cgt_classes_terms', $classes_terms, '', HOUR_IN_SECONDS );
+}
 
-$branch_terms = get_terms(
-	array(
-		'taxonomy'   => 'branche',
-		'hide_empty' => false,
-		'orderby'    => 'name',
-		'order'      => 'ASC',
-	)
-);
+$branch_terms = wp_cache_get( 'cgt_branch_terms' );
+if ( false === $branch_terms ) {
+    $branch_terms = get_terms(
+        array(
+            'taxonomy'   => 'branche',
+            'hide_empty' => false,
+            'orderby'    => 'name',
+            'order'      => 'ASC',
+        )
+    );
+    wp_cache_set( 'cgt_branch_terms', $branch_terms, '', HOUR_IN_SECONDS );
+}
 
-$category_terms = get_terms(
-	array(
-		'taxonomy'   => 'category',
-		'hide_empty' => false,
-		'orderby'    => 'name',
-		'order'      => 'ASC',
-	)
-);
+$category_terms = wp_cache_get( 'cgt_category_terms' );
+if ( false === $category_terms ) {
+    $category_terms = get_terms(
+        array(
+            'taxonomy'   => 'category',
+            'hide_empty' => false,
+            'orderby'    => 'name',
+            'order'      => 'ASC',
+        )
+    );
+    wp_cache_set( 'cgt_category_terms', $category_terms, '', HOUR_IN_SECONDS );
+}
 
 $current_url = get_permalink();
 
