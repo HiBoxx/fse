@@ -137,3 +137,40 @@ function cgt_agenda_save_post( $post_id ) {
 	}
 }
 add_action( 'save_post_cgt_agenda', 'cgt_agenda_save_post' );
+
+/**
+ * Migration helper: convert legacy private agenda events to public.
+ */
+function cgt_agenda_migrate_private_events() {
+	if ( get_option( 'cgt_agenda_public_migration_done' ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'publish_posts' ) ) {
+		return;
+	}
+
+	$private_events = get_posts(
+		array(
+			'post_type'      => 'cgt_agenda',
+			'post_status'    => 'private',
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+			'no_found_rows'  => true,
+		)
+	);
+
+	if ( $private_events ) {
+		foreach ( $private_events as $event_id ) {
+			wp_update_post(
+				array(
+					'ID'          => $event_id,
+					'post_status' => 'publish',
+				)
+			);
+		}
+	}
+
+	update_option( 'cgt_agenda_public_migration_done', 1 );
+}
+add_action( 'admin_init', 'cgt_agenda_migrate_private_events' );

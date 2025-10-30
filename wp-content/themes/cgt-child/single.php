@@ -40,16 +40,6 @@ while ( have_posts() ) :
 				</div>
 
 				<h1 class="article-title"><?php the_title(); ?></h1>
-
-				<div class="article-author">
-					<?php
-					printf(
-						/* translators: %s: post author. */
-						esc_html__( 'Par %s', 'cgt' ),
-						'<span class="author-name">' . esc_html( get_the_author() ) . '</span>'
-					);
-					?>
-				</div>
 			</header>
 
 			<!-- Image mise en avant -->

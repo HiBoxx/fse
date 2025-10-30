@@ -80,7 +80,7 @@ $federal_articles = new WP_Query( $federal_articles_args );
 $agenda_events = new WP_Query(
 	array(
 		'post_type'      => 'cgt_agenda',
-		'post_status'    => array( 'private', 'publish' ),
+		'post_status'    => 'publish',
 		'posts_per_page' => 6,
 		'no_found_rows'  => true,
 		'meta_key'       => 'cgt_event_date',

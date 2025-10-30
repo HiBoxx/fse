@@ -39,6 +39,7 @@ $latest_resources = new WP_Query( $resource_args );
 $agenda_events = new WP_Query(
 	array(
 		'post_type'      => 'cgt_agenda',
+		'post_status'    => 'publish',
 		'posts_per_page' => 6,
 		'orderby'        => 'meta_value',
 		'order'          => 'ASC',
@@ -60,6 +61,7 @@ if ( ! $agenda_events->have_posts() ) {
 	$agenda_events = new WP_Query(
 		array(
 			'post_type'      => 'cgt_agenda',
+			'post_status'    => 'publish',
 			'posts_per_page' => 6,
 			'orderby'        => 'meta_value',
 			'order'          => 'DESC',
@@ -380,8 +382,14 @@ $communiques_tabs = array(
 					<a class="btn btn-light" href="<?php echo esc_url( home_url( '/espace-adherent' ) ); ?>"><?php esc_html_e( 'Se connecter', 'cgt' ); ?></a>
 				</div>
 			</div>
-			<div class="home-cta__aside" aria-hidden="true">
-				<span class="placeholder"></span>
+			<div class="home-cta__aside">
+				<figure class="home-cta__media">
+					<img
+						src="<?php echo esc_url( 'http://fse.local/wp-content/uploads/2025/10/adherent-photo.png' ); ?>"
+						alt="<?php esc_attr_e( 'Adhérents de la fédération réunis', 'cgt' ); ?>"
+						loading="lazy"
+					>
+				</figure>
 			</div>
 		</div>
 	</section>

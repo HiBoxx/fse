@@ -21,7 +21,11 @@ get_header();
 	<section class="federation-section federation-section--story">
 		<div class="container federation-story">
 			<div class="federation-story__media" aria-hidden="true">
-				<span class="placeholder"></span>
+				<img
+					src="<?php echo esc_url( 'http://fse.local/wp-content/uploads/2025/10/federation.png' ); ?>"
+					alt="<?php esc_attr_e( 'Militants de la Fédération CGT des Sociétés d’Études', 'cgt' ); ?>"
+					loading="lazy"
+				>
 			</div>
 			<div class="federation-story__content">
 				<h2><?php esc_html_e( 'Notre histoire', 'cgt' ); ?></h2>

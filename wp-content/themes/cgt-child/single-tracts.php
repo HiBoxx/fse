@@ -40,16 +40,6 @@ while ( have_posts() ) :
 				</div>
 
 				<h1 class="tract-title"><?php the_title(); ?></h1>
-
-				<p class="tract-author">
-					<?php
-					printf(
-						/* translators: %s: post author. */
-						esc_html__( 'Par %s', 'cgt' ),
-						'<span class="author-name">' . esc_html( get_the_author() ) . '</span>'
-					);
-					?>
-				</p>
 			</header>
 
 			<?php if ( has_post_thumbnail() ) : ?>

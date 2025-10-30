@@ -186,8 +186,8 @@ function cgt_register_cpts() {
 				'add_new_item'  => __( 'Ajouter un événement', 'cgt' ),
 				'all_items'     => __( 'Liste des événements', 'cgt' ),
 			),
-			'public'              => false,
-			'publicly_queryable'  => false,
+			'public'              => true,
+			'publicly_queryable'  => true,
 			'show_ui'             => true,
 			'show_in_menu'        => true,
 			'show_in_rest'        => true,
@@ -579,10 +579,6 @@ add_action( 'save_post_cgt_contact', 'cgt_contact_save_post' );
  */
 function cgt_force_private_articles( $data, $postarr ) {
 	if ( isset( $postarr['post_type'] ) && 'articles_adherents' === $postarr['post_type'] ) {
-		$data['post_status'] = 'private';
-	}
-
-	if ( isset( $postarr['post_type'] ) && 'cgt_agenda' === $postarr['post_type'] ) {
 		$data['post_status'] = 'private';
 	}
 
