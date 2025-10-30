@@ -425,6 +425,10 @@ function cgt_download_adhesion_pdf() {
 	$details = cgt_get_adhesion_details( $adhesion_id );
 	$pdf     = cgt_generate_adhesion_pdf( get_the_title( $adhesion_id ), $details );
 
+	if ( is_wp_error( $pdf ) ) {
+		wp_die( esc_html( $pdf->get_error_message() ) );
+	}
+
 	$filename = sanitize_title( get_the_title( $adhesion_id ) ) . '.pdf';
 	header( 'Content-Type: application/pdf' );
 	header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
@@ -482,245 +486,59 @@ function cgt_get_adhesion_details( $post_id ) {
 }
 
 /**
- * Escape text for PDF.
- */
-function cgt_pdf_escape_text( $text ) {
-	// Convert UTF-8 to Windows-1252 so accented characters render correctly with core PDF fonts.
-	if ( function_exists( 'iconv' ) ) {
-		$converted = @iconv( 'UTF-8', 'Windows-1252//TRANSLIT', $text );
-		if ( false !== $converted ) {
-			$text = $converted;
-		}
-	} else {
-		$text = utf8_decode( $text ); // Fallback when iconv is unavailable.
-	}
-
-	$text = str_replace( array( '\\', '(', ')' ), array( '\\\\', '\\(', '\\)' ), $text );
-	$text = preg_replace( '/\r?\n/', '\\n', $text );
-
-	return $text;
-}
-
-/**
  * Generate adhesion PDF using Dompdf when available.
  *
  * @param string $title Title.
  * @param array  $data  Data array.
  *
- * @return string
+ * @return string|WP_Error
  */
 function cgt_generate_adhesion_pdf( $title, $data ) {
-		if ( class_exists( '\Dompdf\Dompdf' ) && function_exists( 'cgt_render_adhesion_pdf_template' ) ) {
-			$html = cgt_render_adhesion_pdf_template( $data );
-
-			if ( ! empty( $html ) ) {
-				$options = new \Dompdf\Options();
-				$options->set( 'isRemoteEnabled', true );
-				$options->set( 'isHtml5ParserEnabled', true );
-				$options->setDefaultFont( 'DejaVu Sans' );
-
-				$dompdf = new \Dompdf\Dompdf( $options );
-				$dompdf->loadHtml( $html, 'UTF-8' );
-				$dompdf->setPaper( 'A4', 'portrait' );
-				$dompdf->render();
-
-			return $dompdf->output();
-		}
+	if ( ! class_exists( '\Dompdf\Dompdf' ) ) {
+		return new WP_Error(
+			'cgt_missing_dompdf',
+			__( 'La génération de PDF nécessite la bibliothèque Dompdf. Merci de vérifier son installation.', 'cgt' )
+		);
 	}
 
-	return cgt_generate_adhesion_pdf_fallback( $title, $data );
-}
-
-/**
- * Generate professional PDF for adhesion data (1 page A4).
- *
- * @param string $title  Title.
- * @param array  $data   Data array.
- *
- * @return string
- */
-function cgt_generate_adhesion_pdf_fallback( $title, $data ) {
-	// PDF content stream with professional layout on 1 page A4 (595x842 points)
-	$pdf_stream = '';
-
-	// Header with red background
-	$pdf_stream .= "q\n"; // Save graphics state
-	$pdf_stream .= "0.784 0.063 0.078 rg\n"; // CGT Red color (#C8102E)
-	$pdf_stream .= "0 802 595 40 re f\n"; // Red rectangle at top
-	$pdf_stream .= "Q\n"; // Restore graphics state
-
-	// White text for header
-	$pdf_stream .= "BT\n";
-	$pdf_stream .= "/F2 16 Tf\n"; // Bold, 16pt
-	$pdf_stream .= "1 1 1 rg\n"; // White color
-	$pdf_stream .= "50 817 Td\n"; // Position
-	$pdf_stream .= '(' . cgt_pdf_escape_text( 'FICHE ADHESION CGT' ) . ") Tj\n";
-	$pdf_stream .= "ET\n";
-
-	// Date in header (right aligned)
-	$pdf_stream .= "BT\n";
-	$pdf_stream .= "/F1 10 Tf\n";
-	$pdf_stream .= "1 1 1 rg\n";
-	$pdf_stream .= "450 817 Td\n";
-	$pdf_stream .= '(' . cgt_pdf_escape_text( date( 'd/m/Y' ) ) . ") Tj\n";
-	$pdf_stream .= "ET\n";
-
-	$y = 770; // Starting Y position
-
-	// Title: Informations Personnelles
-	$pdf_stream .= "q\n";
-	$pdf_stream .= "0.784 0.063 0.078 rg\n"; // Red color
-	$pdf_stream .= "BT /F2 11 Tf 50 {$y} Td (" . cgt_pdf_escape_text( 'INFORMATIONS PERSONNELLES' ) . ") Tj ET\n";
-	$pdf_stream .= "Q\n";
-	$y -= 5;
-
-	// Line under title
-	$pdf_stream .= "q 0.784 0.063 0.078 RG 2 w 50 {$y} m 545 {$y} l S Q\n";
-	$y -= 20;
-
-	// Personal info in 2 columns
-	$left_col = 50;
-	$right_col = 300;
-	$line_height = 15;
-
-	$personal_fields = array(
-		array( 'Nom', $data['nom'] ?? '' ),
-		array( 'Prénom', $data['prenom'] ?? '' ),
-		array( 'Sexe', $data['sexe'] ?? '' ),
-		array( 'Date de naissance', $data['date_naissance'] ?? '' ),
-		array( 'Nationalité', $data['nationalite'] ?? '' ),
-		array( 'Téléphone', $data['tel'] ?? '' ),
-		array( 'Email', $data['email'] ?? '' ),
-		array( 'Statut', $data['statut'] ?? '' ),
-		array( 'Catégorie', $data['categorie'] ?? '' ),
-	);
-
-	$col = 0;
-	foreach ( $personal_fields as $field ) {
-		$x = ( $col === 0 ) ? $left_col : $right_col;
-		// Label in black bold
-		$pdf_stream .= "BT /F2 9 Tf 0 0 0 rg {$x} {$y} Td (" . cgt_pdf_escape_text( $field[0] . ' :' ) . ") Tj ET\n";
-		// Value in black regular
-		$pdf_stream .= "BT /F1 9 Tf 0 0 0 rg " . ( $x + 80 ) . " {$y} Td (" . cgt_pdf_escape_text( $field[1] ) . ") Tj ET\n";
-
-		if ( $col === 1 ) {
-			$y -= $line_height;
-			$col = 0;
-		} else {
-			$col = 1;
-		}
+	if ( ! function_exists( 'cgt_render_adhesion_pdf_template' ) ) {
+		return new WP_Error(
+			'cgt_missing_pdf_template',
+			__( 'Le gabarit de PDF est introuvable.', 'cgt' )
+		);
 	}
 
-	if ( $col === 1 ) {
-		$y -= $line_height;
+	$html = cgt_render_adhesion_pdf_template( $data );
+
+	if ( empty( $html ) ) {
+		return new WP_Error(
+			'cgt_empty_pdf_html',
+			__( 'Impossible de générer le PDF car le contenu est vide.', 'cgt' )
+		);
 	}
 
-	// Adresse (full width)
-	$y -= 5;
-	$pdf_stream .= "BT /F2 9 Tf 0 0 0 rg {$left_col} {$y} Td (" . cgt_pdf_escape_text( 'Adresse :' ) . ") Tj ET\n";
-	$adresse_complete = trim( ( $data['adresse'] ?? '' ) . ', ' . ( $data['code_postal'] ?? '' ) . ' ' . ( $data['ville'] ?? '' ) );
-	$pdf_stream .= "BT /F1 9 Tf 0 0 0 rg " . ( $left_col + 60 ) . " {$y} Td (" . cgt_pdf_escape_text( $adresse_complete ) . ") Tj ET\n";
-	$y -= 25;
+	try {
+		$options = new \Dompdf\Options();
+		$options->set( 'isRemoteEnabled', true );
+		$options->set( 'isHtml5ParserEnabled', true );
+		$options->setDefaultFont( 'DejaVu Sans' );
 
-	// Title: Entreprise
-	$pdf_stream .= "q\n";
-	$pdf_stream .= "0.784 0.063 0.078 rg\n";
-	$pdf_stream .= "BT /F2 11 Tf 50 {$y} Td (" . cgt_pdf_escape_text( 'INFORMATIONS ENTREPRISE' ) . ") Tj ET\n";
-	$pdf_stream .= "Q\n";
-	$y -= 5;
-	$pdf_stream .= "q 0.784 0.063 0.078 RG 2 w 50 {$y} m 545 {$y} l S Q\n";
-	$y -= 20;
-
-	// Enterprise info in 2 columns
-	$enterprise_fields = array(
-		array( 'Nom', $data['entreprise_nom'] ?? '' ),
-		array( 'SIRET', $data['entreprise_siret'] ?? '' ),
-		array( 'Groupe', $data['appartient_groupe'] ?? '' ),
-		array( 'Téléphone', $data['entreprise_tel'] ?? '' ),
-		array( 'Email', $data['entreprise_email'] ?? '' ),
-		array( 'Secteur', $data['secteur'] ?? '' ),
-		array( 'Code APE/NAF', $data['code_ape_naf'] ?? '' ),
-		array( 'Convention', $data['convention_collective'] ?? '' ),
-		array( 'Effectif', $data['effectif'] ?? '' ),
-		array( 'Union Locale', $data['union_locale'] ?? '' ),
-		array( 'Union Dép.', $data['union_departementale'] ?? '' ),
-	);
-
-	$col = 0;
-	foreach ( $enterprise_fields as $field ) {
-		if ( empty( $field[1] ) ) {
-			continue; // Skip empty fields
-		}
-
-		$x = ( $col === 0 ) ? $left_col : $right_col;
-		// Label in black bold
-		$pdf_stream .= "BT /F2 9 Tf 0 0 0 rg {$x} {$y} Td (" . cgt_pdf_escape_text( $field[0] . ' :' ) . ") Tj ET\n";
-
-		// Truncate long text
-		$value = $field[1];
-		if ( strlen( $value ) > 30 ) {
-			$value = substr( $value, 0, 27 ) . '...';
-		}
-		// Value in black regular
-		$pdf_stream .= "BT /F1 9 Tf 0 0 0 rg " . ( $x + 80 ) . " {$y} Td (" . cgt_pdf_escape_text( $value ) . ") Tj ET\n";
-
-		if ( $col === 1 ) {
-			$y -= $line_height;
-			$col = 0;
-		} else {
-			$col = 1;
-		}
+		$dompdf = new \Dompdf\Dompdf( $options );
+		$dompdf->loadHtml( $html, 'UTF-8' );
+		$dompdf->setPaper( 'A4', 'portrait' );
+		$dompdf->render();
+	} catch ( \Exception $e ) {
+		return new WP_Error(
+			'cgt_pdf_render_error',
+			sprintf(
+				/* translators: %s: error message */
+				__( 'Une erreur est survenue lors de la génération du PDF : %s', 'cgt' ),
+				$e->getMessage()
+			)
+		);
 	}
 
-	if ( $col === 1 ) {
-		$y -= $line_height;
-	}
-
-	// Adresse entreprise (full width)
-	if ( ! empty( $data['entreprise_adresse'] ) ) {
-		$y -= 5;
-		$pdf_stream .= "BT /F2 9 Tf 0 0 0 rg {$left_col} {$y} Td (" . cgt_pdf_escape_text( 'Adresse :' ) . ") Tj ET\n";
-		$adresse_ent = trim( ( $data['entreprise_adresse'] ?? '' ) . ', ' . ( $data['entreprise_code_postal'] ?? '' ) . ' ' . ( $data['entreprise_ville'] ?? '' ) );
-		$pdf_stream .= "BT /F1 9 Tf 0 0 0 rg " . ( $left_col + 60 ) . " {$y} Td (" . cgt_pdf_escape_text( $adresse_ent ) . ") Tj ET\n";
-		$y -= 20;
-	}
-
-	// Footer with submission date
-	$y = 60;
-	$pdf_stream .= "q 0.9 0.9 0.9 rg 0 0 595 50 re f Q\n"; // Light gray footer
-	$pdf_stream .= "BT /F1 8 Tf 0.4 0.4 0.4 rg 50 {$y} Td (" . cgt_pdf_escape_text( 'Soumis le : ' . ( $data['date_soumission'] ?? current_time( 'mysql' ) ) ) . ") Tj ET\n";
-
-	// CGT contact in footer
-	$pdf_stream .= "BT /F1 8 Tf 0.4 0.4 0.4 rg 350 {$y} Td (" . cgt_pdf_escape_text( 'CGT Fédération des Sociétés d\'Études' ) . ") Tj ET\n";
-
-	$stream_length = strlen( $pdf_stream );
-
-	$objects = array(
-		'<< /Type /Catalog /Pages 2 0 R >>',
-		'<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-		'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>',
-		"<< /Length $stream_length >>\nstream\n$pdf_stream\nendstream",
-		'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
-		'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>',
-	);
-
-	$pdf    = "%PDF-1.4\n";
-	$offset = array( 0 );
-	foreach ( $objects as $index => $object ) {
-		$offset[ $index + 1 ] = strlen( $pdf );
-		$pdf                 .= ( $index + 1 ) . " 0 obj\n" . $object . "\nendobj\n";
-	}
-
-	$xref_pos = strlen( $pdf );
-	$pdf     .= "xref\n0 " . ( count( $objects ) + 1 ) . "\n";
-	$pdf     .= "0000000000 65535 f \n";
-	for ( $i = 1; $i <= count( $objects ); $i++ ) {
-		$pdf .= sprintf( '%010d 00000 n ', $offset[ $i ] ) . "\n";
-	}
-
-	$pdf .= "trailer\n<< /Size " . ( count( $objects ) + 1 ) . " /Root 1 0 R >>\nstartxref\n" . $xref_pos . "\n%%EOF";
-
-	return $pdf;
+	return $dompdf->output();
 }
 
 /**

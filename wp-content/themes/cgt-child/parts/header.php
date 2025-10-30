@@ -5,7 +5,7 @@
  * @package CGT_Child
  */
 
-$logo_url        = 'http://fse.local/wp-content/uploads/2025/10/logo2.png';
+$logo_url        = cgt_child_get_logo_url();
 $posts_page_id   = (int) get_option( 'page_for_posts' );
 $posts_page_link = $posts_page_id ? get_permalink( $posts_page_id ) : home_url( '/actualites' );
 $classes_page    = get_page_by_path( 'classes' );

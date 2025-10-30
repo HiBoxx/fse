@@ -11,6 +11,18 @@ if ( ! defined( 'CGT_CHILD_VERSION' ) ) {
 	define( 'CGT_CHILD_VERSION', '1.0.0' );
 }
 
+if ( ! defined( 'CGT_CHILD_DEFAULT_LOGO_URL' ) ) {
+	define( 'CGT_CHILD_DEFAULT_LOGO_URL', 'http://fse.local/wp-content/uploads/2025/10/logo2.png' );
+}
+
+if ( ! defined( 'CGT_CHILD_DEFAULT_FAVICON_URL' ) ) {
+	define( 'CGT_CHILD_DEFAULT_FAVICON_URL', 'http://fse.local/wp-content/uploads/2025/10/logo2.png' );
+}
+
+if ( ! defined( 'CGT_CHILD_DEFAULT_IMAGE_URL' ) ) {
+	define( 'CGT_CHILD_DEFAULT_IMAGE_URL', 'http://fse.local/wp-content/uploads/2025/10/image-par-defaut.png' );
+}
+
 // Charge l'autoloader Dompdf si disponible.
 $cgt_child_dompdf_autoloaders = array(
 	get_stylesheet_directory() . '/vendor/dompdf/autoload.inc.php',
@@ -48,6 +60,7 @@ $cgt_inc_files = array(
 	'newsletter.php',
 	'admin-post-creation.php',
 	'admin-menu-reorganization.php',
+	'customizer.php',
 	'content-reset.php',
 );
 
@@ -56,6 +69,121 @@ foreach ( $cgt_inc_files as $cgt_inc_file ) {
 	if ( file_exists( $path ) ) {
 		require_once $path;
 	}
+}
+
+/**
+ * Retourne l'URL du logo fédéral configuré.
+ *
+ * @return string
+ */
+function cgt_child_get_logo_url() {
+	$logo_url = get_theme_mod( 'cgt_logo_url', CGT_CHILD_DEFAULT_LOGO_URL );
+
+	/**
+	 * Filtre l'URL du logo fédéral.
+	 *
+	 * @param string $logo_url URL du logo.
+	 */
+	$logo_url = apply_filters( 'cgt_child_logo_url', $logo_url );
+
+	return esc_url_raw( $logo_url );
+}
+
+/**
+ * Retourne l'URL du favicon fédéral configuré.
+ *
+ * @return string
+ */
+function cgt_child_get_favicon_url() {
+	$favicon_url = get_theme_mod( 'cgt_favicon_url', CGT_CHILD_DEFAULT_FAVICON_URL );
+
+	/**
+	 * Filtre l'URL du favicon fédéral.
+	 *
+	 * @param string $favicon_url URL du favicon.
+	 */
+	$favicon_url = apply_filters( 'cgt_child_favicon_url', $favicon_url );
+
+	return esc_url_raw( $favicon_url );
+}
+
+/**
+ * Injecte le favicon fédéral dans l'ensemble des interfaces publiques et privées.
+ */
+function cgt_child_print_favicon() {
+	$favicon_url = cgt_child_get_favicon_url();
+
+	if ( empty( $favicon_url ) ) {
+		return;
+	}
+
+	printf(
+		'<link rel="icon" href="%1$s" sizes="32x32" />' . PHP_EOL .
+		'<link rel="apple-touch-icon" href="%1$s" />' . PHP_EOL,
+		esc_url( $favicon_url )
+	);
+}
+
+add_action( 'wp_head', 'cgt_child_print_favicon', 1 );
+add_action( 'admin_head', 'cgt_child_print_favicon', 1 );
+add_action( 'login_head', 'cgt_child_print_favicon', 1 );
+
+/**
+ * Retourne l'URL de l'image de remplacement.
+ *
+ * @return string
+ */
+function cgt_child_get_default_image_url() {
+	$default_image = get_theme_mod( 'cgt_default_image_url', CGT_CHILD_DEFAULT_IMAGE_URL );
+
+	/**
+	 * Filtre l'URL de l'image de remplacement.
+	 *
+	 * @param string $default_image URL de l'image.
+	 */
+	$default_image = apply_filters( 'cgt_child_default_image_url', $default_image );
+
+	return esc_url_raw( $default_image );
+}
+
+/**
+ * Récupère le HTML de l'image mise en avant ou de l'image de remplacement.
+ *
+ * @param int         $post_id Post ID.
+ * @param string|int  $size    Image size.
+ * @param array       $attr    Attributes.
+ * @return string
+ */
+function cgt_child_get_post_thumbnail_html( $post_id = 0, $size = 'medium', $attr = array() ) {
+	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
+
+	if ( has_post_thumbnail( $post_id ) ) {
+		return get_the_post_thumbnail( $post_id, $size, $attr );
+	}
+
+	$fallback = cgt_child_get_default_image_url();
+
+	if ( empty( $fallback ) ) {
+		return '';
+	}
+
+	$attr = wp_parse_args(
+		$attr,
+		array(
+			'alt'     => get_the_title( $post_id ),
+			'loading' => 'lazy',
+		)
+	);
+
+	$attributes = '';
+	foreach ( $attr as $key => $value ) {
+		if ( '' === $value || false === $value ) {
+			continue;
+		}
+		$attributes .= sprintf( ' %s="%s"', esc_attr( $key ), esc_attr( $value ) );
+	}
+
+	return sprintf( '<img src="%1$s"%2$s />', esc_url( $fallback ), $attributes );
 }
 
 // Clear cached taxonomies when terms change.
