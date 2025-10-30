@@ -152,6 +152,16 @@ add_action(
 			);
 		}
 
+		// Charger les styles de la page Médiathèque/Bibliothèque
+		if ( is_page( 'mediatheque' ) || is_page_template( 'templates/page-bibliotheque.php' ) ) {
+			wp_enqueue_style(
+				'cgt-library',
+				get_stylesheet_directory_uri() . '/assets/css/library.css',
+				array( 'cgt-child' ),
+				CGT_CHILD_VERSION
+			);
+		}
+
 		// Charger les styles et scripts de la page de connexion
 		if ( is_page_template( 'page-connexion.php' ) ) {
 			wp_enqueue_style(
