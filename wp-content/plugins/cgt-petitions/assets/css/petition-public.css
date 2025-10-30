@@ -225,8 +225,21 @@
 }
 
 /* =========================
-   Content Section
+   Content & Signature Sections
    ========================= */
+
+.cgt-petition-section {
+    display: block;
+    margin-top: 2.5rem;
+}
+
+.cgt-petition-section:first-of-type {
+    margin-top: 0;
+}
+
+.cgt-petition-section--sign {
+    display: block;
+}
 
 .cgt-petition-content {
 	background: white;
@@ -300,7 +313,7 @@
 	align-items: center;
 	gap: 0.75rem;
 	background: var(--cgt-red);
-	color: white;
+	color: #fff;
 	padding: 0.875rem 2rem;
 	border-radius: var(--radius-sm);
 	text-decoration: none;
@@ -310,11 +323,12 @@
 	box-shadow: var(--shadow);
 }
 
-.cgt-petition-pdf__button:hover {
+.cgt-petition-pdf__button:hover,
+.cgt-petition-pdf__button:focus {
 	background: var(--cgt-red-dark);
 	transform: translateY(-2px);
 	box-shadow: var(--shadow-lg);
-	color: white;
+	color: #fff;
 }
 
 .cgt-petition-pdf__button::before {

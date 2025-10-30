@@ -16,7 +16,7 @@ $latest_communiques = new WP_Query(
 
 $resource_args = array(
 	'post_type'      => 'tracts',
-	'posts_per_page' => 4,
+	'posts_per_page' => 3,
 );
 
 if ( ! cgt_user_can_read_private() ) {
