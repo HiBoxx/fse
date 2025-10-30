@@ -105,12 +105,22 @@ function cgt_filter_private_content( $query ) {
 	}
 
 	if ( $query->is_post_type_archive( 'tracts' ) || $query->is_tax( array( 'branche', 'thematique', 'zone_internationale' ) ) || $query->is_search() ) {
-		$meta_query   = (array) $query->get( 'meta_query', array() );
+		$meta_query = (array) $query->get( 'meta_query', array() );
+
+		// Afficher les tracts publics ET ceux sans visibilité définie
 		$meta_query[] = array(
-			'key'     => 'cgt_visibilite',
-			'value'   => 'prive',
-			'compare' => '!=',
+			'relation' => 'OR',
+			array(
+				'key'     => 'cgt_visibilite',
+				'value'   => 'prive',
+				'compare' => '!=',
+			),
+			array(
+				'key'     => 'cgt_visibilite',
+				'compare' => 'NOT EXISTS',
+			),
 		);
+
 		$query->set( 'meta_query', $meta_query );
 	}
 }
