@@ -350,12 +350,105 @@ $communiques_tabs = array(
 			</header>
 
 			<?php if ( $latest_resources->have_posts() ) : ?>
-				<div class="home-grid">
+				<div class="tracts-grid">
 					<?php
 					while ( $latest_resources->have_posts() ) :
 						$latest_resources->the_post();
 						if ( 'tracts' === get_post_type() ) {
-							get_template_part( 'parts/card', null, array( 'context' => 'tract' ) );
+							$visibility = get_post_meta( get_the_ID(), 'cgt_visibilite', true );
+							$pdf_url    = get_post_meta( get_the_ID(), 'cgt_fichier_pdf', true );
+							$is_private = 'prive' === $visibility;
+							$can_access = ! $is_private || cgt_user_can_read_private();
+
+							// Tronquer le titre
+							$title = get_the_title();
+							$title_limit = 70;
+							if ( mb_strlen( $title ) > $title_limit ) {
+								$title = mb_substr( $title, 0, $title_limit ) . '...';
+							}
+							?>
+							<article <?php post_class( 'tract-card' ); ?>>
+								<a href="<?php the_permalink(); ?>" class="tract-card__link" aria-label="<?php echo esc_attr( sprintf( __( 'Voir le tract : %s', 'cgt' ), get_the_title() ) ); ?>">
+									<div class="tract-card__icon">
+										<?php if ( $is_private ) : ?>
+											<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+												<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+												<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+											</svg>
+										<?php else : ?>
+											<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+												<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+												<polyline points="14 2 14 8 20 8"></polyline>
+												<line x1="16" y1="13" x2="8" y2="13"></line>
+												<line x1="16" y1="17" x2="8" y2="17"></line>
+												<polyline points="10 9 9 9 8 9"></polyline>
+											</svg>
+										<?php endif; ?>
+									</div>
+
+									<div class="tract-card__content">
+										<div class="tract-card__header">
+											<span class="tract-card__date">
+												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+													<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+													<line x1="16" y1="2" x2="16" y2="6"></line>
+													<line x1="8" y1="2" x2="8" y2="6"></line>
+													<line x1="3" y1="10" x2="21" y2="10"></line>
+												</svg>
+												<?php echo esc_html( get_the_date() ); ?>
+											</span>
+											<?php if ( $is_private ) : ?>
+												<span class="tract-card__badge tract-card__badge--private">
+													<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+														<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+														<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+													</svg>
+													<?php esc_html_e( 'Adhérents', 'cgt' ); ?>
+												</span>
+											<?php endif; ?>
+										</div>
+
+										<h2 class="tract-card__title"><?php echo esc_html( $title ); ?></h2>
+
+										<?php
+										$branches = wp_get_post_terms( get_the_ID(), 'branche' );
+										if ( ! empty( $branches ) && ! is_wp_error( $branches ) ) :
+											?>
+											<div class="tract-card__branches">
+												<?php foreach ( array_slice( $branches, 0, 2 ) as $branch ) : ?>
+													<span class="tract-card__branch-tag"><?php echo esc_html( $branch->name ); ?></span>
+												<?php endforeach; ?>
+												<?php if ( count( $branches ) > 2 ) : ?>
+													<span class="tract-card__branch-tag tract-card__branch-tag--more">+<?php echo esc_html( count( $branches ) - 2 ); ?></span>
+												<?php endif; ?>
+											</div>
+										<?php endif; ?>
+									</div>
+								</a>
+
+								<div class="tract-card__footer">
+									<?php if ( $pdf_url && $can_access ) : ?>
+										<a class="tract-card__download" href="<?php echo esc_url( $pdf_url ); ?>" download>
+											<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+												<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+												<polyline points="7 10 12 15 17 10"></polyline>
+												<line x1="12" y1="15" x2="12" y2="3"></line>
+											</svg>
+											<?php esc_html_e( 'Télécharger le PDF', 'cgt' ); ?>
+										</a>
+									<?php elseif ( $is_private && ! cgt_user_can_read_private() ) : ?>
+										<div class="tract-card__locked">
+											<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+												<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+												<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+											</svg>
+											<span><?php esc_html_e( 'Réservé aux adhérents', 'cgt' ); ?></span>
+											<a href="<?php echo esc_url( home_url( '/connexion' ) ); ?>" class="tract-card__login-link"><?php esc_html_e( 'Se connecter', 'cgt' ); ?></a>
+										</div>
+									<?php endif; ?>
+								</div>
+							</article>
+							<?php
 						}
 					endwhile;
 					?>
