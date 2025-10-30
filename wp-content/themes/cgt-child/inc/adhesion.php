@@ -491,7 +491,7 @@ function cgt_pdf_escape_text( $text ) {
 }
 
 /**
- * Generate PDF string for adhesion data.
+ * Generate professional PDF for adhesion data (1 page A4).
  *
  * @param string $title  Title.
  * @param array  $data   Data array.
@@ -499,54 +499,164 @@ function cgt_pdf_escape_text( $text ) {
  * @return string
  */
 function cgt_generate_adhesion_pdf( $title, $data ) {
-	$lines = array(
-		sprintf( 'Nom : %s', $data['nom'] ?? '' ),
-		sprintf( 'Prénom : %s', $data['prenom'] ?? '' ),
-		sprintf( 'Sexe : %s', $data['sexe'] ?? '' ),
-		sprintf( 'Date de naissance : %s', $data['date_naissance'] ?? '' ),
-		sprintf( 'Nationalité : %s', $data['nationalite'] ?? '' ),
-		sprintf( 'Adresse : %s %s %s', $data['adresse'] ?? '', $data['code_postal'] ?? '', $data['ville'] ?? '' ),
-		sprintf( 'Téléphone : %s', $data['tel'] ?? '' ),
-		sprintf( 'Email : %s', $data['email'] ?? '' ),
-		sprintf( 'Statut : %s', $data['statut'] ?? '' ),
-		sprintf( 'Catégorie : %s', $data['categorie'] ?? '' ),
-		'',
-		'--- Entreprise ---',
-		sprintf( 'Nom : %s', $data['entreprise_nom'] ?? '' ),
-		sprintf( 'SIRET : %s', $data['entreprise_siret'] ?? '' ),
-		sprintf( 'Groupe : %s', $data['appartient_groupe'] ?? '' ),
-		sprintf( 'Adresse : %s %s %s', $data['entreprise_adresse'] ?? '', $data['entreprise_code_postal'] ?? '', $data['entreprise_ville'] ?? '' ),
-		sprintf( 'Téléphone : %s', $data['entreprise_tel'] ?? '' ),
-		sprintf( 'Email : %s', $data['entreprise_email'] ?? '' ),
-		sprintf( 'Secteur : %s', $data['secteur'] ?? '' ),
-		sprintf( 'Code APE/NAF : %s', $data['code_ape_naf'] ?? '' ),
-		sprintf( 'Convention collective : %s', $data['convention_collective'] ?? '' ),
-		sprintf( 'Effectif : %s', $data['effectif'] ?? '' ),
-		sprintf( 'Union Locale : %s', $data['union_locale'] ?? '' ),
-		sprintf( 'Union Départementale : %s', $data['union_departementale'] ?? '' ),
-		'',
-		sprintf( 'Soumis le : %s', $data['date_soumission'] ?? current_time( 'mysql' ) ),
+	// PDF content stream with professional layout on 1 page A4 (595x842 points)
+	$pdf_stream = '';
+
+	// Header with red background
+	$pdf_stream .= "q\n"; // Save graphics state
+	$pdf_stream .= "0.784 0.063 0.078 rg\n"; // CGT Red color (#C8102E)
+	$pdf_stream .= "0 802 595 40 re f\n"; // Red rectangle at top
+	$pdf_stream .= "Q\n"; // Restore graphics state
+
+	// White text for header
+	$pdf_stream .= "BT\n";
+	$pdf_stream .= "/F2 16 Tf\n"; // Bold, 16pt
+	$pdf_stream .= "1 1 1 rg\n"; // White color
+	$pdf_stream .= "50 817 Td\n"; // Position
+	$pdf_stream .= '(' . cgt_pdf_escape_text( 'FICHE ADHESION CGT' ) . ") Tj\n";
+	$pdf_stream .= "ET\n";
+
+	// Date in header (right aligned)
+	$pdf_stream .= "BT\n";
+	$pdf_stream .= "/F1 10 Tf\n";
+	$pdf_stream .= "1 1 1 rg\n";
+	$pdf_stream .= "450 817 Td\n";
+	$pdf_stream .= '(' . cgt_pdf_escape_text( date( 'd/m/Y' ) ) . ") Tj\n";
+	$pdf_stream .= "ET\n";
+
+	$y = 770; // Starting Y position
+
+	// Title: Informations Personnelles
+	$pdf_stream .= "q\n";
+	$pdf_stream .= "0.784 0.063 0.078 rg\n"; // Red color
+	$pdf_stream .= "BT /F2 11 Tf 50 {$y} Td (" . cgt_pdf_escape_text( 'INFORMATIONS PERSONNELLES' ) . ") Tj ET\n";
+	$pdf_stream .= "Q\n";
+	$y -= 5;
+
+	// Line under title
+	$pdf_stream .= "q 0.784 0.063 0.078 RG 2 w 50 {$y} m 545 {$y} l S Q\n";
+	$y -= 20;
+
+	// Personal info in 2 columns
+	$left_col = 50;
+	$right_col = 300;
+	$line_height = 15;
+
+	$personal_fields = array(
+		array( 'Nom', $data['nom'] ?? '' ),
+		array( 'Prénom', $data['prenom'] ?? '' ),
+		array( 'Sexe', $data['sexe'] ?? '' ),
+		array( 'Date de naissance', $data['date_naissance'] ?? '' ),
+		array( 'Nationalité', $data['nationalite'] ?? '' ),
+		array( 'Téléphone', $data['tel'] ?? '' ),
+		array( 'Email', $data['email'] ?? '' ),
+		array( 'Statut', $data['statut'] ?? '' ),
+		array( 'Catégorie', $data['categorie'] ?? '' ),
 	);
 
-	$escaped_lines = array_map( 'cgt_pdf_escape_text', $lines );
-	$pdf_stream   = 'BT /F1 12 Tf 18 TL 60 780 Td ';
-	$first        = true;
-	foreach ( $escaped_lines as $line ) {
-		if ( ! $first ) {
-			$pdf_stream .= 'T* ';
+	$col = 0;
+	foreach ( $personal_fields as $field ) {
+		$x = ( $col === 0 ) ? $left_col : $right_col;
+		$pdf_stream .= "BT /F2 9 Tf {$x} {$y} Td (" . cgt_pdf_escape_text( $field[0] . ' :' ) . ") Tj ET\n";
+		$pdf_stream .= "BT /F1 9 Tf " . ( $x + 80 ) . " {$y} Td (" . cgt_pdf_escape_text( $field[1] ) . ") Tj ET\n";
+
+		if ( $col === 1 ) {
+			$y -= $line_height;
+			$col = 0;
+		} else {
+			$col = 1;
 		}
-		$pdf_stream .= '(' . $line . ') Tj ';
-		$first = false;
 	}
-	$pdf_stream .= 'ET';
+
+	if ( $col === 1 ) {
+		$y -= $line_height;
+	}
+
+	// Adresse (full width)
+	$y -= 5;
+	$pdf_stream .= "BT /F2 9 Tf {$left_col} {$y} Td (" . cgt_pdf_escape_text( 'Adresse :' ) . ") Tj ET\n";
+	$adresse_complete = trim( ( $data['adresse'] ?? '' ) . ', ' . ( $data['code_postal'] ?? '' ) . ' ' . ( $data['ville'] ?? '' ) );
+	$pdf_stream .= "BT /F1 9 Tf " . ( $left_col + 60 ) . " {$y} Td (" . cgt_pdf_escape_text( $adresse_complete ) . ") Tj ET\n";
+	$y -= 25;
+
+	// Title: Entreprise
+	$pdf_stream .= "q\n";
+	$pdf_stream .= "0.784 0.063 0.078 rg\n";
+	$pdf_stream .= "BT /F2 11 Tf 50 {$y} Td (" . cgt_pdf_escape_text( 'INFORMATIONS ENTREPRISE' ) . ") Tj ET\n";
+	$pdf_stream .= "Q\n";
+	$y -= 5;
+	$pdf_stream .= "q 0.784 0.063 0.078 RG 2 w 50 {$y} m 545 {$y} l S Q\n";
+	$y -= 20;
+
+	// Enterprise info in 2 columns
+	$enterprise_fields = array(
+		array( 'Nom', $data['entreprise_nom'] ?? '' ),
+		array( 'SIRET', $data['entreprise_siret'] ?? '' ),
+		array( 'Groupe', $data['appartient_groupe'] ?? '' ),
+		array( 'Téléphone', $data['entreprise_tel'] ?? '' ),
+		array( 'Email', $data['entreprise_email'] ?? '' ),
+		array( 'Secteur', $data['secteur'] ?? '' ),
+		array( 'Code APE/NAF', $data['code_ape_naf'] ?? '' ),
+		array( 'Convention', $data['convention_collective'] ?? '' ),
+		array( 'Effectif', $data['effectif'] ?? '' ),
+		array( 'Union Locale', $data['union_locale'] ?? '' ),
+		array( 'Union Dép.', $data['union_departementale'] ?? '' ),
+	);
+
+	$col = 0;
+	foreach ( $enterprise_fields as $field ) {
+		if ( empty( $field[1] ) ) {
+			continue; // Skip empty fields
+		}
+
+		$x = ( $col === 0 ) ? $left_col : $right_col;
+		$pdf_stream .= "BT /F2 9 Tf {$x} {$y} Td (" . cgt_pdf_escape_text( $field[0] . ' :' ) . ") Tj ET\n";
+
+		// Truncate long text
+		$value = $field[1];
+		if ( strlen( $value ) > 30 ) {
+			$value = substr( $value, 0, 27 ) . '...';
+		}
+		$pdf_stream .= "BT /F1 9 Tf " . ( $x + 80 ) . " {$y} Td (" . cgt_pdf_escape_text( $value ) . ") Tj ET\n";
+
+		if ( $col === 1 ) {
+			$y -= $line_height;
+			$col = 0;
+		} else {
+			$col = 1;
+		}
+	}
+
+	if ( $col === 1 ) {
+		$y -= $line_height;
+	}
+
+	// Adresse entreprise (full width)
+	if ( ! empty( $data['entreprise_adresse'] ) ) {
+		$y -= 5;
+		$pdf_stream .= "BT /F2 9 Tf {$left_col} {$y} Td (" . cgt_pdf_escape_text( 'Adresse :' ) . ") Tj ET\n";
+		$adresse_ent = trim( ( $data['entreprise_adresse'] ?? '' ) . ', ' . ( $data['entreprise_code_postal'] ?? '' ) . ' ' . ( $data['entreprise_ville'] ?? '' ) );
+		$pdf_stream .= "BT /F1 9 Tf " . ( $left_col + 60 ) . " {$y} Td (" . cgt_pdf_escape_text( $adresse_ent ) . ") Tj ET\n";
+		$y -= 20;
+	}
+
+	// Footer with submission date
+	$y = 60;
+	$pdf_stream .= "q 0.9 0.9 0.9 rg 0 0 595 50 re f Q\n"; // Light gray footer
+	$pdf_stream .= "BT /F1 8 Tf 0.4 0.4 0.4 rg 50 {$y} Td (" . cgt_pdf_escape_text( 'Soumis le : ' . ( $data['date_soumission'] ?? current_time( 'mysql' ) ) ) . ") Tj ET\n";
+
+	// CGT contact in footer
+	$pdf_stream .= "BT /F1 8 Tf 0.4 0.4 0.4 rg 350 {$y} Td (" . cgt_pdf_escape_text( 'CGT Fédération des Sociétés d\'Études' ) . ") Tj ET\n";
 
 	$stream_length = strlen( $pdf_stream );
-	$objects       = array(
+
+	$objects = array(
 		'<< /Type /Catalog /Pages 2 0 R >>',
 		'<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-		'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+		'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>',
 		"<< /Length $stream_length >>\nstream\n$pdf_stream\nendstream",
 		'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+		'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>',
 	);
 
 	$pdf    = "%PDF-1.4\n";
