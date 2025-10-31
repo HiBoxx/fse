@@ -361,7 +361,7 @@ function cgt_enqueue_adhesion_admin_styles( $hook ) {
  */
 function cgt_render_adhesion_admin_page() {
 	if ( ! current_user_can( 'manage_cgt_adhesions' ) ) {
-		wp_die( esc_html__( 'Vous n'avez pas les droits suffisants pour accéder à cette page.', 'cgt' ) );
+		wp_die( esc_html__( 'Vous n\'avez pas les droits suffisants pour accéder à cette page.', 'cgt' ) );
 	}
 
 	// Get statistics
