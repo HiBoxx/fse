@@ -42,9 +42,20 @@ while ( have_posts() ) :
 				<h1 class="tract-title"><?php the_title(); ?></h1>
 			</header>
 
-			<?php if ( has_post_thumbnail() ) : ?>
+			<?php
+			$featured_html = cgt_child_get_post_thumbnail_html(
+				get_the_ID(),
+				'large',
+				array(
+					'class'   => 'featured-img',
+					'loading' => 'lazy',
+					'alt'     => get_the_title(),
+				)
+			);
+			if ( $featured_html ) :
+				?>
 				<div class="tract-featured-image">
-					<?php the_post_thumbnail( 'large', array( 'class' => 'featured-img' ) ); ?>
+					<?php echo $featured_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</div>
 			<?php endif; ?>
 

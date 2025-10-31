@@ -47,23 +47,17 @@ function cgt_register_adherent_role() {
 
 	$adhesion_caps = array( 'manage_cgt_adhesions' );
 
-	// Grant capability to editors & admins.
-	foreach ( array( 'administrator', 'editor' ) as $role_key ) {
-		$role_object = get_role( $role_key );
-		if ( $role_object ) {
-			$role_object->add_cap( 'read_private_cgt' );
-			$role_object->add_cap( 'read_private_articles_adherents' );
-			$role_object->add_cap( 'read_private_cgt_agendas' );
-			foreach ( $article_caps as $cap ) {
-				$role_object->add_cap( $cap );
-			}
-
-			// Seuls les administrateurs gèrent les adhésions.
-			if ( 'administrator' === $role_key ) {
-				foreach ( $adhesion_caps as $cap ) {
-					$role_object->add_cap( $cap );
-				}
-			}
+	// Grant capabilities to administrators only.
+	$admin_role = get_role( 'administrator' );
+	if ( $admin_role ) {
+		$admin_role->add_cap( 'read_private_cgt' );
+		$admin_role->add_cap( 'read_private_articles_adherents' );
+		$admin_role->add_cap( 'read_private_cgt_agendas' );
+		foreach ( $article_caps as $cap ) {
+			$admin_role->add_cap( $cap );
+		}
+		foreach ( $adhesion_caps as $cap ) {
+			$admin_role->add_cap( $cap );
 		}
 	}
 }
@@ -91,6 +85,30 @@ add_action(
 
 		if ( $needs_reapply ) {
 			cgt_register_adherent_role();
+		}
+	}
+);
+
+/**
+ * Remove unused default roles to keep only administrator and adherent.
+ */
+add_action(
+	'after_setup_theme',
+	function () {
+		$roles_to_remove = array(
+			'editor',
+			'author',
+			'contributor',
+			'subscriber',
+			'gestionnaire',
+			'administration',
+			'assistante',
+		);
+
+		foreach ( $roles_to_remove as $role_key ) {
+			if ( get_role( $role_key ) ) {
+				remove_role( $role_key );
+			}
 		}
 	}
 );

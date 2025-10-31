@@ -1,0 +1,570 @@
+/**
+ * Custom Global Admin Design for CGT
+ * Complete WordPress admin interface redesign with CGT branding
+ * Soft burgundy colors - professional and easy on the eyes
+ */
+
+/* ============================================
+   ADMIN BAR (Top)
+   ============================================ */
+
+#wpadminbar {
+    background: linear-gradient(135deg, #8B1538 0%, #A91D3A 100%);
+    box-shadow: 0 2px 8px rgba(139, 21, 56, 0.2);
+}
+
+#wpadminbar .ab-item,
+#wpadminbar a.ab-item,
+#wpadminbar > #wp-toolbar span.ab-label,
+#wpadminbar > #wp-toolbar span.noticon {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+#wpadminbar .ab-icon:before,
+#wpadminbar .ab-item:before {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+#wpadminbar .ab-top-menu > li:hover > .ab-item,
+#wpadminbar .ab-top-menu > li.hover > .ab-item,
+#wpadminbar .ab-top-menu > li > .ab-item:focus,
+#wpadminbar.nojq .quicklinks .ab-top-menu > li > .ab-item:focus,
+#wpadminbar-nojs .ab-top-menu > li.menupop:hover > .ab-item {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+#wpadminbar .menupop .ab-sub-wrapper {
+    background: #7A1230;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+#wpadminbar .ab-submenu .ab-item {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+#wpadminbar .ab-submenu .ab-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+#wpadminbar #wp-admin-bar-site-name > .ab-item:before {
+    content: "●";
+    color: #fff;
+    margin-right: 5px;
+}
+
+/* ============================================
+   ADMIN MENU (Left Sidebar)
+   ============================================ */
+
+#adminmenuback,
+#adminmenuwrap,
+#adminmenu {
+    background: #2C2C2C;
+}
+
+#adminmenu,
+#adminmenu .wp-submenu {
+    background: #2C2C2C;
+}
+
+/* Menu items */
+#adminmenu a {
+    color: #E0E0E0;
+    transition: all 0.2s ease;
+}
+
+#adminmenu .wp-submenu a {
+    color: #B8B8B8;
+}
+
+/* Hover states */
+#adminmenu li.menu-top:hover,
+#adminmenu li.opensub > a.menu-top,
+#adminmenu li > a.menu-top:focus {
+    background: #3A3A3A;
+    color: #fff;
+}
+
+#adminmenu li.menu-top:hover > a,
+#adminmenu li.opensub > a.menu-top,
+#adminmenu li > a.menu-top:focus {
+    color: #fff;
+}
+
+/* Active/Current menu item */
+#adminmenu .wp-has-current-submenu .wp-submenu .wp-submenu-head,
+#adminmenu .wp-menu-arrow,
+#adminmenu .wp-has-current-submenu a.wp-has-current-submenu,
+#adminmenu li.current a.menu-top,
+#adminmenu .wp-has-current-submenu .wp-submenu a.current {
+    background: linear-gradient(135deg, #8B1538 0%, #A91D3A 100%);
+    color: #fff;
+}
+
+#adminmenu .wp-has-current-submenu a.wp-has-current-submenu:after {
+    border-right-color: #8B1538;
+}
+
+#adminmenu li.current a.menu-top .wp-menu-image:before,
+#adminmenu .wp-has-current-submenu .wp-submenu a.current .wp-menu-image:before {
+    color: #fff;
+}
+
+/* Submenu */
+#adminmenu .wp-submenu {
+    background: #232323;
+    box-shadow: inset 2px 0 0 rgba(139, 21, 56, 0.3);
+}
+
+#adminmenu .wp-submenu a:hover {
+    background: rgba(139, 21, 56, 0.15);
+    color: #fff;
+}
+
+#adminmenu .wp-submenu li.current a,
+#adminmenu .wp-submenu a.current {
+    background: rgba(139, 21, 56, 0.25);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Menu icons */
+#adminmenu div.wp-menu-image:before {
+    color: #B8B8B8;
+    transition: color 0.2s ease;
+}
+
+#adminmenu li.menu-top:hover div.wp-menu-image:before,
+#adminmenu li.opensub > a.menu-top div.wp-menu-image:before {
+    color: #fff;
+}
+
+#adminmenu .wp-has-current-submenu div.wp-menu-image:before,
+#adminmenu .current div.wp-menu-image:before {
+    color: #fff;
+}
+
+/* Separator */
+#adminmenu li.wp-menu-separator {
+    background: #1A1A1A;
+    height: 1px;
+    margin: 8px 0;
+}
+
+/* Collapse button */
+#collapse-button {
+    color: #B8B8B8;
+}
+
+#collapse-button:hover {
+    color: #fff;
+}
+
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================ */
+
+/* Body background */
+body.wp-admin {
+    background: #f5f5f5;
+}
+
+/* Page titles */
+.wrap h1,
+.wrap h2 {
+    color: #2C2C2C;
+}
+
+/* Primary buttons */
+.wp-core-ui .button-primary {
+    background: linear-gradient(135deg, #8B1538 0%, #A91D3A 100%);
+    border-color: #7A1230;
+    box-shadow: 0 2px 4px rgba(139, 21, 56, 0.2);
+    text-shadow: none;
+    transition: all 0.2s ease;
+}
+
+.wp-core-ui .button-primary:hover,
+.wp-core-ui .button-primary:focus {
+    background: linear-gradient(135deg, #A91D3A 0%, #C82346 100%);
+    border-color: #8B1538;
+    box-shadow: 0 4px 8px rgba(139, 21, 56, 0.3);
+}
+
+.wp-core-ui .button-primary:active {
+    background: #7A1230;
+    border-color: #6A1028;
+}
+
+.wp-core-ui .button-primary.disabled,
+.wp-core-ui .button-primary:disabled,
+.wp-core-ui .button-primary[disabled] {
+    background: #B8B8B8 !important;
+    border-color: #A0A0A0 !important;
+    box-shadow: none !important;
+}
+
+/* Secondary buttons */
+.wp-core-ui .button,
+.wp-core-ui .button-secondary {
+    border-color: #8B1538;
+    color: #8B1538;
+    transition: all 0.2s ease;
+}
+
+.wp-core-ui .button:hover,
+.wp-core-ui .button-secondary:hover {
+    background: #8B1538;
+    border-color: #8B1538;
+    color: #fff;
+}
+
+/* Links */
+a {
+    color: #8B1538;
+    transition: color 0.2s ease;
+}
+
+a:hover,
+a:active,
+a:focus {
+    color: #A91D3A;
+}
+
+/* ============================================
+   NOTICES & MESSAGES
+   ============================================ */
+
+.notice-success,
+div.updated {
+    border-left-color: #27AE60;
+}
+
+.notice-warning {
+    border-left-color: #E67E22;
+}
+
+.notice-error,
+div.error {
+    border-left-color: #C0392B;
+}
+
+.notice-info {
+    border-left-color: #8B1538;
+}
+
+/* ============================================
+   FORMS & INPUTS
+   ============================================ */
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #8B1538;
+    box-shadow: 0 0 0 1px #8B1538;
+}
+
+/* Checkbox & Radio */
+input[type="checkbox"]:checked:before,
+input[type="radio"]:checked:before {
+    color: #8B1538;
+}
+
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+    border-color: #8B1538;
+    box-shadow: 0 0 0 1px #8B1538;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+.widefat thead tr th,
+.widefat thead tr td {
+    background: #2C2C2C;
+    color: #fff;
+    border-bottom: 2px solid #8B1538;
+}
+
+.widefat tfoot tr th,
+.widefat tfoot tr td {
+    background: #2C2C2C;
+    color: #fff;
+    border-top: 2px solid #8B1538;
+}
+
+.striped > tbody > :nth-child(odd),
+ul.striped > :nth-child(odd),
+.alternate {
+    background: #fafafa;
+}
+
+.widefat tbody tr:hover {
+    background: #f0f0f0;
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+
+.nav-tab {
+    border-color: #ddd;
+    background: #f1f1f1;
+    color: #555;
+    transition: all 0.2s ease;
+}
+
+.nav-tab:hover {
+    background: #fff;
+    color: #8B1538;
+}
+
+.nav-tab-active,
+.nav-tab-active:hover {
+    background: #fff;
+    border-bottom-color: #fff;
+    color: #8B1538;
+    font-weight: 600;
+}
+
+/* ============================================
+   DASHBOARD WIDGETS
+   ============================================ */
+
+#dashboard-widgets .postbox h2 {
+    background: linear-gradient(135deg, #2C2C2C 0%, #3A3A3A 100%);
+    color: #fff;
+}
+
+.postbox > h2 {
+    border-bottom: 2px solid #8B1538;
+}
+
+/* ============================================
+   METABOXES
+   ============================================ */
+
+.postbox .hndle {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.postbox .hndle:hover {
+    background: #fafafa;
+}
+
+.postbox .inside {
+    padding: 20px;
+}
+
+/* ============================================
+   MEDIA UPLOADER
+   ============================================ */
+
+.media-modal-content .media-frame-title,
+.media-modal-content .media-frame-router,
+.media-modal-content .media-frame-menu {
+    background: #2C2C2C;
+    color: #fff;
+}
+
+.media-menu-item.active {
+    background: #8B1538;
+    border-left-color: #8B1538;
+    color: #fff;
+}
+
+.media-menu-item:hover {
+    background: rgba(139, 21, 56, 0.1);
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.tablenav .tablenav-pages a {
+    background: #8B1538;
+    color: #fff;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.tablenav .tablenav-pages a:hover {
+    background: #A91D3A;
+}
+
+.tablenav .tablenav-pages .current {
+    background: #2C2C2C;
+    color: #fff;
+    border-radius: 4px;
+}
+
+/* ============================================
+   SCREEN OPTIONS & HELP
+   ============================================ */
+
+#screen-meta {
+    background: #2C2C2C;
+    border-bottom: 2px solid #8B1538;
+    color: #E0E0E0;
+}
+
+#screen-meta-links .show-settings {
+    background: #2C2C2C;
+    border-color: #8B1538;
+    color: #E0E0E0;
+}
+
+#screen-meta-links .show-settings:hover {
+    background: #8B1538;
+    color: #fff;
+}
+
+/* ============================================
+   PLUGINS & THEMES
+   ============================================ */
+
+.plugin-card,
+.theme {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+}
+
+.plugin-card:hover,
+.theme:hover {
+    box-shadow: 0 4px 16px rgba(139, 21, 56, 0.15);
+}
+
+/* ============================================
+   COLOR PICKER
+   ============================================ */
+
+.wp-picker-container .button {
+    border-color: #8B1538;
+    color: #8B1538;
+}
+
+.wp-picker-container .button:hover {
+    background: #8B1538;
+    color: #fff;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media only screen and (max-width: 960px) {
+    #wpadminbar {
+        position: fixed;
+    }
+}
+
+@media only screen and (max-width: 782px) {
+    #wpadminbar {
+        background: #8B1538;
+    }
+
+    #wpadminbar .ab-icon:before,
+    #wpadminbar .ab-item:before {
+        color: #fff !important;
+    }
+}
+
+/* ============================================
+   CUSTOM BRANDING
+   ============================================ */
+
+/* Login logo replacement (if needed) */
+body.login {
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+}
+
+.login h1 a {
+    background-size: contain;
+    width: 250px;
+    height: 80px;
+}
+
+.login form {
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.login .button-primary {
+    background: linear-gradient(135deg, #8B1538 0%, #A91D3A 100%);
+    border-color: #7A1230;
+    box-shadow: 0 2px 4px rgba(139, 21, 56, 0.2);
+    text-shadow: none;
+}
+
+.login .button-primary:hover {
+    background: linear-gradient(135deg, #A91D3A 0%, #C82346 100%);
+    box-shadow: 0 4px 8px rgba(139, 21, 56, 0.3);
+}
+
+.login input[type="text"]:focus,
+.login input[type="password"]:focus {
+    border-color: #8B1538;
+    box-shadow: 0 0 0 1px #8B1538;
+}
+
+/* ============================================
+   SCROLLBAR (Chrome, Edge, Safari)
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8B1538;
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #A91D3A;
+}
+
+/* ============================================
+   ANIMATION & TRANSITIONS
+   ============================================ */
+
+* {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+#wpfooter {
+    color: #666;
+}
+
+#wpfooter a {
+    color: #8B1538;
+}
+
+#wpfooter a:hover {
+    color: #A91D3A;
+}

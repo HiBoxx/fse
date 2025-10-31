@@ -43,8 +43,15 @@ if ( mb_strlen( $title ) > $title_limit ) {
 // Récupérer et tronquer l'extrait
 $excerpt = get_the_excerpt();
 $excerpt_trimmed = wp_trim_words( $excerpt, $description_limit, '...' );
-$has_thumbnail = has_post_thumbnail( $post_id );
-$image_html    = $has_thumbnail ? get_the_post_thumbnail( $post_id, 'medium_large', array( 'class' => 'card-media__img', 'loading' => 'lazy' ) ) : '';
+$thumbnail_html  = cgt_child_get_post_thumbnail_html(
+	$post_id,
+	'medium',
+	array(
+		'class'   => 'card-image',
+		'loading' => 'lazy',
+		'alt'     => get_the_title( $post_id ),
+	)
+);
 
 ?>
 
@@ -52,12 +59,10 @@ $image_html    = $has_thumbnail ? get_the_post_thumbnail( $post_id, 'medium_larg
 	<?php if ( $permalink ) : ?>
 	<a class="card-link" href="<?php echo esc_url( $permalink ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Lire: %s', 'cgt' ), get_the_title() ) ); ?>">
 	<?php endif; ?>
-		<?php if ( has_post_thumbnail() ) : ?>
+		<?php if ( $thumbnail_html ) : ?>
 			<div class="card-thumbnail">
-				<?php the_post_thumbnail( 'medium', array( 'class' => 'card-image' ) ); ?>
+				<?php echo $thumbnail_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
-		<?php else : ?>
-			<div class="card-placeholder" aria-hidden="true"></div>
 		<?php endif; ?>
 		<div class="card-content">
 			<header class="card-header">

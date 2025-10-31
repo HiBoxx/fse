@@ -1,0 +1,175 @@
+.wp-admin {
+	background-color: #f4f5f7;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	color: #111827;
+}
+
+#wpadminbar {
+	background-color: #111827;
+}
+
+#wpadminbar .ab-item,
+#wpadminbar a.ab-item,
+#wpadminbar .ab-icon,
+#wpadminbar .ab-label {
+	color: #f9fafb !important;
+}
+
+#adminmenu,
+#adminmenuback,
+#adminmenuwrap {
+	background-color: #d00000;
+}
+
+#adminmenu .wp-submenu {
+	background-color: #b00000;
+}
+
+#adminmenu .wp-submenu a {
+	color: rgba(255, 255, 255, 0.85);
+}
+
+#adminmenu .wp-submenu a:hover,
+#adminmenu .wp-submenu li.current a {
+	color: #ffffff;
+}
+
+#adminmenu a.menu-top {
+	color: rgba(255, 255, 255, 0.92);
+	font-weight: 600;
+}
+
+#adminmenu .wp-has-current-submenu > a.menu-top,
+#adminmenu .wp-menu-open > a.menu-top,
+#adminmenu .current.menu-top {
+	background-color: #b00000;
+	color: #ffffff;
+	box-shadow: inset 4px 0 0 0 #f9fafb;
+}
+
+#adminmenu .wp-has-current-submenu .wp-submenu,
+#adminmenu .wp-menu-open .wp-submenu {
+	background-color: #a20000;
+}
+
+#adminmenu li.menu-top:hover,
+#adminmenu li.opensub > a.menu-top,
+#adminmenu li > a.menu-top:focus {
+	background-color: #b50000;
+	color: #ffffff;
+}
+
+.wrap h1,
+.wrap h2,
+.wrap h3 {
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	color: #111827;
+}
+
+a,
+.wrap a {
+	color: #d00000;
+}
+
+.button-primary,
+.page-title-action,
+.wrap .button-primary,
+.wrap .page-title-action {
+	background-color: #d00000;
+	border-color: #b00000;
+	box-shadow: none;
+	text-shadow: none;
+}
+
+.button-primary:hover,
+.page-title-action:hover,
+.wrap .button-primary:hover,
+.wrap .page-title-action:hover {
+	background-color: #b00000;
+	border-color: #920000;
+}
+
+.update-nag,
+.notice,
+.notice-alt,
+.notice-success,
+.notice-warning,
+.notice-error {
+	border-left: 4px solid #d00000;
+}
+
+.wrap .welcome-panel,
+.wrap .postbox,
+.wrap .card,
+.wrap .stuffbox {
+	border-radius: 16px;
+	border: 1px solid rgba(17, 24, 39, 0.08);
+	box-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+}
+
+.wrap .postbox h2,
+.wrap .postbox .hndle,
+.wrap .postbox .handlediv {
+	color: #111827;
+	font-weight: 600;
+}
+
+.wrap .postbox .inside {
+	color: #374151;
+}
+
+.wrap .tablenav .tablenav-pages .pagination-links .button,
+.wrap .tablenav .tablenav-pages .pagination-links .button-secondary {
+	border-radius: 999px;
+}
+
+.wrap .widefat thead th {
+	background-color: rgba(208, 0, 0, 0.08);
+	color: #111827;
+}
+
+.wrap .widefat tbody tr:nth-child(odd) {
+	background-color: rgba(17, 24, 39, 0.02);
+}
+
+.wrap .widefat tbody tr:hover {
+	background-color: rgba(208, 0, 0, 0.08);
+}
+
+.media-modal-content,
+.media-frame-title h1,
+.media-frame h1,
+.media-frame h2 {
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.wp-core-ui .button,
+.wp-core-ui .button-secondary {
+	border-radius: 8px;
+	box-shadow: none;
+}
+
+.wrap .search-box input[type="search"] {
+	border-radius: 999px;
+	border: 1px solid rgba(17, 24, 39, 0.18);
+	padding: 5px 14px;
+}
+
+.wrap .search-box input[type="submit"] {
+	border-radius: 999px;
+}
+
+body.wp-admin #wpfooter {
+	background-color: #f9fafb;
+	color: #6b7280;
+}
+
+.wrap .notice.notice-success,
+.wrap .notice.updated {
+	border-left-color: #15803d;
+}
+
+.wrap .notice.notice-error,
+.wrap .notice.error {
+	border-left-color: #b91c1c;
+}
