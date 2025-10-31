@@ -230,14 +230,14 @@
 }
 
 .cgt-custom-table td a {
-    color: #8B1538;
+    color: white;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
 }
 
 .cgt-custom-table td a:hover {
-    color: #A91D3A;
+    color: white;
     text-decoration: underline;
 }
 
