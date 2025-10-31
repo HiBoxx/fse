@@ -16,7 +16,7 @@ if ( ! defined( 'CGT_CHILD_DEFAULT_LOGO_URL' ) ) {
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_FAVICON_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_FAVICON_URL', 'http://fse.local/wp-content/uploads/2025/10/logo2.png' );
+	define( 'CGT_CHILD_DEFAULT_FAVICON_URL', 'http://fse.local/wp-content/uploads/2025/10/telechargement.png' );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_IMAGE_URL' ) ) {
