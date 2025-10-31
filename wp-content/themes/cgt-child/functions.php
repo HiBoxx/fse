@@ -186,6 +186,15 @@ function cgt_child_get_post_thumbnail_html( $post_id = 0, $size = 'medium', $att
 	return sprintf( '<img src="%1$s"%2$s />', esc_url( $fallback ), $attributes );
 }
 
+add_action(
+	'init',
+	function () {
+		if ( 'FSETUD' !== get_option( 'blogname' ) ) {
+			update_option( 'blogname', 'FSETUD' );
+		}
+	}
+);
+
 // Clear cached taxonomies when terms change.
 add_action( 'edited_term', 'cgt_child_flush_term_cache' );
 add_action( 'created_term', 'cgt_child_flush_term_cache' );

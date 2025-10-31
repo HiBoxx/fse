@@ -165,6 +165,28 @@ function cgt_cleanup_articles_adherents_submenu() {
 // pour éviter l'erreur "headers already sent"
 
 /**
+ * Applique la charte graphique fédérale à l'administration WordPress.
+ *
+ * @param string $hook Page courante.
+ */
+add_action( 'admin_enqueue_scripts', 'cgt_enqueue_admin_branding_assets' );
+function cgt_enqueue_admin_branding_assets( $hook ) {
+	wp_enqueue_style(
+		'cgt-admin-fonts',
+		'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+		array(),
+		null
+	);
+
+	wp_enqueue_style(
+		'cgt-admin-ui',
+		get_stylesheet_directory_uri() . '/assets/css/admin-ui.css',
+		array(),
+		CGT_CHILD_VERSION
+	);
+}
+
+/**
  * Supprime le panneau de bienvenue du tableau de bord.
  */
 add_action(
