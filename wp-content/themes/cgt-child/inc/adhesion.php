@@ -338,13 +338,39 @@ function cgt_register_adhesion_admin_page() {
 }
 
 /**
+ * Enqueue custom CSS for adhesions dashboard.
+ */
+add_action( 'admin_enqueue_scripts', 'cgt_enqueue_adhesion_admin_styles' );
+
+function cgt_enqueue_adhesion_admin_styles( $hook ) {
+	// Only load on our custom dashboard page
+	if ( $hook !== 'cgt_adhesion_page_cgt-adhesions-dashboard' ) {
+		return;
+	}
+
+	wp_enqueue_style(
+		'cgt-admin-adhesions',
+		get_stylesheet_directory_uri() . '/assets/css/admin-adhesions.css',
+		array(),
+		filemtime( get_stylesheet_directory() . '/assets/css/admin-adhesions.css' )
+	);
+}
+
+/**
  * Renders the adhésion dashboard page.
  */
 function cgt_render_adhesion_admin_page() {
 	if ( ! current_user_can( 'manage_cgt_adhesions' ) ) {
-		wp_die( esc_html__( 'Vous n’avez pas les droits suffisants pour accéder à cette page.', 'cgt' ) );
+		wp_die( esc_html__( 'Vous n'avez pas les droits suffisants pour accéder à cette page.', 'cgt' ) );
 	}
 
+	// Get statistics
+	$total_adhesions = wp_count_posts( 'cgt_adhesion' );
+	$total = $total_adhesions->pending + $total_adhesions->publish;
+	$pending = $total_adhesions->pending;
+	$approved = $total_adhesions->publish;
+
+	// Query adhesions
 	$args  = array(
 		'post_type'      => 'cgt_adhesion',
 		'post_status'    => array( 'pending', 'publish', 'draft' ),
@@ -354,52 +380,145 @@ function cgt_render_adhesion_admin_page() {
 	);
 	$query = new WP_Query( $args );
 	?>
-	<div class="wrap">
-		<h1><?php esc_html_e( 'Tableau des adhésions', 'cgt' ); ?></h1>
-		<p><?php esc_html_e( 'Téléchargez les fiches adhérents au format PDF ou contactez-les directement.', 'cgt' ); ?></p>
-		<table class="widefat fixed striped">
-			<thead>
-				<tr>
-					<th><?php esc_html_e( 'Nom', 'cgt' ); ?></th>
-					<th><?php esc_html_e( 'Prénom', 'cgt' ); ?></th>
-					<th><?php esc_html_e( 'Téléphone', 'cgt' ); ?></th>
-					<th><?php esc_html_e( 'Email', 'cgt' ); ?></th>
-					<th><?php esc_html_e( 'Entreprise', 'cgt' ); ?></th>
-					<th><?php esc_html_e( 'PDF', 'cgt' ); ?></th>
-				</tr>
-			</thead>
-			<tbody>
-			<?php if ( $query->have_posts() ) : ?>
-				<?php
-				while ( $query->have_posts() ) :
-					$query->the_post();
-					$post_id   = get_the_ID();
-					$nom       = get_post_meta( $post_id, '_adhesion_nom', true );
-					$prenom    = get_post_meta( $post_id, '_adhesion_prenom', true );
-					$tel       = get_post_meta( $post_id, '_adhesion_tel', true );
-					$email     = get_post_meta( $post_id, '_adhesion_email', true );
-					$entreprise = get_post_meta( $post_id, '_adhesion_entreprise_nom', true );
-					$download_url = wp_nonce_url(
-						admin_url( 'admin-post.php?action=cgt_download_adhesion_pdf&post_id=' . $post_id ),
-						'cgt_download_pdf_' . $post_id
+	<div class="cgt-adhesions-dashboard">
+		<!-- Header -->
+		<div class="cgt-adhesions-header">
+			<h1><?php esc_html_e( 'Gestion des Adhésions CGT', 'cgt' ); ?></h1>
+			<p><?php esc_html_e( 'Gérez les demandes d\'adhésion, téléchargez les fiches et contactez les adhérents.', 'cgt' ); ?></p>
+		</div>
+
+		<!-- Statistics Cards -->
+		<div class="cgt-stats-grid">
+			<div class="cgt-stat-card">
+				<div class="cgt-stat-label"><?php esc_html_e( 'Total Adhésions', 'cgt' ); ?></div>
+				<div class="cgt-stat-value"><?php echo esc_html( $total ); ?></div>
+			</div>
+			<div class="cgt-stat-card">
+				<div class="cgt-stat-label"><?php esc_html_e( 'En Attente', 'cgt' ); ?></div>
+				<div class="cgt-stat-value"><?php echo esc_html( $pending ); ?></div>
+			</div>
+			<div class="cgt-stat-card">
+				<div class="cgt-stat-label"><?php esc_html_e( 'Approuvées', 'cgt' ); ?></div>
+				<div class="cgt-stat-value"><?php echo esc_html( $approved ); ?></div>
+			</div>
+			<div class="cgt-stat-card">
+				<div class="cgt-stat-label"><?php esc_html_e( 'Ce Mois', 'cgt' ); ?></div>
+				<div class="cgt-stat-value">
+					<?php
+					$args_month = array(
+						'post_type'   => 'cgt_adhesion',
+						'post_status' => array( 'pending', 'publish' ),
+						'date_query'  => array(
+							array(
+								'year'  => date( 'Y' ),
+								'month' => date( 'm' ),
+							),
+						),
 					);
+					$query_month = new WP_Query( $args_month );
+					echo esc_html( $query_month->found_posts );
+					wp_reset_postdata();
 					?>
-					<tr>
-						<td><?php echo esc_html( $nom ); ?></td>
-						<td><?php echo esc_html( $prenom ); ?></td>
-						<td><?php echo esc_html( $tel ); ?></td>
-						<td><a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a></td>
-						<td><?php echo esc_html( $entreprise ); ?></td>
-						<td><a class="button" href="<?php echo esc_url( $download_url ); ?>"><?php esc_html_e( 'Télécharger le PDF', 'cgt' ); ?></a></td>
-					</tr>
-				<?php endwhile; ?>
+				</div>
+			</div>
+		</div>
+
+		<!-- Filters (optional for future) -->
+		<!--
+		<div class="cgt-filters">
+			<div class="cgt-filter-item">
+				<label><?php esc_html_e( 'Recherche', 'cgt' ); ?></label>
+				<input type="text" placeholder="Nom, prénom, email..." />
+			</div>
+			<div class="cgt-filter-item">
+				<label><?php esc_html_e( 'Statut', 'cgt' ); ?></label>
+				<select>
+					<option value=""><?php esc_html_e( 'Tous', 'cgt' ); ?></option>
+					<option value="pending"><?php esc_html_e( 'En attente', 'cgt' ); ?></option>
+					<option value="publish"><?php esc_html_e( 'Approuvé', 'cgt' ); ?></option>
+				</select>
+			</div>
+			<button class="cgt-filter-btn"><?php esc_html_e( 'Filtrer', 'cgt' ); ?></button>
+		</div>
+		-->
+
+		<!-- Table Container -->
+		<div class="cgt-table-container">
+			<div class="cgt-table-header">
+				<h2 class="cgt-table-title"><?php esc_html_e( 'Liste des Adhésions', 'cgt' ); ?></h2>
+				<div class="cgt-table-actions">
+					<!-- Future: Export button -->
+				</div>
+			</div>
+
+			<?php if ( $query->have_posts() ) : ?>
+				<table class="cgt-custom-table">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Nom Complet', 'cgt' ); ?></th>
+							<th><?php esc_html_e( 'Email', 'cgt' ); ?></th>
+							<th><?php esc_html_e( 'Téléphone', 'cgt' ); ?></th>
+							<th><?php esc_html_e( 'Entreprise', 'cgt' ); ?></th>
+							<th><?php esc_html_e( 'Date', 'cgt' ); ?></th>
+							<th><?php esc_html_e( 'Statut', 'cgt' ); ?></th>
+							<th><?php esc_html_e( 'Actions', 'cgt' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php
+						while ( $query->have_posts() ) :
+							$query->the_post();
+							$post_id    = get_the_ID();
+							$nom        = get_post_meta( $post_id, '_adhesion_nom', true );
+							$prenom     = get_post_meta( $post_id, '_adhesion_prenom', true );
+							$tel        = get_post_meta( $post_id, '_adhesion_tel', true );
+							$email      = get_post_meta( $post_id, '_adhesion_email', true );
+							$entreprise = get_post_meta( $post_id, '_adhesion_entreprise_nom', true );
+							$status     = get_post_status( $post_id );
+
+							$download_url = wp_nonce_url(
+								admin_url( 'admin-post.php?action=cgt_download_adhesion_pdf&post_id=' . $post_id ),
+								'cgt_download_pdf_' . $post_id
+							);
+							$edit_url = admin_url( 'post.php?post=' . $post_id . '&action=edit' );
+
+							// Status badge class
+							$status_class = 'cgt-status-pending';
+							$status_label = __( 'En attente', 'cgt' );
+							if ( $status === 'publish' ) {
+								$status_class = 'cgt-status-approved';
+								$status_label = __( 'Approuvé', 'cgt' );
+							}
+							?>
+							<tr>
+								<td><strong><?php echo esc_html( $prenom . ' ' . $nom ); ?></strong></td>
+								<td><a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a></td>
+								<td><?php echo esc_html( $tel ); ?></td>
+								<td><?php echo esc_html( $entreprise ); ?></td>
+								<td><?php echo esc_html( get_the_date( 'd/m/Y' ) ); ?></td>
+								<td><span class="cgt-status-badge <?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_label ); ?></span></td>
+								<td>
+									<div class="cgt-table-actions-cell">
+										<a href="<?php echo esc_url( $edit_url ); ?>" class="cgt-action-btn cgt-action-btn-view">
+											<?php esc_html_e( 'Voir', 'cgt' ); ?>
+										</a>
+										<a href="<?php echo esc_url( $download_url ); ?>" class="cgt-action-btn cgt-action-btn-pdf">
+											<?php esc_html_e( 'PDF', 'cgt' ); ?>
+										</a>
+									</div>
+								</td>
+							</tr>
+						<?php endwhile; ?>
+					</tbody>
+				</table>
 			<?php else : ?>
-				<tr>
-					<td colspan="6"><?php esc_html_e( 'Aucune adhésion enregistrée pour le moment.', 'cgt' ); ?></td>
-				</tr>
+				<div class="cgt-empty-state">
+					<div class="cgt-empty-state-icon">📋</div>
+					<h3><?php esc_html_e( 'Aucune adhésion pour le moment', 'cgt' ); ?></h3>
+					<p><?php esc_html_e( 'Les nouvelles demandes d\'adhésion apparaîtront ici.', 'cgt' ); ?></p>
+				</div>
 			<?php endif; ?>
-			</tbody>
-		</table>
+		</div>
 	</div>
 	<?php
 	wp_reset_postdata();
