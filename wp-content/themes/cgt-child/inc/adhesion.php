@@ -351,7 +351,7 @@ function cgt_enqueue_adhesion_admin_styles( $hook ) {
 	wp_enqueue_style(
 		'cgt-admin-adhesions',
 		get_stylesheet_directory_uri() . '/assets/css/admin-adhesions.css',
-		array(),
+		array( 'cgt-admin-global' ), // Depend on global admin styles
 		filemtime( get_stylesheet_directory() . '/assets/css/admin-adhesions.css' )
 	);
 }
