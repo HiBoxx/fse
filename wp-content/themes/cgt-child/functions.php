@@ -768,6 +768,16 @@ function cgt_enqueue_espace_adherent_styles() {
 			CGT_CHILD_VERSION
 		);
 	}
+
+	// Charger les styles de la page single événement
+	if ( is_singular( 'cgt_agenda' ) ) {
+		wp_enqueue_style(
+			'cgt-single-event',
+			get_stylesheet_directory_uri() . '/assets/css/single-event.css',
+			array( 'cgt-child' ),
+			CGT_CHILD_VERSION
+		);
+	}
 }
 
 /**
