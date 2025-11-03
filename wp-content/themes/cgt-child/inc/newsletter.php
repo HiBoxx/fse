@@ -20,6 +20,8 @@ function cgt_create_newsletter_table() {
 		prenom varchar(100) NOT NULL,
 		nom varchar(100) NOT NULL,
 		email varchar(255) NOT NULL,
+		region varchar(120) NOT NULL DEFAULT '',
+		branche varchar(160) NOT NULL DEFAULT '',
 		date_inscription datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
 		PRIMARY KEY (id),
 		UNIQUE KEY email (email)
@@ -48,6 +50,17 @@ add_action(
 		);
 		if ( $exists !== $table_name ) {
 			cgt_create_newsletter_table();
+		}
+
+		// Ensure new columns exist.
+		$columns = $wpdb->get_col( "DESC {$table_name}", 0 ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		if ( $columns ) {
+			if ( ! in_array( 'region', $columns, true ) ) {
+				$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN region varchar(120) NOT NULL DEFAULT '' AFTER email" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			}
+			if ( ! in_array( 'branche', $columns, true ) ) {
+				$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN branche varchar(160) NOT NULL DEFAULT '' AFTER region" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			}
 		}
 	}
 );
@@ -148,6 +161,8 @@ function cgt_render_newsletter_admin_page() {
 							<th class="manage-column"><?php esc_html_e( 'Prénom', 'cgt' ); ?></th>
 							<th class="manage-column"><?php esc_html_e( 'Nom', 'cgt' ); ?></th>
 							<th class="manage-column"><?php esc_html_e( 'Email', 'cgt' ); ?></th>
+							<th class="manage-column"><?php esc_html_e( 'Région', 'cgt' ); ?></th>
+							<th class="manage-column"><?php esc_html_e( 'Branche', 'cgt' ); ?></th>
 							<th class="manage-column"><?php esc_html_e( 'Date d\'inscription', 'cgt' ); ?></th>
 							<th class="manage-column"><?php esc_html_e( 'Actions', 'cgt' ); ?></th>
 						</tr>
@@ -161,6 +176,17 @@ function cgt_render_newsletter_admin_page() {
 								<td><?php echo esc_html( $subscription->prenom ); ?></td>
 								<td><?php echo esc_html( $subscription->nom ); ?></td>
 								<td><a href="mailto:<?php echo esc_attr( $subscription->email ); ?>"><?php echo esc_html( $subscription->email ); ?></a></td>
+								<td><?php echo esc_html( $subscription->region ); ?></td>
+								<td>
+									<?php
+									if ( ! empty( $subscription->branche ) ) {
+										$branch_term = get_term_by( 'slug', $subscription->branche, 'branche' );
+										echo esc_html( $branch_term && ! is_wp_error( $branch_term ) ? $branch_term->name : $subscription->branche );
+									} else {
+										echo '&mdash;';
+									}
+									?>
+								</td>
 								<td><?php echo esc_html( wp_date( 'd/m/Y H:i', strtotime( $subscription->date_inscription ) ) ); ?></td>
 								<td>
 									<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=cgt-newsletter&action=delete&id=' . $subscription->id ), 'delete_newsletter_' . $subscription->id ) ); ?>"
@@ -198,7 +224,8 @@ function cgt_handle_newsletter_export() {
 
 		global $wpdb;
 		$table_name    = $wpdb->prefix . 'cgt_newsletter';
-		$subscriptions = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i ORDER BY date_inscription DESC", $table_name ), ARRAY_A );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$subscriptions = $wpdb->get_results( "SELECT * FROM {$table_name} ORDER BY date_inscription DESC", ARRAY_A );
 
 		// Set headers for CSV download
 		header( 'Content-Type: text/csv; charset=utf-8' );
@@ -211,16 +238,26 @@ function cgt_handle_newsletter_export() {
 		fprintf( $output, chr( 0xEF ) . chr( 0xBB ) . chr( 0xBF ) );
 
 		// Add headers
-		fputcsv( $output, array( 'Prénom', 'Nom', 'Email', 'Date d\'inscription' ), ';' );
+		fputcsv( $output, array( 'Prénom', 'Nom', 'Email', 'Région', 'Branche', 'Date d\'inscription' ), ';' );
 
 		// Add data
 		foreach ( $subscriptions as $subscription ) {
+			$branch_value = $subscription['branche'];
+			if ( $branch_value ) {
+				$branch_term = get_term_by( 'slug', $branch_value, 'branche' );
+				if ( $branch_term && ! is_wp_error( $branch_term ) ) {
+					$branch_value = $branch_term->name;
+				}
+			}
+
 			fputcsv(
 				$output,
 				array(
 					$subscription['prenom'],
 					$subscription['nom'],
 					$subscription['email'],
+					$subscription['region'],
+					$branch_value,
 					wp_date( 'd/m/Y H:i', strtotime( $subscription['date_inscription'] ) ),
 				),
 				';'
@@ -259,10 +296,18 @@ function cgt_handle_newsletter_subscription() {
 	$prenom = isset( $_POST['prenom'] ) ? sanitize_text_field( wp_unslash( $_POST['prenom'] ) ) : '';
 	$nom    = isset( $_POST['nom'] ) ? sanitize_text_field( wp_unslash( $_POST['nom'] ) ) : '';
 	$email  = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+	$region  = isset( $_POST['region'] ) ? sanitize_text_field( wp_unslash( $_POST['region'] ) ) : '';
+	$branche = isset( $_POST['branche'] ) ? sanitize_text_field( wp_unslash( $_POST['branche'] ) ) : '';
 
 	// Validate
-	if ( empty( $prenom ) || empty( $nom ) || empty( $email ) ) {
+	if ( empty( $prenom ) || empty( $nom ) || empty( $email ) || empty( $region ) || empty( $branche ) ) {
 		wp_send_json_error( array( 'message' => __( 'Tous les champs sont obligatoires.', 'cgt' ) ) );
+	}
+
+	// Validate branche term exists.
+	$branche_term = get_term_by( 'slug', $branche, 'branche' );
+	if ( ! $branche_term || is_wp_error( $branche_term ) ) {
+		wp_send_json_error( array( 'message' => __( 'La branche sélectionnée est invalide.', 'cgt' ) ) );
 	}
 
 	if ( ! is_email( $email ) ) {
@@ -305,8 +350,10 @@ function cgt_handle_newsletter_subscription() {
 			'prenom' => $prenom,
 			'nom'    => $nom,
 			'email'  => $email,
+			'region' => $region,
+			'branche'=> $branche,
 		),
-		array( '%s', '%s', '%s' )
+		array( '%s', '%s', '%s', '%s', '%s' )
 	);
 
 	if ( $inserted ) {

@@ -633,6 +633,38 @@ $communiques_tabs = array(
 					<p><?php esc_html_e( 'Restez informé·e de nos actualités, tracts et bulletins fédéraux.', 'cgt' ); ?></p>
 				</div>
 
+				<?php
+				$newsletter_regions = array(
+					'Auvergne-Rhône-Alpes',
+					'Bourgogne-Franche-Comté',
+					'Bretagne',
+					'Centre-Val de Loire',
+					'Corse',
+					'Grand Est',
+					'Hauts-de-France',
+					'Île-de-France',
+					'Normandie',
+					'Nouvelle-Aquitaine',
+					'Occitanie',
+					'Pays de la Loire',
+					'Provence-Alpes-Côte d\'Azur',
+					'Guadeloupe',
+					'Guyane',
+					'Martinique',
+					'La Réunion',
+					'Mayotte',
+				);
+
+				$newsletter_branches = get_terms(
+					array(
+						'taxonomy'   => 'branche',
+						'hide_empty' => false,
+						'orderby'    => 'name',
+						'order'      => 'ASC',
+					)
+				);
+				?>
+
 				<form id="newsletterForm" class="newsletter-form">
 					<div class="newsletter-form__message" id="newsletterMessage" style="display: none;"></div>
 
@@ -650,6 +682,28 @@ $communiques_tabs = array(
 						<label for="newsletter_email"><?php esc_html_e( 'Email', 'cgt' ); ?> <span class="required">*</span></label>
 						<input type="email" id="newsletter_email" name="email" required>
 					</div>
+
+					<div class="newsletter-form__field">
+						<label for="newsletter_region"><?php esc_html_e( 'Région', 'cgt' ); ?> <span class="required">*</span></label>
+						<select id="newsletter_region" name="region" required>
+							<option value=""><?php esc_html_e( 'Choisissez votre région', 'cgt' ); ?></option>
+							<?php foreach ( $newsletter_regions as $region_label ) : ?>
+								<option value="<?php echo esc_attr( $region_label ); ?>"><?php echo esc_html( $region_label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+
+					<?php if ( ! is_wp_error( $newsletter_branches ) && ! empty( $newsletter_branches ) ) : ?>
+						<div class="newsletter-form__field">
+							<label for="newsletter_branche"><?php esc_html_e( 'Branche', 'cgt' ); ?> <span class="required">*</span></label>
+							<select id="newsletter_branche" name="branche" required>
+								<option value=""><?php esc_html_e( 'Choisissez votre branche', 'cgt' ); ?></option>
+								<?php foreach ( $newsletter_branches as $branch_term ) : ?>
+									<option value="<?php echo esc_attr( $branch_term->slug ); ?>"><?php echo esc_html( $branch_term->name ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+					<?php endif; ?>
 
 					<div class="newsletter-form__field newsletter-form__field--checkbox">
 						<label class="newsletter-form__checkbox-label">

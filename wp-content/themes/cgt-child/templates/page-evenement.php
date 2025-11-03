@@ -45,12 +45,6 @@ $share_facebook = 'https://www.facebook.com/sharer/sharer.php?u=' . $share_url;
 <main id="primary" class="site-main event-page">
 	<section class="event-hero">
 		<div class="container event-hero__inner">
-			<a class="event-back" href="<?php echo esc_url( $back_link ); ?>">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<polyline points="15 18 9 12 15 6"></polyline>
-				</svg>
-				<?php esc_html_e( 'Retour à l’agenda', 'cgt' ); ?>
-			</a>
 			<span class="event-hero__eyebrow"><?php esc_html_e( 'Agenda syndical', 'cgt' ); ?></span>
 			<h1 class="event-hero__title"><?php the_title(); ?></h1>
 

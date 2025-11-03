@@ -1,5 +1,5 @@
 :root {
-	--cgt-red: #d00000;
+	--cgt-red: #d11313;
 	--cgt-red-600: #b00000;
 	--cgt-white: #ffffff;
 	--cgt-black: #111111;
@@ -2325,26 +2325,6 @@ button:focus {
 .event-hero__inner {
 	display: grid;
 	gap: 1.5rem;
-}
-
-.event-back {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.35rem;
-	color: var(--cgt-white);
-	font-size: 0.9rem;
-	text-decoration: none;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-}
-
-.event-back svg {
-	stroke: currentColor;
-}
-
-.event-back:hover,
-.event-back:focus-visible {
-	text-decoration: underline;
 }
 
 .event-hero__eyebrow {
