@@ -13,8 +13,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * @param int $post_id Post ID
  * @param WP_Post $post Post object
+ * @param bool $update Whether this is an update or new post
  */
-function cgt_sync_pdf_to_library( $post_id, $post ) {
+function cgt_sync_pdf_to_library( $post_id, $post, $update ) {
 	// Vérifier si c'est un article ou tract
 	if ( ! in_array( $post->post_type, array( 'post', 'tracts' ), true ) ) {
 		return;
@@ -22,6 +23,11 @@ function cgt_sync_pdf_to_library( $post_id, $post ) {
 
 	// Ne pas exécuter lors de l'autosave
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	// Ne pas exécuter lors des révisions
+	if ( wp_is_post_revision( $post_id ) ) {
 		return;
 	}
 
@@ -103,7 +109,8 @@ function cgt_sync_pdf_to_library( $post_id, $post ) {
 		}
 	}
 }
-add_action( 'save_post', 'cgt_sync_pdf_to_library', 20, 2 );
+// Priorité 100 pour s'assurer que toutes les metas sont enregistrées
+add_action( 'save_post', 'cgt_sync_pdf_to_library', 100, 3 );
 
 /**
  * Supprimer l'entrée bibliothèque quand un article/tract est supprimé
@@ -127,33 +134,29 @@ add_action( 'before_delete_post', 'cgt_delete_synced_library_entry' );
 
 /**
  * Filtrer la médiathèque pour afficher uniquement les images (pas les PDF)
+ * DÉSACTIVÉ pour le moment - À réactiver plus tard si nécessaire
  */
+/*
 function cgt_filter_media_library( $query ) {
 	// Uniquement dans l'admin
 	if ( ! is_admin() ) {
 		return $query;
 	}
 
-	// Ne pas filtrer si on est sur la page de bibliothèque
-	if ( isset( $_GET['page'] ) && 'cgt-library' === $_GET['page'] ) {
+	// Ne pas filtrer si on demande explicitement des PDF
+	if ( isset( $query['post_mime_type'] ) && 'application/pdf' === $query['post_mime_type'] ) {
 		return $query;
 	}
 
-	// Ne pas filtrer dans certains contextes
-	$screen = get_current_screen();
-	if ( $screen && in_array( $screen->id, array( 'cgt_pdf_library' ), true ) ) {
-		return $query;
-	}
-
-	// Filtrer pour n'afficher que les images
+	// Filtrer pour n'afficher que les images dans la médiathèque standard
 	if ( isset( $query['post_type'] ) && 'attachment' === $query['post_type'] ) {
-		// Ajouter un filtre pour les types MIME d'images uniquement
 		$query['post_mime_type'] = 'image';
 	}
 
 	return $query;
 }
 add_filter( 'ajax_query_attachments_args', 'cgt_filter_media_library' );
+*/
 
 /**
  * Ajouter une colonne dans la liste des articles/tracts pour voir si un PDF est synchronisé
