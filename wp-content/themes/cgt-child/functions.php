@@ -783,6 +783,47 @@ function cgt_enqueue_espace_adherent_styles() {
 }
 
 /**
+ * Admin: modernise Media Library appearance.
+ */
+add_action(
+	'admin_enqueue_scripts',
+	function ( $hook_suffix ) {
+		if ( in_array( $hook_suffix, array( 'upload.php', 'media-new.php' ), true ) ) {
+			wp_enqueue_style(
+				'cgt-admin-media',
+				get_stylesheet_directory_uri() . '/assets/css/admin-media.css',
+				array(),
+				CGT_CHILD_VERSION
+			);
+			wp_enqueue_script(
+				'cgt-admin-media',
+				get_stylesheet_directory_uri() . '/assets/js/admin-media.js',
+				array(),
+				CGT_CHILD_VERSION,
+				true
+			);
+			wp_localize_script(
+				'cgt-admin-media',
+				'cgtMediaFilter',
+				array(
+					'i18nEmptyNotice' => __( 'Aucun média ne correspond à ce filtre.', 'cgt' ),
+				)
+			);
+		}
+	}
+);
+
+add_action(
+	'load-upload.php',
+	function () {
+		if ( isset( $_GET['mode'] ) && 'grid' === $_GET['mode'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wp_safe_redirect( remove_query_arg( 'mode' ) );
+			exit;
+		}
+	}
+);
+
+/**
  * Add security headers to HTTP responses
  */
 add_action( 'send_headers', 'cgt_add_security_headers' );
