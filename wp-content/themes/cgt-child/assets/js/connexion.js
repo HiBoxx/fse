@@ -17,10 +17,19 @@
         const btnCancel = document.getElementById('btn-cancel');
         const adhesionForm = document.getElementById('adhesion-form');
 
+        const accountRequestTrigger = document.getElementById('openAccountRequestModal');
+        const accountRequestModal = document.getElementById('accountRequestModal');
+        const accountRequestClose = document.getElementById('closeAccountRequestModal');
+        const accountRequestOverlay = document.querySelector('[data-account-request-close]');
+        const accountRequestForm = document.getElementById('accountRequestForm');
+        const accountRequestPassword = document.getElementById('accountRequestPassword');
+        const accountRequestPasswordConfirm = document.getElementById('accountRequestPasswordConfirm');
+        const accountRequestMessage = document.getElementById('accountRequestMessage');
+
         /**
          * Ouvrir la modal
          */
-        function openModal() {
+        function openAdhesionModal() {
             if (adhesionModal) {
                 adhesionModal.style.display = 'flex';
                 document.body.style.overflow = 'hidden'; // Empêcher le scroll
@@ -38,38 +47,35 @@
         /**
          * Fermer la modal
          */
-        function closeModal() {
+        function closeAdhesionModal() {
             if (adhesionModal) {
                 adhesionModal.style.display = 'none';
                 document.body.style.overflow = ''; // Restaurer le scroll
             }
         }
 
+        function isAdhesionModalOpen() {
+            return adhesionModal && adhesionModal.style.display === 'flex';
+        }
+
         /**
          * Event listeners pour ouvrir/fermer la modal
          */
         if (btnAdhesion) {
-            btnAdhesion.addEventListener('click', openModal);
+            btnAdhesion.addEventListener('click', openAdhesionModal);
         }
 
         if (modalClose) {
-            modalClose.addEventListener('click', closeModal);
+            modalClose.addEventListener('click', closeAdhesionModal);
         }
 
         if (btnCancel) {
-            btnCancel.addEventListener('click', closeModal);
+            btnCancel.addEventListener('click', closeAdhesionModal);
         }
 
         if (modalOverlay) {
-            modalOverlay.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', closeAdhesionModal);
         }
-
-        // Fermer avec la touche Echap
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && adhesionModal && adhesionModal.style.display === 'flex') {
-                closeModal();
-            }
-        });
 
         /**
          * Validation du formulaire
@@ -189,6 +195,180 @@
 
             return isValid;
         }
+
+        /**
+         * Gestion de la modal de demande de compte adhérent.
+         */
+        function openAccountModal() {
+            if (accountRequestModal) {
+                accountRequestModal.classList.add('is-open');
+                accountRequestModal.style.display = 'flex';
+                accountRequestModal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+
+                setTimeout(() => {
+                    const firstInput = accountRequestModal.querySelector('input:not([type="hidden"])');
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                }, 100);
+            }
+        }
+
+        function closeAccountModal() {
+            if (accountRequestModal) {
+                accountRequestModal.classList.remove('is-open');
+                accountRequestModal.style.display = 'none';
+                accountRequestModal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function isAccountModalOpen() {
+            return accountRequestModal && accountRequestModal.classList.contains('is-open');
+        }
+
+        function resetAccountMessage() {
+            if (!accountRequestMessage) {
+                return;
+            }
+            accountRequestMessage.classList.remove('is-visible');
+            accountRequestMessage.classList.remove('is-success');
+        }
+
+        function showAccountMessage(type, text) {
+            if (!accountRequestMessage) {
+                return;
+            }
+
+            resetAccountMessage();
+            accountRequestMessage.textContent = text;
+            accountRequestMessage.classList.add('is-visible');
+
+            if (type === 'success') {
+                accountRequestMessage.classList.add('is-success');
+            }
+        }
+
+        if (accountRequestTrigger) {
+            accountRequestTrigger.addEventListener('click', function() {
+                if (accountRequestForm) {
+                    const resetFields = accountRequestForm.querySelectorAll('input, select');
+                    resetFields.forEach(function(field) {
+                        field.style.borderColor = '';
+                        field.style.backgroundColor = '';
+                    });
+                }
+
+                if (accountRequestMessage) {
+                    resetAccountMessage();
+                    accountRequestMessage.textContent = '';
+                }
+
+                openAccountModal();
+            });
+        }
+
+        if (accountRequestClose) {
+            accountRequestClose.addEventListener('click', function() {
+                closeAccountModal();
+            });
+        }
+
+        if (accountRequestOverlay) {
+            accountRequestOverlay.addEventListener('click', function() {
+                closeAccountModal();
+            });
+        }
+
+        if (accountRequestForm) {
+            accountRequestForm.addEventListener('submit', function(e) {
+                resetAccountMessage();
+
+                const requiredFields = accountRequestForm.querySelectorAll('input[required], select[required]');
+                let hasEmptyField = false;
+
+                requiredFields.forEach(function(field) {
+                    let invalid = false;
+
+                    if (field.type === 'checkbox') {
+                        invalid = !field.checked;
+                    } else if (!field.value) {
+                        invalid = true;
+                    }
+
+                    if (invalid) {
+                        hasEmptyField = true;
+                        field.style.borderColor = '#ef4444';
+                        field.style.backgroundColor = '#fee2e2';
+                        if (field.type === 'checkbox') {
+                            field.style.outline = '2px solid #ef4444';
+                        }
+                    } else {
+                        field.style.borderColor = '';
+                        field.style.backgroundColor = '';
+                        if (field.type === 'checkbox') {
+                            field.style.outline = '';
+                        }
+                    }
+                });
+
+                if (hasEmptyField) {
+                    e.preventDefault();
+                    showAccountMessage('error', 'Merci de renseigner tous les champs obligatoires.');
+                    return;
+                }
+
+                if (accountRequestPassword && accountRequestPasswordConfirm) {
+                    if (accountRequestPassword.value !== accountRequestPasswordConfirm.value) {
+                        e.preventDefault();
+                        showAccountMessage('error', 'Les mots de passe ne correspondent pas.');
+                        accountRequestPassword.style.borderColor = '#ef4444';
+                        accountRequestPasswordConfirm.style.borderColor = '#ef4444';
+                        accountRequestPassword.style.backgroundColor = '#fee2e2';
+                        accountRequestPasswordConfirm.style.backgroundColor = '#fee2e2';
+                        accountRequestPassword.focus();
+                        return;
+                    } else {
+                        accountRequestPassword.style.borderColor = '';
+                        accountRequestPasswordConfirm.style.borderColor = '';
+                        accountRequestPassword.style.backgroundColor = '';
+                        accountRequestPasswordConfirm.style.backgroundColor = '';
+                    }
+                }
+            });
+        }
+
+        if (accountRequestModal) {
+            const state = accountRequestModal.dataset.accountRequestState;
+            const type = accountRequestModal.dataset.accountRequestType || 'error';
+
+            if (state && state !== 'success') {
+                openAccountModal();
+            }
+
+            if (state && accountRequestMessage && accountRequestMessage.textContent.trim().length > 0) {
+                accountRequestMessage.classList.add('is-visible');
+                if (type === 'success') {
+                    accountRequestMessage.classList.add('is-success');
+                }
+            }
+        }
+
+        // Fermer les modales avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key !== 'Escape') {
+                return;
+            }
+
+            if (isAdhesionModalOpen()) {
+                closeAdhesionModal();
+            }
+
+            if (isAccountModalOpen()) {
+                closeAccountModal();
+            }
+        });
 
         /**
          * Mettre en évidence un champ avec erreur

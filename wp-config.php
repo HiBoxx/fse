@@ -82,7 +82,7 @@ $table_prefix = 'wp_';
  * Custom CGT Configuration
  */
 // Email pour les notifications d'adhésion (peut être surchargé par variable d'environnement)
-define( 'CGT_ADMIN_EMAIL', getenv('CGT_ADMIN_EMAIL') ?: 'webmaster.fsetud@cgt.fr' );
+define( 'CGT_ADMIN_EMAIL', getenv('CGT_ADMIN_EMAIL') ?: 'admfsetud@cgt.fr' );
 
 // Sécurité: Désactiver l'éditeur de fichiers dans l'admin
 define( 'DISALLOW_FILE_EDIT', true );
