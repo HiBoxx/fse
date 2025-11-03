@@ -201,6 +201,13 @@ class CGT_PDF_Library {
 
 	/**
 	 * Render the main library admin page.
+	 *
+	 * ✅ CORRECTIONS PERFORMANCE :
+	 * - Pagination ajoutée (24 PDF par page)
+	 * - Optimisation N+1 queries (pré-chargement des metas/terms)
+	 * - Comptes catégories en 1 seule requête SQL
+	 *
+	 * @since 1.2.0
 	 */
 	public function render_library_page() {
 		if ( ! current_user_can( 'edit_posts' ) ) {
@@ -208,11 +215,16 @@ class CGT_PDF_Library {
 		}
 
 		$selected_cat = isset( $_GET['cgt_cat'] ) ? absint( $_GET['cgt_cat'] ) : 0;
+		$paged = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
+
+		// ✅ Pagination : 24 PDF par page
+		$per_page = 24;
 
 		$args = array(
 			'post_type'      => self::CPT,
 			'post_status'    => array( 'publish', 'private', 'pending', 'draft' ),
-			'posts_per_page' => -1,
+			'posts_per_page' => $per_page,
+			'paged'          => $paged,
 			'orderby'        => 'date',
 			'order'          => 'DESC',
 			'no_found_rows'  => false,
@@ -236,25 +248,59 @@ class CGT_PDF_Library {
 			)
 		);
 
+		// ✅ OPTIMISATION : Compter les posts par catégorie en 1 seule requête SQL
+		global $wpdb;
 		$category_counts = array();
-		foreach ( $categories as $cat ) {
-			$count_query = new WP_Query(
-				array(
-					'post_type'      => self::CPT,
-					'post_status'    => array( 'publish', 'private', 'pending', 'draft' ),
-					'posts_per_page' => 1,
-					'no_found_rows'  => true,
-					'tax_query'      => array(
-						array(
-							'taxonomy' => 'category',
-							'field'    => 'term_id',
-							'terms'    => $cat->term_id,
-						),
-					),
-				)
-			);
-			$category_counts[ $cat->term_id ] = (int) $count_query->found_posts;
-			wp_reset_postdata();
+
+		$counts_sql = "
+			SELECT tr.term_taxonomy_id, COUNT(DISTINCT p.ID) as count
+			FROM {$wpdb->posts} p
+			INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			WHERE p.post_type = %s
+			AND p.post_status IN ('publish', 'private', 'pending', 'draft')
+			AND tt.taxonomy = 'category'
+			GROUP BY tr.term_taxonomy_id
+		";
+
+		$counts = $wpdb->get_results( $wpdb->prepare( $counts_sql, self::CPT ) );
+
+		foreach ( $counts as $count_row ) {
+			$category_counts[ $count_row->term_taxonomy_id ] = (int) $count_row->count;
+		}
+
+		// ✅ OPTIMISATION N+1 : Pré-charger TOUTES les metas en 1 requête
+		if ( $query->have_posts() ) {
+			$post_ids = wp_list_pluck( $query->posts, 'ID' );
+
+			// Pré-charger les post metas
+			update_meta_cache( 'post', $post_ids );
+
+			// Pré-charger les termes (catégories)
+			update_object_term_cache( $post_ids, self::CPT );
+
+			// ✅ Pré-charger les posts sources en 1 requête
+			$source_ids = array();
+			foreach ( $post_ids as $pid ) {
+				$source_id = get_post_meta( $pid, '_cgt_source_post_id', true );
+				if ( $source_id ) {
+					$source_ids[] = (int) $source_id;
+				}
+			}
+
+			$sources_by_id = array();
+			if ( ! empty( $source_ids ) ) {
+				$source_posts = get_posts( array(
+					'post__in'       => array_unique( $source_ids ),
+					'post_type'      => array( 'post', 'tracts' ),
+					'posts_per_page' => -1,
+					'post_status'    => 'any',
+				) );
+
+				foreach ( $source_posts as $source_post ) {
+					$sources_by_id[ $source_post->ID ] = $source_post;
+				}
+			}
 		}
 		?>
 		<div class="wrap cgt-library-page">
@@ -433,6 +479,28 @@ class CGT_PDF_Library {
 							</div>
 
 						<?php endif; ?>
+
+						<?php
+						// ✅ Pagination
+						if ( $query->max_num_pages > 1 ) :
+							$pagination_args = array(
+								'base'      => add_query_arg( 'paged', '%#%' ),
+								'format'    => '',
+								'current'   => $paged,
+								'total'     => $query->max_num_pages,
+								'prev_text' => '← ' . __( 'Précédent', 'cgt' ),
+								'next_text' => __( 'Suivant', 'cgt' ) . ' →',
+							);
+
+							if ( $selected_cat ) {
+								$pagination_args['add_args'] = array( 'cgt_cat' => $selected_cat );
+							}
+							?>
+							<div class="cgt-library-pagination">
+								<?php echo paginate_links( $pagination_args ); ?>
+							</div>
+						<?php endif; ?>
+
 					</div>
 
 				</div>

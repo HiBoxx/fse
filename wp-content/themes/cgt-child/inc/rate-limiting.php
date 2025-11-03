@@ -38,36 +38,113 @@ function cgt_check_rate_limit( $action, $limit = 3, $time_window = 3600 ) {
 }
 
 /**
- * Obtenir l'adresse IP du client (compatible avec proxies et CloudFlare)
+ * Obtenir l'adresse IP du client de manière sécurisée
+ *
+ * ✅ CORRECTION SÉCURITÉ :
+ * - Vérifie que la requête vient d'un proxy de confiance avant d'accepter les headers
+ * - Prévient l'IP spoofing
+ * - Valide les IPs avec filtres stricts
+ *
+ * @since 1.2.0
  *
  * @return string Adresse IP du client.
  */
 function cgt_get_client_ip() {
-	$ip_keys = array(
-		'HTTP_CF_CONNECTING_IP', // CloudFlare
-		'HTTP_X_FORWARDED_FOR',
-		'HTTP_X_REAL_IP',
-		'REMOTE_ADDR',
+	// ✅ Liste des plages IP des proxys de confiance (CloudFlare)
+	// Source: https://www.cloudflare.com/ips/
+	$trusted_proxies = array(
+		'173.245.48.0/20',
+		'103.21.244.0/22',
+		'103.22.200.0/22',
+		'103.31.4.0/22',
+		'141.101.64.0/18',
+		'108.162.192.0/18',
+		'190.93.240.0/20',
+		'188.114.96.0/20',
+		'197.234.240.0/22',
+		'198.41.128.0/17',
+		'162.158.0.0/15',
+		'104.16.0.0/13',
+		'104.24.0.0/14',
+		'172.64.0.0/13',
+		'131.0.72.0/22',
 	);
 
-	foreach ( $ip_keys as $key ) {
-		if ( ! empty( $_SERVER[ $key ] ) ) {
-			$ip = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
+	$remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '0.0.0.0';
 
-			// Si plusieurs IPs, prendre la première
-			if ( strpos( $ip, ',' ) !== false ) {
-				$ip_array = explode( ',', $ip );
-				$ip = trim( $ip_array[0] );
-			}
+	// ✅ Vérifier si la requête vient d'un proxy de confiance
+	$is_trusted_proxy = false;
+	foreach ( $trusted_proxies as $proxy_range ) {
+		if ( cgt_ip_in_range( $remote_addr, $proxy_range ) ) {
+			$is_trusted_proxy = true;
+			break;
+		}
+	}
 
-			// Valider l'IP
-			if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
-				return $ip;
+	// ✅ Accepter les headers UNIQUEMENT si le proxy est de confiance
+	if ( $is_trusted_proxy ) {
+		$ip_keys = array(
+			'HTTP_CF_CONNECTING_IP', // CloudFlare
+			'HTTP_X_FORWARDED_FOR',
+			'HTTP_X_REAL_IP',
+		);
+
+		foreach ( $ip_keys as $key ) {
+			if ( ! empty( $_SERVER[ $key ] ) ) {
+				$ip = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
+
+				// Si plusieurs IPs, prendre la première (client réel)
+				if ( strpos( $ip, ',' ) !== false ) {
+					$ip_array = explode( ',', $ip );
+					$ip = trim( $ip_array[0] );
+				}
+
+				// ✅ Validation stricte : exclure IPs privées et réservées
+				if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+					return $ip;
+				}
 			}
 		}
 	}
 
+	// ✅ Fallback sécurisé : toujours utiliser REMOTE_ADDR si pas de proxy de confiance
+	if ( filter_var( $remote_addr, FILTER_VALIDATE_IP ) ) {
+		return $remote_addr;
+	}
+
 	return '0.0.0.0';
+}
+
+/**
+ * Vérifier si une IP est dans une plage CIDR
+ *
+ * @since 1.2.0
+ *
+ * @param string $ip    Adresse IP à vérifier.
+ * @param string $range Plage CIDR (ex: 192.168.1.0/24).
+ *
+ * @return bool True si l'IP est dans la plage.
+ */
+function cgt_ip_in_range( $ip, $range ) {
+	if ( strpos( $range, '/' ) === false ) {
+		return $ip === $range;
+	}
+
+	list( $subnet, $bits ) = explode( '/', $range );
+
+	// Convertir en long
+	$ip = ip2long( $ip );
+	$subnet = ip2long( $subnet );
+
+	if ( false === $ip || false === $subnet ) {
+		return false;
+	}
+
+	// Créer le masque
+	$mask = -1 << ( 32 - (int) $bits );
+	$subnet &= $mask;
+
+	return ( $ip & $mask ) === $subnet;
 }
 
 /**
