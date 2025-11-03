@@ -58,6 +58,7 @@ $cgt_inc_files = array(
 	'optimizations.php',
 	'home-slider.php',
 	'newsletter.php',
+	'library-sync.php',
 	'admin-post-creation.php',
 	'admin-menu-reorganization.php',
 	'content-reset.php',

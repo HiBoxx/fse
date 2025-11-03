@@ -393,6 +393,7 @@ function cgt_render_add_article_page() {
 	$keywords    = '';
 	$sources     = '';
 	$featured_id = 0;
+	$pdf_id      = 0;
 
 	// Charger les données existantes si en mode édition
 	if ( $is_edit ) {
@@ -415,6 +416,10 @@ function cgt_render_add_article_page() {
 			// Mots-clés
 			$tags     = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
 			$keywords = implode( ', ', $tags );
+
+			// PDF
+			$pdf_url = get_post_meta( $post->ID, 'cgt_fichier_pdf', true );
+			$pdf_id  = $pdf_url ? attachment_url_to_postid( $pdf_url ) : 0;
 		} else {
 			$errors[] = __( 'Article introuvable.', 'cgt' );
 			$is_edit  = false;
@@ -435,6 +440,7 @@ function cgt_render_add_article_page() {
 			$keywords    = isset( $_POST['cgt_article_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_keywords'] ) ) : '';
 			$sources     = isset( $_POST['cgt_article_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_article_sources'] ) ) : '';
 			$featured_id = isset( $_POST['cgt_article_featured_id'] ) ? absint( $_POST['cgt_article_featured_id'] ) : 0;
+			$pdf_id      = isset( $_POST['cgt_article_pdf_id'] ) ? absint( $_POST['cgt_article_pdf_id'] ) : 0;
 			$edit_id_post = isset( $_POST['cgt_article_edit_id'] ) ? absint( $_POST['cgt_article_edit_id'] ) : 0;
 
 			// Validation
@@ -498,6 +504,13 @@ function cgt_render_add_article_page() {
 						delete_post_thumbnail( $post_id );
 					}
 
+					// Ajouter le PDF
+					if ( $pdf_id ) {
+						$pdf_url = wp_get_attachment_url( $pdf_id );
+						update_post_meta( $post_id, 'cgt_fichier_pdf', $pdf_url );
+					} else {
+						delete_post_meta( $post_id, 'cgt_fichier_pdf' );
+					}
 
 					// Message de succès
 					$view_link = get_permalink( $post_id );
@@ -526,7 +539,7 @@ function cgt_render_add_article_page() {
 		'article',
 		$message,
 		$errors,
-		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'categories', 'branches', 'is_edit', 'edit_id' )
+		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'pdf_id', 'categories', 'branches', 'is_edit', 'edit_id' )
 	);
 }
 
@@ -1311,31 +1324,29 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 							</div>
 						</div>
 
-						<?php if ( ! $is_article ) : ?>
-							<!-- PDF (uniquement pour tract) -->
-							<div class="form-group">
-								<label>
-									<?php esc_html_e( 'Fichier PDF', 'cgt' ); ?>
-									<span class="hint"><?php esc_html_e( 'Document PDF du tract (max 15 MB)', 'cgt' ); ?></span>
-								</label>
-								<div class="media-upload-container">
-									<input type="hidden" name="cgt_tract_pdf_id" id="tract-pdf-id" value="<?php echo esc_attr( $pdf_id ); ?>">
-									<div id="tract-pdf-preview" class="media-preview">
-										<?php if ( ! empty( $pdf_id ) ) : ?>
-											<p style="margin:0; color: #059669; font-weight: 600;">📄 <?php echo esc_html( basename( wp_get_attachment_url( $pdf_id ) ) ); ?></p>
-										<?php endif; ?>
-									</div>
-									<div class="button-group">
-										<button type="button" class="button button-primary" id="tract-pdf-upload">
-											📎 <?php esc_html_e( 'Sélectionner un PDF', 'cgt' ); ?>
-										</button>
-										<button type="button" class="button" id="tract-pdf-remove" style="<?php echo empty( $pdf_id ) ? 'display:none;' : ''; ?>">
-											🗑️ <?php esc_html_e( 'Supprimer', 'cgt' ); ?>
-										</button>
-									</div>
+						<!-- Fichier PDF -->
+						<div class="form-group">
+							<label>
+								<?php esc_html_e( 'Fichier PDF', 'cgt' ); ?> <span class="optional"><?php esc_html_e( '(Facultatif)', 'cgt' ); ?></span>
+								<span class="hint"><?php echo $is_article ? esc_html__( 'Document PDF complémentaire (max 15 MB)', 'cgt' ) : esc_html__( 'Document PDF du tract (max 15 MB)', 'cgt' ); ?></span>
+							</label>
+							<div class="media-upload-container">
+								<input type="hidden" name="cgt_<?php echo esc_attr( $field_prefix ); ?>_pdf_id" id="<?php echo esc_attr( $field_prefix ); ?>-pdf-id" value="<?php echo esc_attr( $pdf_id ); ?>">
+								<div id="<?php echo esc_attr( $field_prefix ); ?>-pdf-preview" class="media-preview">
+									<?php if ( ! empty( $pdf_id ) ) : ?>
+										<p style="margin:0; color: #059669; font-weight: 600;">📄 <?php echo esc_html( basename( wp_get_attachment_url( $pdf_id ) ) ); ?></p>
+									<?php endif; ?>
+								</div>
+								<div class="button-group">
+									<button type="button" class="button button-primary" id="<?php echo esc_attr( $field_prefix ); ?>-pdf-upload">
+										📎 <?php esc_html_e( 'Sélectionner un PDF', 'cgt' ); ?>
+									</button>
+									<button type="button" class="button" id="<?php echo esc_attr( $field_prefix ); ?>-pdf-remove" style="<?php echo empty( $pdf_id ) ? 'display:none;' : ''; ?>">
+										🗑️ <?php esc_html_e( 'Supprimer', 'cgt' ); ?>
+									</button>
 								</div>
 							</div>
-						<?php endif; ?>
+						</div>
 
 						<!-- Bouton submit -->
 						<div class="form-actions">
@@ -1387,10 +1398,9 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 			$(this).hide();
 		});
 
-		<?php if ( ! $is_article ) : ?>
-		// PDF (uniquement pour tract)
+		// PDF
 		var pdfUploader;
-		$('#tract-pdf-upload').on('click', function(e) {
+		$('#<?php echo esc_js( $field_prefix ); ?>-pdf-upload').on('click', function(e) {
 			e.preventDefault();
 			if (pdfUploader) {
 				pdfUploader.open();
@@ -1404,20 +1414,19 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 			});
 			pdfUploader.on('select', function() {
 				var attachment = pdfUploader.state().get('selection').first().toJSON();
-				$('#tract-pdf-id').val(attachment.id);
-				$('#tract-pdf-preview').html('<p style="margin:0; color: #059669; font-weight: 600;">📄 ' + attachment.filename + '</p>');
-				$('#tract-pdf-remove').show();
+				$('#<?php echo esc_js( $field_prefix ); ?>-pdf-id').val(attachment.id);
+				$('#<?php echo esc_js( $field_prefix ); ?>-pdf-preview').html('<p style="margin:0; color: #059669; font-weight: 600;">📄 ' + attachment.filename + '</p>');
+				$('#<?php echo esc_js( $field_prefix ); ?>-pdf-remove').show();
 			});
 			pdfUploader.open();
 		});
 
-		$('#tract-pdf-remove').on('click', function(e) {
+		$('#<?php echo esc_js( $field_prefix ); ?>-pdf-remove').on('click', function(e) {
 			e.preventDefault();
-			$('#tract-pdf-id').val('');
-			$('#tract-pdf-preview').html('');
+			$('#<?php echo esc_js( $field_prefix ); ?>-pdf-id').val('');
+			$('#<?php echo esc_js( $field_prefix ); ?>-pdf-preview').html('');
 			$(this).hide();
 		});
-		<?php endif; ?>
 	});
 	</script>
 	<?php

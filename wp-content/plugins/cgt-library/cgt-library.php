@@ -334,8 +334,10 @@ class CGT_PDF_Library {
 								$post_id   = get_the_ID();
 								$file_id   = (int) get_post_meta( $post_id, self::META_FILE, true );
 								$file_url  = $file_id ? wp_get_attachment_url( $file_id ) : '';
-								$shortcode = '[pdf_document id="' . $post_id . '"]';
 								$terms     = get_the_terms( $post_id, 'category' );
+								$is_synced = get_post_meta( $post_id, '_cgt_auto_synced', true );
+								$source_id = get_post_meta( $post_id, '_cgt_source_post_id', true );
+								$source_type = get_post_meta( $post_id, '_cgt_source_post_type', true );
 								?>
 
 								<article class="cgt-pdf-card">
@@ -380,18 +382,25 @@ class CGT_PDF_Library {
 										<?php endif; ?>
 									</div>
 
-									<!-- Shortcode -->
-									<div class="cgt-pdf-shortcode">
-										<div class="cgt-pdf-shortcode-label">
-											<?php esc_html_e( 'Shortcode', 'cgt' ); ?>
+									<!-- Source de synchronisation -->
+									<?php if ( $is_synced && $source_id ) : ?>
+										<div class="cgt-pdf-source">
+											<div class="cgt-pdf-source-label">
+												<span style="color: #10b981;">✓</span> <?php esc_html_e( 'Synchronisé depuis', 'cgt' ); ?>
+											</div>
+											<div class="cgt-pdf-source-info">
+												<?php
+												$source_post = get_post( $source_id );
+												if ( $source_post ) {
+													$source_label = 'post' === $source_type ? 'Article' : 'Tract';
+													$edit_url = admin_url( 'post.php?post=' . $source_id . '&action=edit' );
+													echo '<strong>' . esc_html( $source_label ) . ':</strong> ';
+													echo '<a href="' . esc_url( $edit_url ) . '" target="_blank">' . esc_html( $source_post->post_title ) . '</a>';
+												}
+												?>
+											</div>
 										</div>
-										<div class="cgt-pdf-shortcode-box">
-											<code><?php echo esc_html( $shortcode ); ?></code>
-											<button type="button" class="cgt-copy-btn" data-shortcode="<?php echo esc_attr( $shortcode ); ?>">
-												<?php esc_html_e( 'Copier', 'cgt' ); ?>
-											</button>
-										</div>
-									</div>
+									<?php endif; ?>
 
 									<!-- Actions -->
 									<div class="cgt-pdf-actions">
@@ -441,7 +450,7 @@ class CGT_PDF_Library {
 			$new_columns[ $key ] = $label;
 			if ( 'date' === $key ) {
 				$new_columns['category']  = __( 'Catégorie', 'cgt' );
-				$new_columns['shortcode'] = __( 'Shortcode', 'cgt' );
+				$new_columns['source'] = __( 'Source', 'cgt' );
 			}
 		}
 
@@ -458,8 +467,21 @@ class CGT_PDF_Library {
 			}
 		}
 
-		if ( 'shortcode' === $column ) {
-			echo '<code>[pdf_document id="' . absint( $post_id ) . '"]</code>';
+		if ( 'source' === $column ) {
+			$is_synced = get_post_meta( $post_id, '_cgt_auto_synced', true );
+			$source_id = get_post_meta( $post_id, '_cgt_source_post_id', true );
+			$source_type = get_post_meta( $post_id, '_cgt_source_post_type', true );
+
+			if ( $is_synced && $source_id ) {
+				$source_post = get_post( $source_id );
+				if ( $source_post ) {
+					$source_label = 'post' === $source_type ? 'Article' : 'Tract';
+					$edit_url = admin_url( 'post.php?post=' . $source_id . '&action=edit' );
+					echo '<span style="color: #10b981;">✓</span> <a href="' . esc_url( $edit_url ) . '" target="_blank">' . esc_html( $source_label ) . '</a>';
+				}
+			} else {
+				echo '<span style="color: #9ca3af;">Manuel</span>';
+			}
 		}
 	}
 

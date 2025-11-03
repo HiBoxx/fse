@@ -405,69 +405,48 @@
 	justify-content: center;
 }
 
-/* Card Shortcode */
-.cgt-pdf-shortcode {
+/* Card Source */
+.cgt-pdf-source {
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
+	padding: 0.75rem;
+	background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+	border-left: 3px solid var(--color-success);
+	border-radius: var(--radius-sm);
 }
 
-.cgt-pdf-shortcode-label {
+.cgt-pdf-source-label {
 	font-size: 0.75rem;
 	font-weight: 700;
-	color: var(--color-gray-600);
+	color: var(--color-success);
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
-}
-
-.cgt-pdf-shortcode-box {
 	display: flex;
 	align-items: center;
-	gap: 0.5rem;
-	background: var(--color-gray-900);
-	padding: 0.75rem 1rem;
-	border-radius: var(--radius-sm);
+	gap: 0.375rem;
 }
 
-.cgt-pdf-shortcode-box code {
-	flex: 1;
-	color: #10b981;
-	font-family: 'Monaco', 'Courier New', monospace;
+.cgt-pdf-source-info {
 	font-size: 0.875rem;
-	font-weight: 600;
+	color: var(--color-gray-700);
+	line-height: 1.5;
 }
 
-.cgt-copy-btn {
-	background: rgba(255, 255, 255, 0.1);
-	color: white;
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	padding: 0.375rem 0.875rem;
-	border-radius: var(--radius-sm);
-	font-size: 0.75rem;
+.cgt-pdf-source-info strong {
+	color: var(--color-gray-900);
+}
+
+.cgt-pdf-source-info a {
+	color: var(--color-info);
+	text-decoration: none;
 	font-weight: 600;
-	cursor: pointer;
 	transition: var(--transition);
-	white-space: nowrap;
 }
 
-.cgt-copy-btn:hover {
-	background: rgba(255, 255, 255, 0.2);
-	border-color: rgba(255, 255, 255, 0.3);
-}
-
-.cgt-copy-btn.copied {
-	background: var(--color-success);
-	border-color: var(--color-success);
-	animation: pulse 0.5s ease-out;
-}
-
-@keyframes pulse {
-	0%, 100% {
-		transform: scale(1);
-	}
-	50% {
-		transform: scale(1.05);
-	}
+.cgt-pdf-source-info a:hover {
+	color: var(--cgt-primary);
+	text-decoration: underline;
 }
 
 /* Card Actions */
