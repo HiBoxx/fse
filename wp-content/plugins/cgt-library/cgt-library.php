@@ -26,6 +26,27 @@ class CGT_PDF_Library {
 		add_action( 'manage_' . self::CPT . '_posts_custom_column', array( $this, 'render_custom_columns' ), 10, 2 );
 
 		add_shortcode( 'pdf_document', array( $this, 'shortcode_output' ) );
+
+		// ✅ PHASE 2 : Invalider le cache des compteurs lors des modifications
+		add_action( 'save_post_' . self::CPT, array( $this, 'clear_category_counts_cache' ) );
+		add_action( 'delete_post', array( $this, 'clear_category_counts_cache' ) );
+		add_action( 'set_object_terms', array( $this, 'clear_category_counts_cache_on_term_change' ), 10, 4 );
+	}
+
+	/**
+	 * ✅ PHASE 2 : Invalider le cache des compteurs de catégories
+	 */
+	public function clear_category_counts_cache() {
+		delete_transient( 'cgt_library_cat_counts' );
+	}
+
+	/**
+	 * ✅ PHASE 2 : Invalider le cache lors du changement de taxonomie
+	 */
+	public function clear_category_counts_cache_on_term_change( $object_id, $terms, $tt_ids, $taxonomy ) {
+		if ( 'category' === $taxonomy && self::CPT === get_post_type( $object_id ) ) {
+			delete_transient( 'cgt_library_cat_counts' );
+		}
 	}
 
 	/**
@@ -241,23 +262,32 @@ class CGT_PDF_Library {
 			)
 		);
 
-		// ✅ OPTIMISATION : Compter les posts par catégorie en 1 seule requête SQL
-		global $wpdb;
-		$counts_sql = "
-			SELECT tr.term_taxonomy_id, COUNT(DISTINCT p.ID) as count
-			FROM {$wpdb->posts} p
-			INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-			WHERE p.post_type = %s
-			AND p.post_status IN ('publish', 'private', 'pending', 'draft')
-			AND tt.taxonomy = 'category'
-			GROUP BY tr.term_taxonomy_id
-		";
-		$counts = $wpdb->get_results( $wpdb->prepare( $counts_sql, self::CPT ) );
+		// ✅ PHASE 2 : Cache des compteurs de catégories (5 minutes)
+		$cache_key       = 'cgt_library_cat_counts';
+		$category_counts = get_transient( $cache_key );
 
-		$category_counts = array();
-		foreach ( $counts as $count_row ) {
-			$category_counts[ $count_row->term_taxonomy_id ] = (int) $count_row->count;
+		if ( false === $category_counts ) {
+			// ✅ OPTIMISATION : Compter les posts par catégorie en 1 seule requête SQL
+			global $wpdb;
+			$counts_sql = "
+				SELECT tr.term_taxonomy_id, COUNT(DISTINCT p.ID) as count
+				FROM {$wpdb->posts} p
+				INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+				INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+				WHERE p.post_type = %s
+				AND p.post_status IN ('publish', 'private', 'pending', 'draft')
+				AND tt.taxonomy = 'category'
+				GROUP BY tr.term_taxonomy_id
+			";
+			$counts = $wpdb->get_results( $wpdb->prepare( $counts_sql, self::CPT ) );
+
+			$category_counts = array();
+			foreach ( $counts as $count_row ) {
+				$category_counts[ $count_row->term_taxonomy_id ] = (int) $count_row->count;
+			}
+
+			// Mettre en cache pour 5 minutes
+			set_transient( $cache_key, $category_counts, 5 * MINUTE_IN_SECONDS );
 		}
 		// Plus besoin de wp_reset_postdata() ici car on n'utilise plus WP_Query
 		?>

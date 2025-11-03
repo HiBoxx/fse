@@ -54,6 +54,7 @@ $cgt_inc_files = array(
 	'account-request.php',
 	'rate-limiting.php',
 	'pdf-validation.php',
+	'autoload-audit.php',
 	'admin-dashboard.php',
 	'agenda.php',
 	'brevo.php',

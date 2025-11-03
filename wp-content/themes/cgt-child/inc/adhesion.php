@@ -88,6 +88,67 @@ function cgt_adhesion_submit_handler() {
         $errors[] = 'Le code postal doit contenir 5 chiffres.';
     }
 
+    // ✅ PHASE 2 : Validation des longueurs maximales pour éviter les abus
+    $field_lengths = array(
+        'nom'                      => 100,
+        'prenom'                   => 100,
+        'sexe'                     => 20,
+        'date_naissance'           => 10,
+        'nationalite'              => 100,
+        'adresse'                  => 255,
+        'code_postal'              => 10,
+        'ville'                    => 100,
+        'tel'                      => 20,
+        'email'                    => 254,
+        'statut'                   => 100,
+        'categorie'                => 100,
+        'entreprise_nom'           => 255,
+        'entreprise_siret'         => 14,
+        'appartient_groupe'        => 255,
+        'entreprise_adresse'       => 255,
+        'entreprise_code_postal'   => 10,
+        'entreprise_ville'         => 100,
+        'entreprise_tel'           => 20,
+        'entreprise_email'         => 254,
+        'secteur'                  => 255,
+        'code_ape_naf'             => 10,
+        'convention_collective'    => 255,
+        'effectif'                 => 100,
+        'union_locale'             => 100,
+        'union_departementale'     => 100,
+    );
+
+    foreach ( $field_lengths as $field => $max_length ) {
+        if ( isset( $data[ $field ] ) && mb_strlen( $data[ $field ] ) > $max_length ) {
+            $errors[] = sprintf(
+                'Le champ %s est trop long (maximum %d caractères, %d fournis).',
+                $field,
+                $max_length,
+                mb_strlen( $data[ $field ] )
+            );
+        }
+    }
+
+    // ✅ Validation spécifique SIRET (14 chiffres si fourni)
+    if ( ! empty( $data['entreprise_siret'] ) && ! preg_match( '/^[0-9]{14}$/', $data['entreprise_siret'] ) ) {
+        $errors[] = 'Le numéro SIRET doit contenir exactement 14 chiffres.';
+    }
+
+    // ✅ Validation email entreprise (si fourni)
+    if ( ! empty( $data['entreprise_email'] ) && ! is_email( $data['entreprise_email'] ) ) {
+        $errors[] = 'L\'adresse email de l\'entreprise n\'est pas valide.';
+    }
+
+    // ✅ Validation téléphone entreprise (10 chiffres si fourni)
+    if ( ! empty( $data['entreprise_tel'] ) && ! preg_match( '/^[0-9]{10}$/', $data['entreprise_tel'] ) ) {
+        $errors[] = 'Le numéro de téléphone de l\'entreprise doit contenir 10 chiffres.';
+    }
+
+    // ✅ Validation code postal entreprise (5 chiffres si fourni)
+    if ( ! empty( $data['entreprise_code_postal'] ) && ! preg_match( '/^[0-9]{5}$/', $data['entreprise_code_postal'] ) ) {
+        $errors[] = 'Le code postal de l\'entreprise doit contenir 5 chiffres.';
+    }
+
     // Si des erreurs, rediriger avec message
     if ( ! empty( $errors ) ) {
         $redirect_url = add_query_arg(
