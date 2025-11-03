@@ -205,7 +205,7 @@ function cgt_enqueue_custom_post_creation_assets( $hook ) {
 			overflow: hidden;
 		}
 		.submit-article-header {
-			background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+			background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 			color: white;
 			padding: 30px;
 			border-radius: 0;
@@ -247,7 +247,7 @@ function cgt_enqueue_custom_post_creation_assets( $hook ) {
 			margin-top: 4px;
 		}
 		.form-group .required {
-			color: #c8102e;
+			color: #ce1010;
 		}
 		.form-group .optional {
 			font-weight: normal;
@@ -264,7 +264,7 @@ function cgt_enqueue_custom_post_creation_assets( $hook ) {
 		}
 		.form-control:focus {
 			outline: none;
-			border-color: #c8102e;
+			border-color: #ce1010;
 			box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
 		}
 		.form-row {
@@ -309,15 +309,15 @@ function cgt_enqueue_custom_post_creation_assets( $hook ) {
 			flex-wrap: wrap;
 		}
 		.button-primary {
-			background: #c8102e !important;
-			border-color: #c8102e !important;
+			background: #ce1010 !important;
+			border-color: #ce1010 !important;
 			text-shadow: none !important;
 			box-shadow: none !important;
 			transition: all 0.2s;
 		}
 		.button-primary:hover {
-			background: #a00d26 !important;
-			border-color: #a00d26 !important;
+			background: #a30f0f !important;
+			border-color: #a30f0f !important;
 		}
 		.form-actions {
 			margin-top: 40px;

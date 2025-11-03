@@ -136,7 +136,7 @@ if ( ! is_wp_error( $branch_terms ) ) {
 }
 
 $bulletins_link_base = $all_articles_link ? $all_articles_link : get_post_type_archive_link( 'post' );
-$bulletins_link_args = array( 'thematique' => 'bulletins' );
+$bulletins_link_args = array( 'categorie' => 'bulletins' );
 
 if ( $user_branch_id ) {
 	$user_branch = get_term( $user_branch_id, 'branche' );
@@ -145,7 +145,7 @@ if ( $user_branch_id ) {
 	}
 }
 
-$bulletins_link = add_query_arg( array_filter( $bulletins_link_args ), $bulletins_link_base ) . '#tab=bulletins';
+$bulletins_link = add_query_arg( array_filter( $bulletins_link_args ), $bulletins_link_base );
 
 $agenda_term = get_term_by( 'slug', 'agenda', 'thematique' );
 $agenda_link = ( $agenda_term && ! is_wp_error( $agenda_term ) ) ? get_term_link( $agenda_term ) : '#';

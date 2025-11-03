@@ -209,7 +209,7 @@ function cgt_render_admin_overview() {
 			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px;">
 				<!-- Apparence -->
 				<div style="background: white; border: 1px solid #c3c4c7; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-					<h2 style="margin-top: 0; font-size: 18px; color: #c8102e;">
+					<h2 style="margin-top: 0; font-size: 18px; color: #ce1010;">
 						🎨 <?php esc_html_e( 'Apparence', 'cgt' ); ?>
 					</h2>
 					<p><?php esc_html_e( 'Gérez les thèmes, menus et personnalisations visuelles du site.', 'cgt' ); ?></p>
@@ -220,7 +220,7 @@ function cgt_render_admin_overview() {
 
 				<!-- Extensions -->
 				<div style="background: white; border: 1px solid #c3c4c7; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-					<h2 style="margin-top: 0; font-size: 18px; color: #c8102e;">
+					<h2 style="margin-top: 0; font-size: 18px; color: #ce1010;">
 						🔌 <?php esc_html_e( 'Extensions', 'cgt' ); ?>
 					</h2>
 					<p><?php esc_html_e( 'Installez et gérez les plugins pour étendre les fonctionnalités.', 'cgt' ); ?></p>
@@ -231,7 +231,7 @@ function cgt_render_admin_overview() {
 
 				<!-- Outils -->
 				<div style="background: white; border: 1px solid #c3c4c7; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-					<h2 style="margin-top: 0; font-size: 18px; color: #c8102e;">
+					<h2 style="margin-top: 0; font-size: 18px; color: #ce1010;">
 						🛠️ <?php esc_html_e( 'Outils', 'cgt' ); ?>
 					</h2>
 					<p><?php esc_html_e( 'Importez, exportez et utilisez les outils de maintenance.', 'cgt' ); ?></p>
@@ -242,7 +242,7 @@ function cgt_render_admin_overview() {
 
 				<!-- Réglages -->
 				<div style="background: white; border: 1px solid #c3c4c7; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-					<h2 style="margin-top: 0; font-size: 18px; color: #c8102e;">
+					<h2 style="margin-top: 0; font-size: 18px; color: #ce1010;">
 						⚙️ <?php esc_html_e( 'Réglages', 'cgt' ); ?>
 					</h2>
 					<p><?php esc_html_e( 'Configurez les paramètres généraux, lecture, écriture et permaliens.', 'cgt' ); ?></p>
@@ -256,13 +256,13 @@ function cgt_render_admin_overview() {
 
 	<style>
 		.cgt-admin-overview .button-primary {
-			background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
-			border-color: #c8102e;
+			background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
+			border-color: #ce1010;
 			margin-top: 10px;
 		}
 		.cgt-admin-overview .button-primary:hover {
-			background: #a00d26;
-			border-color: #a00d26;
+			background: #a30f0f;
+			border-color: #a30f0f;
 		}
 	</style>
 	<?php

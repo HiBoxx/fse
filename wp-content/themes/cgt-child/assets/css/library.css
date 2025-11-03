@@ -8,7 +8,7 @@
    ========================================================================== */
 
 .library-hero {
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	color: white;
 	padding: 60px 0;
 	margin-bottom: 40px;
@@ -129,7 +129,7 @@
 }
 
 .filter-label svg {
-	color: #c8102e;
+	color: #ce1010;
 	flex-shrink: 0;
 }
 
@@ -146,12 +146,12 @@
 }
 
 .filter-select:hover {
-	border-color: #c8102e;
+	border-color: #ce1010;
 }
 
 .filter-select:focus {
 	outline: none;
-	border-color: #c8102e;
+	border-color: #ce1010;
 	box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
 }
 
@@ -179,7 +179,7 @@
 	margin-bottom: 24px;
 	padding: 16px 24px;
 	background: #f9fafb;
-	border-left: 4px solid #c8102e;
+	border-left: 4px solid #ce1010;
 	border-radius: 8px;
 }
 
@@ -190,7 +190,7 @@
 }
 
 .library-results-info strong {
-	color: #c8102e;
+	color: #ce1010;
 	font-weight: 700;
 }
 
@@ -242,7 +242,7 @@
 }
 
 .library-list-item__link:focus {
-	outline: 2px solid #c8102e;
+	outline: 2px solid #ce1010;
 	outline-offset: -2px;
 }
 
@@ -261,7 +261,7 @@
 }
 
 .library-list-item:hover .library-list-item__title {
-	color: #c8102e;
+	color: #ce1010;
 }
 
 .library-list-item__meta {
@@ -318,7 +318,7 @@
 }
 
 .library-list-item:hover .library-list-item__arrow {
-	color: #c8102e;
+	color: #ce1010;
 	transform: translateX(4px);
 }
 
@@ -390,15 +390,15 @@
 }
 
 .library-pagination .page-numbers:hover {
-	border-color: #c8102e;
-	color: #c8102e;
+	border-color: #ce1010;
+	color: #ce1010;
 	background: #fef2f2;
 }
 
 .library-pagination .page-numbers.current {
-	background: #c8102e;
+	background: #ce1010;
 	color: white;
-	border-color: #c8102e;
+	border-color: #ce1010;
 	pointer-events: none;
 }
 

@@ -8,7 +8,7 @@
    ========================================================================== */
 
 .contact-hero {
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	color: white;
 	padding: 60px 0;
 	margin-bottom: 40px;
@@ -98,7 +98,7 @@
 .contact-method-card:hover {
 	transform: translateY(-4px);
 	box-shadow: 0 12px 24px rgba(200, 16, 46, 0.15);
-	border-color: #c8102e;
+	border-color: #ce1010;
 }
 
 .contact-method-card__icon {
@@ -178,7 +178,7 @@
 	width: 48px;
 	height: 48px;
 	flex-shrink: 0;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	border-radius: 12px;
 	display: flex;
 	align-items: center;
@@ -236,7 +236,7 @@
 .contact-form-wrapper textarea:focus,
 .contact-form-wrapper select:focus {
 	outline: none;
-	border-color: #c8102e;
+	border-color: #ce1010;
 	box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
 }
 
@@ -330,7 +330,7 @@
 	width: 40px;
 	height: 40px;
 	flex-shrink: 0;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	border-radius: 10px;
 	display: flex;
 	align-items: center;
@@ -358,7 +358,7 @@
 }
 
 .contact-info-item__content a {
-	color: #c8102e;
+	color: #ce1010;
 	text-decoration: none;
 	font-weight: 600;
 }
@@ -393,7 +393,7 @@
 
 .contact-hours__time {
 	font-weight: 700;
-	color: #c8102e;
+	color: #ce1010;
 	font-size: 0.9375rem;
 }
 
@@ -440,7 +440,7 @@
 	width: 48px;
 	height: 48px;
 	flex-shrink: 0;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	border-radius: 12px;
 	display: flex;
 	align-items: center;
@@ -510,7 +510,7 @@
 	width: 48px;
 	height: 48px;
 	flex-shrink: 0;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	border-radius: 12px;
 	display: flex;
 	align-items: center;

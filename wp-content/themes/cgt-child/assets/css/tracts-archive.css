@@ -12,7 +12,7 @@
 }
 
 .tracts-hero {
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	color: white;
 	padding: 60px 0;
 	margin-bottom: 40px;
@@ -167,7 +167,7 @@
 }
 
 .filter-label svg {
-	color: #c8102e;
+	color: #ce1010;
 	flex-shrink: 0;
 }
 
@@ -189,12 +189,12 @@
 }
 
 .filter-select:hover {
-	border-color: #c8102e;
+	border-color: #ce1010;
 }
 
 .filter-select:focus {
 	outline: none;
-	border-color: #c8102e;
+	border-color: #ce1010;
 	box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
 }
 
@@ -261,7 +261,7 @@
 }
 
 .tract-card__link:focus {
-	outline: 2px solid #c8102e;
+	outline: 2px solid #ce1010;
 	outline-offset: -2px;
 	border-radius: 12px;
 }
@@ -273,7 +273,7 @@
 	left: 0;
 	right: 0;
 	height: 4px;
-	background: linear-gradient(90deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(90deg, #ce1010 0%, #a30f0f 100%);
 	transform: scaleX(0);
 	transform-origin: left;
 	transition: transform 0.3s ease;
@@ -282,7 +282,7 @@
 .tract-card:hover {
 	transform: translateY(-4px);
 	box-shadow: 0 12px 24px rgba(200, 16, 46, 0.15);
-	border-color: #c8102e;
+	border-color: #ce1010;
 }
 
 .tract-card:hover::before {
@@ -297,7 +297,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: #c8102e;
+	color: #ce1010;
 	flex-shrink: 0;
 }
 
@@ -346,7 +346,7 @@
 
 .tract-card__badge--private {
 	background: #fff1f2;
-	color: #c8102e;
+	color: #ce1010;
 	border: 1px solid #ffe4e6;
 }
 
@@ -386,9 +386,9 @@
 }
 
 .tract-card__branch-tag--more {
-	background: #c8102e;
+	background: #ce1010;
 	color: white;
-	border-color: #c8102e;
+	border-color: #ce1010;
 }
 
 .tract-card__footer {
@@ -402,7 +402,7 @@
 	align-items: center;
 	gap: 8px;
 	padding: 12px 20px;
-	background: #c8102e;
+	background: #ce1010;
 	color: white;
 	font-weight: 600;
 	font-size: 0.875rem;
@@ -419,7 +419,7 @@
 }
 
 .tract-card__download:hover {
-	background: #a00d26;
+	background: #a30f0f;
 	transform: translateY(-2px);
 	box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
 }
@@ -454,7 +454,7 @@
 	display: inline-flex;
 	align-items: center;
 	padding: 8px 16px;
-	background: #c8102e;
+	background: #ce1010;
 	color: white;
 	font-weight: 600;
 	font-size: 0.875rem;
@@ -464,7 +464,7 @@
 }
 
 .tract-card__login-link:hover {
-	background: #a00d26;
+	background: #a30f0f;
 }
 
 /* ==========================================================================
@@ -545,13 +545,13 @@
 
 .tracts-pagination .page-numbers:hover {
 	background: #f9fafb;
-	border-color: #c8102e;
-	color: #c8102e;
+	border-color: #ce1010;
+	color: #ce1010;
 }
 
 .tracts-pagination .page-numbers.current {
-	background: #c8102e;
-	border-color: #c8102e;
+	background: #ce1010;
+	border-color: #ce1010;
 	color: white;
 }
 

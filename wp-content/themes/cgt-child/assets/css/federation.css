@@ -8,7 +8,7 @@
    ========================================================================== */
 
 .federation-hero {
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	color: white;
 	padding: 60px 0;
 	margin-bottom: 60px;
@@ -114,7 +114,7 @@
 .federation-story__icon {
 	width: 48px;
 	height: 48px;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	border-radius: 12px;
 	display: flex;
 	align-items: center;
@@ -169,13 +169,13 @@
 .federation-stat-card:hover {
 	transform: translateY(-4px);
 	box-shadow: 0 12px 24px rgba(200, 16, 46, 0.15);
-	border-color: #c8102e;
+	border-color: #ce1010;
 }
 
 .federation-stat-card__icon {
 	width: 64px;
 	height: 64px;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	border-radius: 16px;
 	display: flex;
 	align-items: center;
@@ -195,7 +195,7 @@
 .federation-stat-card__value {
 	font-size: 2.5rem;
 	font-weight: 700;
-	color: #c8102e;
+	color: #ce1010;
 	margin: 0 0 8px;
 	line-height: 1;
 }
@@ -225,7 +225,7 @@
 .federation-branches-section__icon {
 	width: 48px;
 	height: 48px;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	border-radius: 12px;
 	display: flex;
 	align-items: center;
@@ -271,7 +271,7 @@
 	left: 0;
 	right: 0;
 	height: 4px;
-	background: linear-gradient(90deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(90deg, #ce1010 0%, #a30f0f 100%);
 	transform: scaleX(0);
 	transform-origin: left;
 	transition: transform 0.3s ease;
@@ -280,7 +280,7 @@
 .federation-branch-card:hover {
 	transform: translateY(-4px);
 	box-shadow: 0 12px 24px rgba(200, 16, 46, 0.15);
-	border-color: #c8102e;
+	border-color: #ce1010;
 }
 
 .federation-branch-card:hover::before {
@@ -305,7 +305,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: #c8102e;
+	color: #ce1010;
 	flex-shrink: 0;
 }
 
@@ -340,7 +340,7 @@
 	top: 8px;
 	width: 6px;
 	height: 6px;
-	background: #c8102e;
+	background: #ce1010;
 	border-radius: 50%;
 }
 
@@ -363,7 +363,7 @@
 .federation-actions-section__icon {
 	width: 48px;
 	height: 48px;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	border-radius: 12px;
 	display: flex;
 	align-items: center;
@@ -406,13 +406,13 @@
 .federation-action-card:hover {
 	transform: translateY(-4px);
 	box-shadow: 0 12px 24px rgba(200, 16, 46, 0.15);
-	border-color: #c8102e;
+	border-color: #ce1010;
 }
 
 .federation-action-card__icon {
 	width: 56px;
 	height: 56px;
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	border-radius: 14px;
 	display: flex;
 	align-items: center;
@@ -444,7 +444,7 @@
    ========================================================================== */
 
 .federation-cta-section {
-	background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
 	padding: 80px 0;
 	position: relative;
 	overflow: hidden;
@@ -495,7 +495,7 @@
 
 .btn-white {
 	background: white;
-	color: #c8102e;
+	color: #ce1010;
 	border: 2px solid white;
 }
 
@@ -512,7 +512,7 @@
 
 .btn-outline-white:hover {
 	background: white;
-	color: #c8102e;
+	color: #ce1010;
 }
 
 .federation-cta__actions .btn {

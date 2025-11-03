@@ -150,7 +150,7 @@ while ( have_posts() ) :
 		.article-header {
 			margin-bottom: 30px;
 			padding-bottom: 25px;
-			border-bottom: 3px solid #c8102e;
+			border-bottom: 3px solid #ce1010;
 		}
 
 		.article-meta {
@@ -197,7 +197,7 @@ while ( have_posts() ) :
 
 		.author-name {
 			font-weight: 600;
-			color: #c8102e;
+			color: #ce1010;
 		}
 
 		.article-featured-image {
@@ -287,7 +287,7 @@ while ( have_posts() ) :
 		}
 
 		.article-content a:hover {
-			color: #a00d26;
+			color: #a30f0f;
 		}
 
 		.article-sources {
@@ -377,8 +377,8 @@ while ( have_posts() ) :
 
 		.nav-previous a:hover,
 		.nav-next a:hover {
-			background: #c8102e;
-			border-color: #c8102e;
+			background: #ce1010;
+			border-color: #ce1010;
 			color: #fff;
 		}
 
@@ -401,7 +401,7 @@ while ( have_posts() ) :
 		.back-button {
 			display: inline-block;
 			padding: 12px 30px;
-			background: #c8102e;
+			background: #ce1010;
 			color: #fff;
 			text-decoration: none;
 			border-radius: 6px;
@@ -411,7 +411,7 @@ while ( have_posts() ) :
 		}
 
 		.back-button:hover {
-			background: #a00d26;
+			background: #a30f0f;
 			transform: translateY(-2px);
 			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 		}
