@@ -18,23 +18,37 @@ defined( 'ABSPATH' ) || exit;
 function cgt_sync_pdf_to_library( $post_id, $post, $update ) {
 	// Vérifier si c'est un article ou tract
 	if ( ! in_array( $post->post_type, array( 'post', 'tracts' ), true ) ) {
-		return;
+		return false;
 	}
 
 	// Ne pas exécuter lors de l'autosave
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-		return;
+		return false;
 	}
 
 	// Ne pas exécuter lors des révisions
 	if ( wp_is_post_revision( $post_id ) ) {
-		return;
+		return false;
 	}
 
 	// Vérifier les permissions
 	if ( ! current_user_can( 'edit_post', $post_id ) ) {
-		return;
+		return false;
 	}
+
+	// ✅ FIX RACE CONDITION : Acquérir un lock transient pour éviter les doublons
+	$lock_key = 'cgt_sync_lock_' . $post_id;
+
+	if ( false !== get_transient( $lock_key ) ) {
+		error_log( sprintf( 'CGT PDF Sync: Lock actif pour post %d, synchronisation annulée', $post_id ) );
+		return false;
+	}
+
+	// Définir le lock pour 30 secondes
+	set_transient( $lock_key, 1, 30 );
+
+	// ✅ GESTION D'ERREURS : try/catch pour libérer le lock même en cas d'erreur
+	try {
 
 	// Récupérer l'ID du PDF depuis les meta
 	$pdf_url = get_post_meta( $post_id, 'cgt_fichier_pdf', true );
@@ -47,7 +61,9 @@ function cgt_sync_pdf_to_library( $post_id, $post, $update ) {
 			wp_delete_post( $existing_lib, true );
 			delete_post_meta( $post_id, '_cgt_library_sync_id' );
 		}
-		return;
+		// Libérer le lock avant de sortir
+		delete_transient( $lock_key );
+		return false;
 	}
 
 	// Vérifier si une entrée bibliothèque existe déjà
@@ -107,6 +123,24 @@ function cgt_sync_pdf_to_library( $post_id, $post, $update ) {
 			update_post_meta( $library_id, '_cgt_source_post_id', $post_id );
 			update_post_meta( $library_id, '_cgt_source_post_type', $post->post_type );
 		}
+	}
+
+		// ✅ Libérer le lock après succès
+		delete_transient( $lock_key );
+		return true;
+
+	} catch ( Exception $e ) {
+		// ✅ ERREUR : Logger et libérer le lock
+		error_log( sprintf(
+			'CGT PDF Sync ERREUR [Post:%d, Type:%s]: %s',
+			$post_id,
+			$post->post_type,
+			$e->getMessage()
+		) );
+
+		// Libérer le lock même en cas d'erreur
+		delete_transient( $lock_key );
+		return false;
 	}
 }
 // Priorité 100 pour s'assurer que toutes les metas sont enregistrées

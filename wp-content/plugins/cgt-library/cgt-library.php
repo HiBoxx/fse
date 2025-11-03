@@ -207,12 +207,17 @@ class CGT_PDF_Library {
 			wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
 		}
 
+		// ✅ Pagination : 24 PDF par page
+		$paged    = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
+		$per_page = 24;
+
 		$selected_cat = isset( $_GET['cgt_cat'] ) ? absint( $_GET['cgt_cat'] ) : 0;
 
 		$args = array(
 			'post_type'      => self::CPT,
 			'post_status'    => array( 'publish', 'private', 'pending', 'draft' ),
-			'posts_per_page' => -1,
+			'posts_per_page' => $per_page, // ✅ Changed from -1
+			'paged'          => $paged,
 			'orderby'        => 'date',
 			'order'          => 'DESC',
 			'no_found_rows'  => false,
@@ -236,26 +241,25 @@ class CGT_PDF_Library {
 			)
 		);
 
+		// ✅ OPTIMISATION : Compter les posts par catégorie en 1 seule requête SQL
+		global $wpdb;
+		$counts_sql = "
+			SELECT tr.term_taxonomy_id, COUNT(DISTINCT p.ID) as count
+			FROM {$wpdb->posts} p
+			INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			WHERE p.post_type = %s
+			AND p.post_status IN ('publish', 'private', 'pending', 'draft')
+			AND tt.taxonomy = 'category'
+			GROUP BY tr.term_taxonomy_id
+		";
+		$counts = $wpdb->get_results( $wpdb->prepare( $counts_sql, self::CPT ) );
+
 		$category_counts = array();
-		foreach ( $categories as $cat ) {
-			$count_query = new WP_Query(
-				array(
-					'post_type'      => self::CPT,
-					'post_status'    => array( 'publish', 'private', 'pending', 'draft' ),
-					'posts_per_page' => 1,
-					'no_found_rows'  => true,
-					'tax_query'      => array(
-						array(
-							'taxonomy' => 'category',
-							'field'    => 'term_id',
-							'terms'    => $cat->term_id,
-						),
-					),
-				)
-			);
-			$category_counts[ $cat->term_id ] = (int) $count_query->found_posts;
-			wp_reset_postdata();
+		foreach ( $counts as $count_row ) {
+			$category_counts[ $count_row->term_taxonomy_id ] = (int) $count_row->count;
 		}
+		// Plus besoin de wp_reset_postdata() ici car on n'utilise plus WP_Query
 		?>
 		<div class="wrap cgt-library-page">
 
@@ -329,6 +333,25 @@ class CGT_PDF_Library {
 					<div class="cgt-library-grid">
 						<?php if ( $query->have_posts() ) : ?>
 							<?php
+							// ✅ OPTIMISATION N+1 : Pré-charger TOUTES les metas en 1 requête
+							$post_ids = wp_list_pluck( $query->posts, 'ID' );
+							update_meta_cache( 'post', $post_ids );
+							update_object_term_cache( $post_ids, self::CPT );
+
+							// ✅ OPTIMISATION : Pré-charger les posts sources pour éviter N requêtes
+							$source_ids = array();
+							foreach ( $post_ids as $pid ) {
+								$source_id = get_post_meta( $pid, '_cgt_source_post_id', true );
+								if ( $source_id ) {
+									$source_ids[] = (int) $source_id;
+								}
+							}
+							if ( ! empty( $source_ids ) ) {
+								$source_ids = array_unique( $source_ids );
+								// Charger en cache tous les posts sources
+								_prime_post_caches( $source_ids, false, true );
+							}
+
 							while ( $query->have_posts() ) :
 								$query->the_post();
 								$post_id   = get_the_ID();
@@ -433,6 +456,28 @@ class CGT_PDF_Library {
 							</div>
 
 						<?php endif; ?>
+
+						<?php
+						// ✅ Pagination
+						if ( $query->max_num_pages > 1 ) :
+							$pagination_args = array(
+								'base'      => add_query_arg( 'paged', '%#%' ),
+								'format'    => '',
+								'current'   => $paged,
+								'total'     => $query->max_num_pages,
+								'prev_text' => '← ' . __( 'Précédent', 'cgt' ),
+								'next_text' => __( 'Suivant', 'cgt' ) . ' →',
+							);
+
+							if ( $selected_cat ) {
+								$pagination_args['add_args'] = array( 'cgt_cat' => $selected_cat );
+							}
+							?>
+							<div class="cgt-library-pagination">
+								<?php echo paginate_links( $pagination_args ); ?>
+							</div>
+						<?php endif; ?>
+
 					</div>
 
 				</div>

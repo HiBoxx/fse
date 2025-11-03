@@ -52,6 +52,7 @@ $cgt_inc_files = array(
 	'security.php',
 	'adhesion.php',
 	'rate-limiting.php',
+	'pdf-validation.php',
 	'admin-dashboard.php',
 	'agenda.php',
 	'brevo.php',
