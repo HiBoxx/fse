@@ -35,7 +35,7 @@ if ( $user_branch_id ) {
 
 $private_tracts_args = array(
 	'post_type'      => 'tracts',
-	'post_status'    => array( 'publish', 'private' ),
+	'post_status'    => array( 'publish', 'draft', 'pending', 'private' ),
 	'posts_per_page' => 2,
 	'no_found_rows'  => true,
 	'meta_query'     => array(

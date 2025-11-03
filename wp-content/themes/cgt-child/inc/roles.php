@@ -27,6 +27,7 @@ function cgt_register_adherent_role() {
 		$role->add_cap( 'read_private_cgt' );
 		$role->add_cap( 'read_private_articles_adherents' );
 		$role->add_cap( 'read_private_cgt_agendas' );
+		$role->add_cap( 'read_private_posts' );
 	}
 
 	$article_caps = array(
@@ -53,6 +54,7 @@ function cgt_register_adherent_role() {
 		$admin_role->add_cap( 'read_private_cgt' );
 		$admin_role->add_cap( 'read_private_articles_adherents' );
 		$admin_role->add_cap( 'read_private_cgt_agendas' );
+		$admin_role->add_cap( 'read_private_posts' );
 		foreach ( $article_caps as $cap ) {
 			$admin_role->add_cap( $cap );
 		}
@@ -67,9 +69,9 @@ add_action(
 	function () {
 	$role            = get_role( 'adherent' );
 	$needs_reapply   = false;
-	$required_caps   = array( 'edit_article_adherent', 'manage_cgt_adhesions' );
+	$required_caps   = array( 'edit_article_adherent', 'manage_cgt_adhesions', 'read_private_posts' );
 
-		if ( ! $role || ! $role->has_cap( 'read_private_cgt' ) ) {
+	if ( ! $role || ! $role->has_cap( 'read_private_cgt' ) || ! $role->has_cap( 'read_private_posts' ) ) {
 			$needs_reapply = true;
 		}
 
