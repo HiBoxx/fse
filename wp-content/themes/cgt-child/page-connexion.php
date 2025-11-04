@@ -4,13 +4,12 @@
  * Description: Page de connexion personnalisée avec bloc de connexion et bloc d'adhésion
  */
 
-get_header();
-
-$login_page_url   = get_permalink();
-$current_action   = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : 'login';
-$login_state      = isset( $_GET['login'] ) ? sanitize_key( wp_unslash( $_GET['login'] ) ) : '';
-$logged_out       = isset( $_GET['loggedout'] ) && 'true' === sanitize_key( wp_unslash( $_GET['loggedout'] ) );
-$checkemail_state = isset( $_GET['checkemail'] ) ? sanitize_key( wp_unslash( $_GET['checkemail'] ) ) : '';
+$login_page_url        = get_permalink();
+$current_action        = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : 'login';
+$login_state           = isset( $_GET['login'] ) ? sanitize_key( wp_unslash( $_GET['login'] ) ) : '';
+$logged_out            = isset( $_GET['loggedout'] ) && 'true' === sanitize_key( wp_unslash( $_GET['loggedout'] ) );
+$checkemail_state      = isset( $_GET['checkemail'] ) ? sanitize_key( wp_unslash( $_GET['checkemail'] ) ) : '';
+$account_request_state = isset( $_GET['account_request'] ) ? sanitize_key( wp_unslash( $_GET['account_request'] ) ) : '';
 $requested_redirect = isset( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
 
 $login_messages = array();
@@ -42,6 +41,55 @@ if ( 'confirm' === $checkemail_state && 'lostpassword' !== $current_action ) {
 	);
 }
 
+$account_request_feedback = null;
+$account_request_messages = array(
+	'success'         => array(
+		'type' => 'success',
+		'text' => __( 'Votre compte a été créé et vous êtes maintenant connecté·e.', 'cgt' ),
+	),
+	'username_exists' => array(
+		'type' => 'error',
+		'text' => __( 'Cet identifiant est déjà utilisé. Merci d’en choisir un autre.', 'cgt' ),
+	),
+	'email_exists'    => array(
+		'type' => 'error',
+		'text' => __( 'Un compte existe déjà avec cet email.', 'cgt' ),
+	),
+	'password_mismatch' => array(
+		'type' => 'error',
+		'text' => __( 'Les mots de passe ne correspondent pas.', 'cgt' ),
+	),
+	'missing_fields'  => array(
+		'type' => 'error',
+		'text' => __( 'Merci de renseigner tous les champs obligatoires.', 'cgt' ),
+	),
+	'invalid_email'   => array(
+		'type' => 'error',
+		'text' => __( 'L’adresse email n’est pas valide.', 'cgt' ),
+	),
+	'invalid_branch'  => array(
+		'type' => 'error',
+		'text' => __( 'Merci de sélectionner une branche valide.', 'cgt' ),
+	),
+	'rate_limited'    => array(
+		'type' => 'error',
+		'text' => __( 'Vous avez effectué trop de tentatives. Veuillez réessayer dans quelques minutes.', 'cgt' ),
+	),
+	'terms_missing'   => array(
+		'type' => 'error',
+		'text' => __( 'Merci de confirmer l’acceptation des CGU et des mentions légales.', 'cgt' ),
+	),
+	'general_error'   => array(
+		'type' => 'error',
+		'text' => __( 'Une erreur est survenue lors de la création du compte.', 'cgt' ),
+	),
+);
+
+if ( $account_request_state && isset( $account_request_messages[ $account_request_state ] ) ) {
+	$account_request_feedback = $account_request_messages[ $account_request_state ];
+	$login_messages[]         = $account_request_feedback;
+}
+
 $lost_messages = array();
 if ( 'confirm' === $checkemail_state ) {
 	$lost_messages[] = array(
@@ -65,6 +113,78 @@ $back_to_login_url = remove_query_arg(
 if ( $requested_redirect ) {
 	$back_to_login_url = add_query_arg( 'redirect_to', rawurlencode( $requested_redirect ), $back_to_login_url );
 }
+
+$branch_terms = get_terms(
+	array(
+		'taxonomy'   => 'branche',
+		'hide_empty' => false,
+		'orderby'    => 'name',
+		'order'      => 'ASC',
+	)
+);
+
+if ( is_wp_error( $branch_terms ) ) {
+	$branch_terms = array();
+}
+
+$cgt_legal_links = array(
+	'cgu'     => array(
+		'slugs' => array( 'cgu', 'conditions-generales', 'conditions-generales-d-utilisation' ),
+		'title' => 'Conditions générales d’utilisation',
+	),
+	'legal'   => array(
+		'slugs' => array( 'mentions-legales', 'mentions-legales-et-confidentialite' ),
+		'title' => 'Mentions légales',
+	),
+	'privacy' => array(
+		'slugs' => array( 'politique-de-confidentialite', 'politique-de-confidentialite-cgt' ),
+		'title' => 'Politique de confidentialité',
+	),
+);
+
+$cgu_url      = home_url();
+$mentions_url = home_url();
+$privacy_url  = home_url();
+
+foreach ( $cgt_legal_links as $key => $data ) {
+	$page_url = '';
+
+	foreach ( $data['slugs'] as $slug ) {
+		$page = get_page_by_path( $slug );
+		if ( $page && 'publish' === get_post_status( $page ) ) {
+			$page_url = get_permalink( $page );
+			break;
+		}
+	}
+
+	if ( ! $page_url ) {
+		$page = get_page_by_title( $data['title'] );
+		if ( $page && 'page' === get_post_type( $page ) && 'publish' === get_post_status( $page ) ) {
+			$page_url = get_permalink( $page );
+		}
+	}
+
+	if ( 'cgu' === $key ) {
+		$cgu_url = $page_url ? $page_url : home_url();
+	} elseif ( 'legal' === $key ) {
+		$mentions_url = $page_url ? $page_url : home_url();
+	} elseif ( 'privacy' === $key ) {
+		$privacy_url = $page_url ? $page_url : home_url();
+	}
+}
+
+$redirect_target = '';
+if ( $requested_redirect ) {
+	$decoded_redirect = rawurldecode( $requested_redirect );
+	$redirect_target  = wp_validate_redirect( $decoded_redirect, home_url( '/espace-adherent' ) );
+}
+
+if ( is_user_logged_in() && 'success' === $account_request_state && $redirect_target ) {
+	wp_safe_redirect( $redirect_target );
+	exit;
+}
+
+get_header();
 ?>
 
 <main class="connexion-page">
@@ -147,10 +267,16 @@ if ( $requested_redirect ) {
 
                     <input type="hidden" name="redirect_to" value="<?php echo esc_url(home_url('/espace-adherent')); ?>">
 
-                    <button type="submit" name="wp-submit" id="wp-submit" class="btn btn-primary btn-block">
-                        Se connecter
-                    </button>
-                </form>
+					<button type="submit" name="wp-submit" id="wp-submit" class="btn btn-primary btn-block">
+						Se connecter
+					</button>
+				</form>
+
+				<div class="account-request">
+					<button type="button" class="account-request__trigger" id="openAccountRequestModal">
+						<?php esc_html_e( 'Je suis déjà adhérent·e mais je n’ai pas encore de compte', 'cgt' ); ?>
+					</button>
+				</div>
 
 				<div class="login-links">
 					<a href="<?php echo esc_url( add_query_arg( 'action', 'lostpassword', $login_page_url ) ); ?>" class="lost-password">
@@ -482,7 +608,119 @@ if ( $requested_redirect ) {
                 <?php endif; ?>
             </div>
         </div>
-    </div>
+</div>
 </main>
+
+<?php
+$account_request_state_attr = $account_request_state ? esc_attr( $account_request_state ) : '';
+$account_request_type_attr  = $account_request_feedback ? esc_attr( $account_request_feedback['type'] ) : '';
+$form_message_classes       = 'account-request-form__message';
+
+if ( $account_request_feedback ) {
+	$form_message_classes .= ' is-visible';
+	if ( 'success' === $account_request_feedback['type'] ) {
+		$form_message_classes .= ' is-success';
+	}
+}
+?>
+
+<div
+	class="account-request-modal"
+	id="accountRequestModal"
+	aria-hidden="true"
+	role="dialog"
+	aria-modal="true"
+	data-account-request-state="<?php echo $account_request_state_attr; ?>"
+	data-account-request-type="<?php echo $account_request_type_attr; ?>"
+>
+	<div class="account-request-modal__overlay" data-account-request-close></div>
+	<div class="account-request-modal__content" role="document">
+		<button type="button" class="account-request-modal__close" id="closeAccountRequestModal" aria-label="<?php esc_attr_e( 'Fermer', 'cgt' ); ?>">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+		</button>
+		<div class="account-request-modal__header">
+			<span class="account-request-modal__icon">👥</span>
+			<h2><?php esc_html_e( 'Créer mon compte adhérent', 'cgt' ); ?></h2>
+			<p><?php esc_html_e( 'Complétez ce formulaire pour accéder à l’espace adhérent en ligne.', 'cgt' ); ?></p>
+		</div>
+		<form class="account-request-form" id="accountRequestForm" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<?php wp_nonce_field( 'cgt_account_request', 'cgt_account_request_nonce' ); ?>
+			<input type="hidden" name="action" value="cgt_request_account">
+			<?php echo cgt_render_honeypot( 'cgt_hp_account_request' ); ?>
+			<div class="account-request-form__grid">
+				<label class="account-request-form__field">
+					<span><?php esc_html_e( 'Prénom', 'cgt' ); ?> <span class="required">*</span></span>
+					<input type="text" name="prenom" required autocomplete="given-name">
+				</label>
+				<label class="account-request-form__field">
+					<span><?php esc_html_e( 'Nom', 'cgt' ); ?> <span class="required">*</span></span>
+					<input type="text" name="nom" required autocomplete="family-name">
+				</label>
+				<label class="account-request-form__field">
+					<span><?php esc_html_e( 'Email', 'cgt' ); ?> <span class="required">*</span></span>
+					<input type="email" name="email" required autocomplete="email">
+				</label>
+				<label class="account-request-form__field">
+					<span><?php esc_html_e( 'Identifiant souhaité', 'cgt' ); ?> <span class="required">*</span></span>
+					<input type="text" name="username" required autocomplete="username">
+				</label>
+				<label class="account-request-form__field">
+					<span><?php esc_html_e( 'Mot de passe', 'cgt' ); ?> <span class="required">*</span></span>
+					<input type="password" name="password" id="accountRequestPassword" required autocomplete="new-password" minlength="8">
+				</label>
+				<label class="account-request-form__field">
+					<span><?php esc_html_e( 'Confirmer le mot de passe', 'cgt' ); ?> <span class="required">*</span></span>
+					<input type="password" name="password_confirm" id="accountRequestPasswordConfirm" required autocomplete="new-password" minlength="8">
+				</label>
+				<label class="account-request-form__field account-request-form__field--full">
+					<span><?php esc_html_e( 'Entreprise', 'cgt' ); ?></span>
+					<input type="text" name="entreprise" autocomplete="organization">
+				</label>
+				<label class="account-request-form__field account-request-form__field--full">
+					<span><?php esc_html_e( 'Branche', 'cgt' ); ?> <span class="required">*</span></span>
+					<select name="branche" required>
+						<option value=""><?php esc_html_e( '-- Choisir une branche --', 'cgt' ); ?></option>
+						<?php if ( ! is_wp_error( $branch_terms ) ) : ?>
+							<?php foreach ( $branch_terms as $branch_option ) : ?>
+								<option value="<?php echo esc_attr( $branch_option->term_id ); ?>"><?php echo esc_html( $branch_option->name ); ?></option>
+							<?php endforeach; ?>
+						<?php endif; ?>
+					</select>
+				</label>
+			</div>
+			<label class="account-request-form__consent">
+				<input type="checkbox" name="accept_terms" value="1" required>
+				<span>
+					<?php
+					echo wp_kses(
+						sprintf(
+							/* translators: 1: legal notice link, 2: privacy policy link. */
+							__( 'J’accepte les <a href="%1$s">mentions légales</a> et la <a href="%2$s">politique de confidentialité</a>.', 'cgt' ),
+							esc_url( $mentions_url ),
+							esc_url( $privacy_url )
+						),
+						array(
+							'a' => array(
+								'href'   => array(),
+								'target' => array(),
+								'rel'    => array(),
+							),
+						)
+					);
+					?>
+					<span class="required">*</span>
+				</span>
+			</label>
+			<div class="<?php echo esc_attr( $form_message_classes ); ?>" id="accountRequestMessage" aria-live="polite" role="status">
+				<?php
+				if ( $account_request_feedback ) {
+					echo esc_html( $account_request_feedback['text'] );
+				}
+				?>
+			</div>
+			<button type="submit" class="btn btn-primary btn-block account-request-form__submit"><?php esc_html_e( 'Envoyer ma demande', 'cgt' ); ?></button>
+		</form>
+	</div>
+</div>
 
 <?php get_footer(); ?>

@@ -112,6 +112,11 @@ function cgt_redirect_adherent_from_admin() {
 		return;
 	}
 
+	global $pagenow;
+	if ( isset( $pagenow ) && 'admin-post.php' === $pagenow ) {
+		return;
+	}
+
 	$target_page = get_page_by_path( 'espace-adherent' );
 	$redirect    = $target_page ? get_permalink( $target_page ) : home_url( '/' );
 
