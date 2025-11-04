@@ -255,8 +255,9 @@ function cgt_hide_admin_bar_for_custom_roles() {
 
 /**
  * ✅ Rediriger les gestionnaires et assistance vers leurs espaces après connexion
+ * Priorité 5 pour s'exécuter AVANT cgt_login_redirect (priorité 10)
  */
-add_filter( 'login_redirect', 'cgt_custom_roles_login_redirect', 10, 3 );
+add_filter( 'login_redirect', 'cgt_custom_roles_login_redirect', 5, 3 );
 
 function cgt_custom_roles_login_redirect( $redirect_to, $request, $user ) {
 	if ( ! isset( $user->roles ) || ! is_array( $user->roles ) ) {

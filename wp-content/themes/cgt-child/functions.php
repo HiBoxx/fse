@@ -664,6 +664,13 @@ function cgt_login_redirect( $redirect_to, $requested_redirect_to, $user ) {
 		return $requested_redirect_to;
 	}
 
+	// ✅ Ne pas rediriger les gestionnaires et assistances (ils ont leurs propres espaces)
+	if ( isset( $user->roles ) && is_array( $user->roles ) ) {
+		if ( in_array( 'gestionnaire', $user->roles, true ) || in_array( 'assistance', $user->roles, true ) ) {
+			return $redirect_to; // Laisser la fonction cgt_custom_roles_login_redirect gérer la redirection
+		}
+	}
+
 	return home_url( '/espace-adherent' );
 }
 add_filter( 'login_redirect', 'cgt_login_redirect', 10, 3 );
