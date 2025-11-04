@@ -739,3 +739,50 @@ function cgt_render_adhesion_pdf_template( $data ) {
 
 	return ob_get_clean();
 }
+
+/**
+ * ✅ Handle frontend PDF download for gestionnaires (non-admin users).
+ * This allows gestionnaire role to download PDFs from the gestionnaire space.
+ */
+add_action( 'template_redirect', 'cgt_handle_frontend_adhesion_pdf_download' );
+
+function cgt_handle_frontend_adhesion_pdf_download() {
+	// Only process if download_adhesion parameter is present
+	if ( ! isset( $_GET['download_adhesion'] ) ) {
+		return;
+	}
+
+	// Check if user is logged in and has the download capability
+	if ( ! is_user_logged_in() || ! current_user_can( 'download_cgt_adhesions' ) ) {
+		wp_die( esc_html__( 'Accès refusé. Vous devez avoir les droits nécessaires pour télécharger ce document.', 'cgt' ) );
+	}
+
+	$adhesion_id = absint( $_GET['download_adhesion'] );
+
+	// Validate adhesion ID
+	if ( ! $adhesion_id || 'cgt_adhesion' !== get_post_type( $adhesion_id ) ) {
+		wp_die( esc_html__( 'Adhésion introuvable.', 'cgt' ) );
+	}
+
+	// Get adhesion details
+	$details = cgt_get_adhesion_details( $adhesion_id );
+	$title   = get_the_title( $adhesion_id );
+
+	// Generate PDF
+	$pdf = cgt_generate_adhesion_pdf( $title, $details );
+
+	if ( is_wp_error( $pdf ) ) {
+		wp_die( esc_html( $pdf->get_error_message() ) );
+	}
+
+	// Send PDF to browser
+	$filename = sanitize_title( $title ) . '.pdf';
+	header( 'Content-Type: application/pdf' );
+	header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+	header( 'Content-Length: ' . strlen( $pdf ) );
+	header( 'Cache-Control: private, max-age=0, must-revalidate' );
+	header( 'Pragma: public' );
+	set_time_limit( 0 );
+	echo $pdf;
+	exit;
+}

@@ -293,6 +293,10 @@ get_header();
                         <strong>Accès Adhérent</strong>
                         <p>Pour les membres syndiqués</p>
                     </div>
+                    <div class="access-type">
+                        <strong>Accès Gestionnaire</strong>
+                        <p>Pour la gestion des adhésions</p>
+                    </div>
                 </div>
             </div>
 
