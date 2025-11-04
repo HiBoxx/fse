@@ -297,6 +297,10 @@ get_header();
                         <strong>Accès Gestionnaire</strong>
                         <p>Pour la gestion des adhésions</p>
                     </div>
+                    <div class="access-type">
+                        <strong>Accès Assistance</strong>
+                        <p>Pour la gestion des contenus</p>
+                    </div>
                 </div>
             </div>
 
