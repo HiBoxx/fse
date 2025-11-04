@@ -48,11 +48,12 @@ function cgt_enqueue_media_assets( $hook ) {
  */
 function cgt_render_modern_media_page() {
 	// Paramètres
-	$paged       = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
-	$per_page    = 24;
-	$search      = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
-	$filter_type = isset( $_GET['filter_type'] ) ? sanitize_text_field( wp_unslash( $_GET['filter_type'] ) ) : '';
-	$filter_size = isset( $_GET['filter_size'] ) ? sanitize_text_field( wp_unslash( $_GET['filter_size'] ) ) : '';
+	$paged           = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
+	$per_page        = 24;
+	$search          = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
+	$filter_type     = isset( $_GET['filter_type'] ) ? sanitize_text_field( wp_unslash( $_GET['filter_type'] ) ) : '';
+	$filter_size     = isset( $_GET['filter_size'] ) ? sanitize_text_field( wp_unslash( $_GET['filter_size'] ) ) : '';
+	$filter_category = isset( $_GET['filter_category'] ) ? absint( $_GET['filter_category'] ) : 0;
 
 	// Query
 	$args = array(
@@ -76,10 +77,29 @@ function cgt_render_modern_media_page() {
 		}
 	}
 
+	// ✅ Filtre par catégorie
+	if ( $filter_category ) {
+		$args['tax_query'] = array(
+			array(
+				'taxonomy' => 'category',
+				'field'    => 'term_id',
+				'terms'    => $filter_category,
+			),
+		);
+	}
+
 	$query = new WP_Query( $args );
 
 	// Statistiques
 	$stats = cgt_get_media_stats();
+
+	// ✅ Récupérer les catégories
+	$categories = get_categories( array(
+		'taxonomy'   => 'category',
+		'hide_empty' => false,
+		'orderby'    => 'name',
+		'order'      => 'ASC',
+	) );
 
 	?>
 	<div class="wrap cgt-media-modern">
@@ -205,6 +225,27 @@ function cgt_render_modern_media_page() {
 							<span class="filter-label">Grands</span>
 							<span class="filter-sublabel">> 2 MB</span>
 						</a>
+					</div>
+				</div>
+
+				<!-- ✅ NOUVEAU : Filtre par catégories -->
+				<div class="cgt-filter-section">
+					<h3>📂 Catégories</h3>
+					<div class="cgt-filter-list">
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=cgt-media-library' ) ); ?>"
+						   class="cgt-filter-item <?php echo empty( $filter_category ) ? 'active' : ''; ?>">
+							<span class="filter-label">Toutes les catégories</span>
+						</a>
+						<?php if ( ! empty( $categories ) ) : ?>
+							<?php foreach ( $categories as $category ) : ?>
+								<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'cgt-media-library', 'filter_category' => $category->term_id ), admin_url( 'admin.php' ) ) ); ?>"
+								   class="cgt-filter-item <?php echo $filter_category === $category->term_id ? 'active' : ''; ?>">
+									<span class="filter-icon">📁</span>
+									<span class="filter-label"><?php echo esc_html( $category->name ); ?></span>
+									<span class="filter-count"><?php echo esc_html( $category->count ); ?></span>
+								</a>
+							<?php endforeach; ?>
+						<?php endif; ?>
 					</div>
 				</div>
 
@@ -427,7 +468,7 @@ function cgt_get_media_custom_css() {
 	}
 
 	.cgt-media-header {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #e30613 0%, #b8050f 100%);
 		padding: 30px 40px;
 		color: white;
 		display: flex;
@@ -454,7 +495,7 @@ function cgt_get_media_custom_css() {
 
 	.cgt-upload-btn {
 		background: white !important;
-		color: #667eea !important;
+		color: #e30613 !important;
 		border: none !important;
 		padding: 12px 24px !important;
 		font-size: 15px !important;
@@ -496,7 +537,7 @@ function cgt_get_media_custom_css() {
 	.cgt-stat-card:hover {
 		transform: translateY(-3px);
 		box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-		border-color: #667eea;
+		border-color: #e30613;
 	}
 
 	.stat-icon {
@@ -566,12 +607,12 @@ function cgt_get_media_custom_css() {
 	}
 
 	.cgt-search-input:focus {
-		border-color: #667eea;
+		border-color: #e30613;
 		outline: none;
 	}
 
 	.cgt-search-btn {
-		background: #667eea;
+		background: #e30613;
 		color: white;
 		border: none;
 		padding: 10px 15px;
@@ -581,7 +622,7 @@ function cgt_get_media_custom_css() {
 	}
 
 	.cgt-search-btn:hover {
-		background: #5568d3;
+		background: #b8050f;
 	}
 
 	.cgt-filter-list {
@@ -604,14 +645,14 @@ function cgt_get_media_custom_css() {
 
 	.cgt-filter-item:hover {
 		background: #f8fafc;
-		color: #667eea;
+		color: #e30613;
 	}
 
 	.cgt-filter-item.active {
-		background: #ede9fe;
-		color: #667eea;
+		background: #fee2e2;
+		color: #e30613;
 		font-weight: 600;
-		border-color: #c4b5fd;
+		border-color: #fca5a5;
 	}
 
 	.filter-icon {
@@ -640,7 +681,7 @@ function cgt_get_media_custom_css() {
 	}
 
 	.cgt-filter-item.active .filter-count {
-		background: #667eea;
+		background: #e30613;
 		color: white;
 	}
 
@@ -673,7 +714,7 @@ function cgt_get_media_custom_css() {
 	.cgt-media-card:hover {
 		transform: translateY(-5px);
 		box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-		border-color: #667eea;
+		border-color: #e30613;
 	}
 
 	.media-preview {
@@ -775,7 +816,7 @@ function cgt_get_media_custom_css() {
 
 	.media-btn:hover {
 		background: white;
-		color: #667eea;
+		color: #e30613;
 	}
 
 	.media-btn.danger:hover {
@@ -805,15 +846,15 @@ function cgt_get_media_custom_css() {
 	}
 
 	.cgt-pagination a:hover {
-		background: #667eea;
+		background: #e30613;
 		color: white;
-		border-color: #667eea;
+		border-color: #e30613;
 	}
 
 	.cgt-pagination .current {
-		background: #667eea;
+		background: #e30613;
 		color: white;
-		border-color: #667eea;
+		border-color: #e30613;
 		font-weight: 600;
 	}
 
