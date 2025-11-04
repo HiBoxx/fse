@@ -119,6 +119,10 @@ body.upload-php .tablenav .actions input[type="search"] {
 	border: 1px solid var(--cgt-border);
 }
 
+body.upload-php .tablenav .bulkactions {
+	display: none;
+}
+
 .cgt-media-filters {
 	display: inline-flex;
 	gap: 0.5rem;
