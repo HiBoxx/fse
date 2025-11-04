@@ -111,7 +111,7 @@ function cgt_render_modern_media_page() {
 					<span class="dashicons dashicons-images-alt2"></span>
 					Médiathèque CGT
 				</h1>
-				<p class="subtitle">Gérez vos images, PDF et documents</p>
+				<p class="subtitle" style="color:white">Gérez vos images, PDF et documents</p>
 			</div>
 			<div class="cgt-media-actions">
 				<button class="button button-primary button-large cgt-upload-btn" onclick="cgtOpenMediaUploader()">
