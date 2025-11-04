@@ -25,6 +25,25 @@ function cgt_add_modern_media_page() {
 }
 
 /**
+ * ✅ Masquer le menu média natif en faveur de la médiathèque personnalisée.
+ */
+add_action( 'admin_menu', 'cgt_remove_native_media_menu', 999 );
+function cgt_remove_native_media_menu() {
+	remove_menu_page( 'upload.php' );
+}
+
+add_action( 'load-upload.php', 'cgt_redirect_native_media_to_custom' );
+add_action( 'load-media-new.php', 'cgt_redirect_native_media_to_custom' );
+function cgt_redirect_native_media_to_custom() {
+	if ( ! current_user_can( 'upload_files' ) ) {
+		return;
+	}
+
+	wp_safe_redirect( admin_url( 'admin.php?page=cgt-media-library' ) );
+	exit;
+}
+
+/**
  * ✅ Enregistrer les styles et scripts
  */
 add_action( 'admin_enqueue_scripts', 'cgt_enqueue_media_assets' );

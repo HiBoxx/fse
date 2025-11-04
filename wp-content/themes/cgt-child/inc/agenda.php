@@ -23,6 +23,63 @@ function cgt_agenda_register_metaboxes() {
 add_action( 'add_meta_boxes_cgt_agenda', 'cgt_agenda_register_metaboxes' );
 
 /**
+ * Enqueue custom admin styles for agenda screens.
+ */
+function cgt_agenda_enqueue_admin_assets( $hook_suffix ) {
+	$screen = get_current_screen();
+	if ( ! $screen || 'cgt_agenda' !== $screen->post_type ) {
+		return;
+	}
+
+	wp_enqueue_style(
+		'cgt-admin-agenda',
+		get_stylesheet_directory_uri() . '/assets/css/admin-agenda.css',
+		array(),
+		CGT_CHILD_VERSION
+	);
+}
+add_action( 'admin_enqueue_scripts', 'cgt_agenda_enqueue_admin_assets' );
+
+/**
+ * Custom hero area on agenda edit screens.
+ *
+ * @param WP_Post $post Post object.
+ */
+function cgt_agenda_edit_form_intro( $post ) {
+	if ( ! $post || 'cgt_agenda' !== $post->post_type ) {
+		return;
+	}
+
+	?>
+	<div class="cgt-agenda-hero">
+		<div>
+			<h1><?php esc_html_e( 'Nouvel événement / Édition', 'cgt' ); ?></h1>
+			<p><?php esc_html_e( 'Publiez un rendez-vous syndical clair et complet : date, lieu, informations pratiques et documents associés.', 'cgt' ); ?></p>
+		</div>
+		<div class="hero-icon">🗓️</div>
+	</div>
+	<?php
+}
+add_action( 'edit_form_top', 'cgt_agenda_edit_form_intro' );
+
+/**
+ * Customize the default title placeholder for agenda events.
+ *
+ * @param string $placeholder Default placeholder text.
+ *
+ * @return string
+ */
+function cgt_agenda_title_placeholder( $placeholder ) {
+	$screen = get_current_screen();
+	if ( $screen && 'cgt_agenda' === $screen->post_type ) {
+		$placeholder = __( 'Titre de l’événement (ex. Assemblée générale des ingénieur·es)', 'cgt' );
+	}
+
+	return $placeholder;
+}
+add_filter( 'enter_title_here', 'cgt_agenda_title_placeholder' );
+
+/**
  * Render agenda metabox.
  *
  * @param WP_Post $post Current post.
@@ -48,36 +105,63 @@ function cgt_agenda_render_metabox( $post ) {
 		$current_doc_url = wp_get_attachment_url( $document_value );
 	}
 	?>
-	<table class="form-table">
-		<tbody>
-			<tr>
-				<th scope="row"><label for="cgt_event_date"><?php esc_html_e( 'Date et heure', 'cgt' ); ?></label></th>
-				<td>
-					<input type="datetime-local" id="cgt_event_date" name="cgt_event_date" value="<?php echo esc_attr( $datetime_attr ); ?>" class="regular-text">
-					<p class="description"><?php esc_html_e( 'Sélectionnez la date et l’heure de l’événement.', 'cgt' ); ?></p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="cgt_event_address"><?php esc_html_e( 'Adresse', 'cgt' ); ?></label></th>
-				<td>
-					<textarea id="cgt_event_address" name="cgt_event_address" rows="3" class="large-text"><?php echo esc_textarea( $address_value ); ?></textarea>
-					<p class="description"><?php esc_html_e( 'Lieu de l’événement (adresse, salle, indications).', 'cgt' ); ?></p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="cgt_event_document"><?php esc_html_e( 'Document (PDF ou image)', 'cgt' ); ?></label></th>
-				<td>
-					<?php if ( $current_doc_url ) : ?>
-						<p><a href="<?php echo esc_url( $current_doc_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Document actuel', 'cgt' ); ?></a></p>
-					<?php endif; ?>
-					<input type="file" id="cgt_event_document" name="cgt_event_document" accept=".pdf,image/*">
-					<?php if ( $document_value ) : ?>
-						<p><label><input type="checkbox" name="cgt_event_document_remove" value="1"> <?php esc_html_e( 'Supprimer le document associé', 'cgt' ); ?></label></p>
-					<?php endif; ?>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+	<div class="cgt-agenda-meta">
+		<div class="cgt-agenda-meta__field cgt-agenda-meta__field--half">
+			<label for="cgt_event_date">
+				<span class="cgt-agenda-meta__label"><?php esc_html_e( 'Date et heure', 'cgt' ); ?></span>
+			</label>
+			<input
+				type="datetime-local"
+				id="cgt_event_date"
+				name="cgt_event_date"
+				value="<?php echo esc_attr( $datetime_attr ); ?>"
+				class="cgt-agenda-meta__input"
+			>
+			<p class="cgt-agenda-meta__hint"><?php esc_html_e( 'Sélectionnez la date et l’heure de l’événement.', 'cgt' ); ?></p>
+		</div>
+
+		<div class="cgt-agenda-meta__field">
+			<label for="cgt_event_address">
+				<span class="cgt-agenda-meta__label"><?php esc_html_e( 'Adresse / Informations pratiques', 'cgt' ); ?></span>
+			</label>
+			<textarea
+				id="cgt_event_address"
+				name="cgt_event_address"
+				rows="4"
+				class="cgt-agenda-meta__textarea"
+				placeholder="<?php esc_attr_e( 'Salle, adresse complète, modalités d’accès…', 'cgt' ); ?>"
+			><?php echo esc_textarea( $address_value ); ?></textarea>
+			<p class="cgt-agenda-meta__hint"><?php esc_html_e( 'Lieu de l’événement (adresse, salle, indications).', 'cgt' ); ?></p>
+		</div>
+
+		<div class="cgt-agenda-meta__field">
+			<span class="cgt-agenda-meta__label"><?php esc_html_e( 'Document associé (PDF ou image)', 'cgt' ); ?></span>
+
+			<div class="cgt-agenda-meta__upload">
+				<label class="cgt-agenda-upload__button" for="cgt_event_document">
+					<span class="dashicons dashicons-upload"></span>
+					<?php esc_html_e( 'Téléverser un fichier', 'cgt' ); ?>
+				</label>
+				<input type="file" id="cgt_event_document" name="cgt_event_document" accept=".pdf,image/*" class="cgt-agenda-upload__input">
+
+				<?php if ( $current_doc_url ) : ?>
+					<a class="cgt-agenda-upload__current" href="<?php echo esc_url( $current_doc_url ); ?>" target="_blank" rel="noopener">
+						<span class="dashicons dashicons-media-default"></span>
+						<?php esc_html_e( 'Voir le document actuel', 'cgt' ); ?>
+					</a>
+				<?php endif; ?>
+			</div>
+
+			<?php if ( $document_value ) : ?>
+				<label class="cgt-agenda-meta__checkbox">
+					<input type="checkbox" name="cgt_event_document_remove" value="1">
+					<span><?php esc_html_e( 'Supprimer le document associé', 'cgt' ); ?></span>
+				</label>
+			<?php endif; ?>
+
+			<p class="cgt-agenda-meta__hint"><?php esc_html_e( 'Formats acceptés : PDF, JPG, PNG. Taille recommandée &lt; 10 Mo.', 'cgt' ); ?></p>
+		</div>
+	</div>
 	<?php
 }
 

@@ -41,6 +41,64 @@ function cgt_output_cookie_banner() {
 	}
 
 	?>
+	<script>
+		(function () {
+			const STORAGE_KEY = 'cgtCookieBannerSeenAt';
+			const ONE_HOUR_MS = 60 * 60 * 1000;
+
+			function shouldDisplayBanner() {
+				try {
+					const stored = window.localStorage.getItem(STORAGE_KEY);
+					if (!stored) {
+						return true;
+					}
+					const lastSeen = parseInt(stored, 10);
+					if (Number.isNaN(lastSeen)) {
+						return true;
+					}
+					return Date.now() - lastSeen >= ONE_HOUR_MS;
+				} catch (err) {
+					return true;
+				}
+			}
+
+			function markBannerSeen() {
+				try {
+					window.localStorage.setItem(STORAGE_KEY, String(Date.now()));
+				} catch (err) {
+					/* noop */
+				}
+			}
+
+			document.addEventListener('DOMContentLoaded', function () {
+				const wrapper = document.querySelector('.cookie-banner');
+				if (!wrapper) {
+					return;
+				}
+
+				const acceptBtn = wrapper.querySelector('.cookie-accept');
+				const declineBtn = wrapper.querySelector('.cookie-decline');
+
+				function closeBanner() {
+					wrapper.classList.remove('is-visible');
+					markBannerSeen();
+				}
+
+				if (shouldDisplayBanner()) {
+					wrapper.classList.add('is-visible');
+				}
+
+				if (acceptBtn) {
+					acceptBtn.addEventListener('click', closeBanner);
+				}
+				if (declineBtn) {
+					declineBtn.addEventListener('click', closeBanner);
+				}
+			});
+		})();
+	</script>
+
+	?>
 	<div class="cookie-banner" role="dialog" aria-live="polite" aria-label="<?php esc_attr_e( 'Bannière cookies', 'cgt' ); ?>">
 		<div class="cookie-content">
 			<p class="cookie-text">
