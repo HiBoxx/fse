@@ -492,6 +492,92 @@ get_header();
 	color: #3730a3;
 }
 
+/* Formulaires de soumission */
+.cgt-card-form {
+	margin-bottom: 1.5rem;
+}
+
+.cgt-form-details {
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	padding: 0.75rem 1rem;
+	background: #f9fafb;
+}
+
+.cgt-form-summary {
+	font-weight: 600;
+	font-size: 0.95rem;
+	cursor: pointer;
+	color: #1f2937;
+}
+
+.cgt-form-summary::-webkit-details-marker {
+	display: none;
+}
+
+.cgt-form-summary::before {
+	content: '\25BC';
+	display: inline-block;
+	margin-right: 0.5rem;
+	transition: transform 0.2s ease;
+}
+
+.cgt-form-details[open] .cgt-form-summary::before {
+	transform: rotate(180deg);
+}
+
+.cgt-form-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 1rem 1.5rem;
+	padding-top: 1rem;
+}
+
+.cgt-form-field {
+	display: grid;
+	gap: 0.5rem;
+}
+
+.cgt-form-field span {
+	font-weight: 600;
+	font-size: 0.9rem;
+	color: #475569;
+}
+
+.cgt-form-field input,
+.cgt-form-field textarea,
+.cgt-form-field select {
+	width: 100%;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	padding: 0.65rem 0.75rem;
+	font-size: 0.95rem;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cgt-form-field input:focus,
+.cgt-form-field textarea:focus,
+.cgt-form-field select:focus {
+	outline: none;
+	border-color: #e30613;
+	box-shadow: 0 0 0 2px rgba(227, 6, 19, 0.15);
+}
+
+.cgt-form-field--full {
+	grid-column: 1 / -1;
+}
+
+.cgt-form-actions {
+	grid-column: 1 / -1;
+}
+
+.cgt-form-note {
+	grid-column: 1 / -1;
+	font-size: 0.85rem;
+	color: #6b7280;
+	margin: 0;
+}
+
 /* Empty state */
 .cgt-empty-state {
 	text-align: center;

@@ -283,6 +283,39 @@ function cgt_custom_roles_login_redirect( $redirect_to, $request, $user ) {
 }
 
 /**
+ * Redirect gestionnaire / assistance users away from espace adhérent frontend.
+ */
+add_action(
+	'template_redirect',
+	function () {
+		if ( ! is_user_logged_in() || ! is_page( 'espace-adherent' ) ) {
+			return;
+		}
+
+		$user = wp_get_current_user();
+		if ( ! $user || empty( $user->roles ) ) {
+			return;
+		}
+
+		if ( in_array( 'gestionnaire', (array) $user->roles, true ) ) {
+			$gestionnaire_page = get_page_by_path( 'gestionnaire' );
+			if ( $gestionnaire_page ) {
+				wp_safe_redirect( get_permalink( $gestionnaire_page ) );
+				exit;
+			}
+		}
+
+		if ( in_array( 'assistance', (array) $user->roles, true ) ) {
+			$assistance_page = get_page_by_path( 'assistance' );
+			if ( $assistance_page ) {
+				wp_safe_redirect( get_permalink( $assistance_page ) );
+				exit;
+			}
+		}
+	}
+);
+
+/**
  * ✅ Créer automatiquement la page gestionnaire
  * S'exécute une seule fois lors de l'activation du thème
  */

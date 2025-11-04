@@ -14,9 +14,13 @@ require_once ABSPATH . 'wp-admin/includes/post.php';
 
 get_header();
 
-$has_access    = cgt_user_can_read_private();
 $current_user  = wp_get_current_user();
+$user_roles    = $current_user ? (array) $current_user->roles : array();
+$has_access    = cgt_user_can_read_private() || in_array( 'gestionnaire', $user_roles, true ) || in_array( 'assistance', $user_roles, true );
 $display_name  = $current_user && $current_user->display_name ? $current_user->display_name : $current_user->user_login;
+$role_overrides = array( 'gestionnaire', 'assistance' );
+$has_override_role = array_intersect( $user_roles, $role_overrides );
+$requires_branch_selection = in_array( 'adherent', $user_roles, true ) && empty( $has_override_role );
 
 // Get user's selected branch
 $user_branch_id = get_user_meta( get_current_user_id(), 'cgt_user_branch', true );
@@ -299,7 +303,7 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 					<h1 class="member-dashboard__title"><?php printf( esc_html__( 'Bonjour %s', 'cgt' ), esc_html( $display_name ) ); ?></h1>
 					<?php
 					// Use already defined $user_branch_id from line 22
-					if ( $user_branch_id ) {
+					if ( $requires_branch_selection && $user_branch_id ) {
 						$user_branch = get_term( $user_branch_id, 'branche' );
 						if ( $user_branch && ! is_wp_error( $user_branch ) ) {
 							echo '<div class="member-dashboard__branch-container">';
@@ -315,28 +319,30 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 				</div>
 			</div>
 
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="member-branch-selector" id="branchSelectorForm" style="<?php echo $user_branch_id ? 'display: none;' : ''; ?>">
-				<?php wp_nonce_field( 'cgt_select_branch', 'cgt_branch_nonce' ); ?>
-				<input type="hidden" name="action" value="cgt_select_user_branch">
-				<label for="user_branch"><?php esc_html_e( $user_branch_id ? 'Modifier votre branche :' : 'Sélectionnez votre branche :', 'cgt' ); ?></label>
-				<select name="user_branch" id="user_branch" required>
-					<option value=""><?php esc_html_e( '-- Choisir une branche --', 'cgt' ); ?></option>
-					<?php
-					if ( ! is_wp_error( $branch_terms ) ) {
-						foreach ( $branch_terms as $branch ) {
-							$selected = ( $user_branch_id && $branch->term_id == $user_branch_id ) ? ' selected' : '';
-							echo '<option value="' . esc_attr( $branch->term_id ) . '"' . $selected . '>' . esc_html( $branch->name ) . '</option>';
+			<?php if ( $requires_branch_selection ) : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="member-branch-selector" id="branchSelectorForm" style="<?php echo $user_branch_id ? 'display: none;' : ''; ?>">
+					<?php wp_nonce_field( 'cgt_select_branch', 'cgt_branch_nonce' ); ?>
+					<input type="hidden" name="action" value="cgt_select_user_branch">
+					<label for="user_branch"><?php esc_html_e( $user_branch_id ? 'Modifier votre branche :' : 'Sélectionnez votre branche :', 'cgt' ); ?></label>
+					<select name="user_branch" id="user_branch" required>
+						<option value=""><?php esc_html_e( '-- Choisir une branche --', 'cgt' ); ?></option>
+						<?php
+						if ( ! is_wp_error( $branch_terms ) ) {
+							foreach ( $branch_terms as $branch ) {
+								$selected = ( $user_branch_id && $branch->term_id == $user_branch_id ) ? ' selected' : '';
+								echo '<option value="' . esc_attr( $branch->term_id ) . '"' . $selected . '>' . esc_html( $branch->name ) . '</option>';
+							}
 						}
-					}
-					?>
-				</select>
-				<div class="member-branch-selector__actions">
-					<button type="submit" class="btn btn-compact"><?php esc_html_e( 'Valider', 'cgt' ); ?></button>
-					<?php if ( $user_branch_id ) : ?>
-						<button type="button" class="btn btn-compact btn-outline" id="cancelBranchBtn"><?php esc_html_e( 'Annuler', 'cgt' ); ?></button>
-					<?php endif; ?>
-				</div>
-			</form>
+						?>
+					</select>
+					<div class="member-branch-selector__actions">
+						<button type="submit" class="btn btn-compact"><?php esc_html_e( 'Valider', 'cgt' ); ?></button>
+						<?php if ( $user_branch_id ) : ?>
+							<button type="button" class="btn btn-compact btn-outline" id="cancelBranchBtn"><?php esc_html_e( 'Annuler', 'cgt' ); ?></button>
+						<?php endif; ?>
+					</div>
+				</form>
+			<?php endif; ?>
 		</div>
 		<p><?php esc_html_e( 'Votre tableau de bord centralise les ressources privées, les actions à venir et vos espaces d\'échanges.', 'cgt' ); ?></p>
 	</header>

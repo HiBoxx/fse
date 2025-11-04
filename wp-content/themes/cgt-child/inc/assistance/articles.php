@@ -28,7 +28,9 @@ if ( ! empty( $search ) ) {
 	$args['s'] = $search;
 }
 
-$query = new WP_Query( $args );
+$query        = new WP_Query( $args );
+$status_param = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
+$branches     = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
 ?>
 
 <div class="cgt-articles-section">
@@ -38,10 +40,96 @@ $query = new WP_Query( $args );
 			<p class="cgt-section-description"><?php esc_html_e( 'Gérez tous les articles du site', 'cgt' ); ?></p>
 		</div>
 		<div>
-			<p class="cgt-info-message">
-				<?php esc_html_e( 'Pour créer ou modifier des articles, utilisez l\'éditeur WordPress classique via le dashboard admin.', 'cgt' ); ?>
-			</p>
+			<?php if ( 'success' === $status_param ) : ?>
+				<p class="cgt-info-message" style="background:#ecfdf5;color:#047857;">
+					<?php esc_html_e( 'Article envoyé à l’administration pour validation.', 'cgt' ); ?>
+				</p>
+			<?php elseif ( in_array( $status_param, array( 'missing', 'error', 'nonce' ), true ) ) : ?>
+				<p class="cgt-info-message" style="background:#fee2e2;color:#b91c1c;">
+					<?php
+					switch ( $status_param ) {
+						case 'missing':
+							esc_html_e( 'Merci de renseigner au minimum le titre et la description.', 'cgt' );
+							break;
+						case 'nonce':
+							esc_html_e( 'Votre session a expiré. Veuillez réessayer.', 'cgt' );
+							break;
+						default:
+							esc_html_e( 'Une erreur est survenue lors de l’envoi de l’article.', 'cgt' );
+							break;
+					}
+					?>
+				</p>
+			<?php else : ?>
+				<p class="cgt-info-message">
+					<?php esc_html_e( 'Soumettez un article via le formulaire ci-dessous. Il sera transmis à l’administration pour validation.', 'cgt' ); ?>
+				</p>
+			<?php endif; ?>
 		</div>
+	</div>
+
+	<div class="cgt-card cgt-card-form">
+		<details class="cgt-form-details" <?php echo 'success' === $status_param ? '' : 'open'; ?>>
+			<summary class="cgt-form-summary">
+				<span>➕ <?php esc_html_e( 'Nouvel article', 'cgt' ); ?></span>
+			</summary>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data" class="cgt-form-grid">
+				<?php wp_nonce_field( 'cgt_assistance_article', 'cgt_assistance_article_nonce' ); ?>
+				<input type="hidden" name="action" value="cgt_assistance_article_submit">
+
+				<label class="cgt-form-field">
+					<span><?php esc_html_e( 'Titre', 'cgt' ); ?> *</span>
+					<input type="text" name="title" required>
+				</label>
+
+				<label class="cgt-form-field cgt-form-field--full">
+					<span><?php esc_html_e( 'Description', 'cgt' ); ?> *</span>
+					<textarea name="description" rows="6" required></textarea>
+				</label>
+
+				<label class="cgt-form-field">
+					<span><?php esc_html_e( 'Extrait', 'cgt' ); ?></span>
+					<textarea name="excerpt" rows="3"></textarea>
+				</label>
+
+				<label class="cgt-form-field">
+					<span><?php esc_html_e( 'Branche', 'cgt' ); ?></span>
+					<select name="branch">
+						<option value=""><?php esc_html_e( '-- Choisir une branche --', 'cgt' ); ?></option>
+						<?php if ( ! is_wp_error( $branches ) ) : foreach ( $branches as $branch ) : ?>
+							<option value="<?php echo esc_attr( $branch->term_id ); ?>"><?php echo esc_html( $branch->name ); ?></option>
+						<?php endforeach; endif; ?>
+					</select>
+				</label>
+
+				<label class="cgt-form-field">
+					<span><?php esc_html_e( 'Mots-clés (séparés par des virgules)', 'cgt' ); ?></span>
+					<input type="text" name="keywords" placeholder="ex: égalité, négociation">
+				</label>
+
+				<label class="cgt-form-field cgt-form-field--full">
+					<span><?php esc_html_e( 'Sources et références', 'cgt' ); ?></span>
+					<textarea name="sources" rows="3"></textarea>
+				</label>
+
+				<label class="cgt-form-field">
+					<span><?php esc_html_e( 'Image mise en avant (optionnel)', 'cgt' ); ?></span>
+					<input type="file" name="featured_image" accept="image/*">
+				</label>
+
+				<label class="cgt-form-field">
+					<span><?php esc_html_e( 'Document PDF (optionnel)', 'cgt' ); ?></span>
+					<input type="file" name="pdf_file" accept="application/pdf">
+				</label>
+
+				<div class="cgt-form-actions">
+					<button type="submit" class="cgt-btn cgt-btn-primary">
+						<?php esc_html_e( 'Envoyer à l’administration', 'cgt' ); ?>
+					</button>
+				</div>
+				<p class="cgt-form-note"><?php esc_html_e( 'L’article sera enregistré en attente de validation par l’administration.', 'cgt' ); ?></p>
+			</form>
+		</details>
 	</div>
 
 	<!-- Barre de recherche -->
