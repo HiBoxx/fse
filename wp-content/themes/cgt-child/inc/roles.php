@@ -64,6 +64,190 @@ function cgt_register_adherent_role() {
 	}
 }
 
+/**
+ * ✅ NOUVEAU : Créer le rôle gestionnaire pour l'espace adhésions
+ * Accès uniquement à la page gestionnaire (pas au back office WordPress)
+ */
+function cgt_register_gestionnaire_role() {
+	$role = get_role( 'gestionnaire' );
+
+	// Créer le rôle s'il n'existe pas
+	if ( ! $role ) {
+		$role = add_role(
+			'gestionnaire',
+			__( 'Gestionnaire', 'cgt' ),
+			array(
+				'read'                   => true,
+				'view_cgt_adhesions'     => true,
+				'download_cgt_adhesions' => true,
+			)
+		);
+	}
+
+	// S'assurer que les capacités sont présentes
+	if ( $role ) {
+		$role->add_cap( 'view_cgt_adhesions' );
+		$role->add_cap( 'download_cgt_adhesions' );
+	}
+}
+add_action( 'init', 'cgt_register_gestionnaire_role' );
+
+/**
+ * ✅ Bloquer l'accès au back office WordPress pour les gestionnaires
+ * Les gestionnaires sont redirigés vers leur espace dédié
+ */
+add_action( 'admin_init', 'cgt_block_gestionnaire_admin_access' );
+
+function cgt_block_gestionnaire_admin_access() {
+	// Ne pas bloquer les requêtes AJAX
+	if ( wp_doing_ajax() ) {
+		return;
+	}
+
+	// Vérifier si l'utilisateur est un gestionnaire
+	$user = wp_get_current_user();
+	if ( ! $user || ! in_array( 'gestionnaire', (array) $user->roles, true ) ) {
+		return;
+	}
+
+	// Trouver la page gestionnaire
+	$gestionnaire_page = get_page_by_path( 'gestionnaire' );
+	$redirect_url      = $gestionnaire_page ? get_permalink( $gestionnaire_page ) : home_url();
+
+	// Rediriger vers l'espace gestionnaire
+	wp_safe_redirect( $redirect_url );
+	exit;
+}
+
+/**
+ * ✅ Masquer la barre d'administration WordPress pour les gestionnaires
+ */
+add_action( 'after_setup_theme', 'cgt_hide_admin_bar_for_gestionnaire' );
+
+function cgt_hide_admin_bar_for_gestionnaire() {
+	$user = wp_get_current_user();
+	if ( $user && in_array( 'gestionnaire', (array) $user->roles, true ) ) {
+		show_admin_bar( false );
+	}
+}
+
+/**
+ * ✅ Rediriger les gestionnaires vers leur espace après connexion
+ */
+add_filter( 'login_redirect', 'cgt_gestionnaire_login_redirect', 10, 3 );
+
+function cgt_gestionnaire_login_redirect( $redirect_to, $request, $user ) {
+	// Vérifier si c'est un gestionnaire
+	if ( isset( $user->roles ) && is_array( $user->roles ) && in_array( 'gestionnaire', $user->roles, true ) ) {
+		// Trouver la page gestionnaire
+		$gestionnaire_page = get_page_by_path( 'gestionnaire' );
+		if ( $gestionnaire_page ) {
+			return get_permalink( $gestionnaire_page );
+		}
+	}
+	return $redirect_to;
+}
+
+/**
+ * ✅ Créer automatiquement la page gestionnaire
+ * S'exécute une seule fois lors de l'activation du thème
+ */
+add_action( 'after_switch_theme', 'cgt_create_gestionnaire_page' );
+add_action( 'init', 'cgt_create_gestionnaire_page' );
+
+function cgt_create_gestionnaire_page() {
+	// Vérifier si déjà créée
+	if ( get_option( 'cgt_gestionnaire_page_created', false ) ) {
+		return;
+	}
+
+	// Vérifier si la page existe déjà
+	$existing_page = get_page_by_path( 'gestionnaire' );
+	if ( $existing_page ) {
+		update_option( 'cgt_gestionnaire_page_created', true, false );
+		return;
+	}
+
+	// Créer la page
+	$page_id = wp_insert_post(
+		array(
+			'post_title'     => 'Espace Gestionnaire',
+			'post_name'      => 'gestionnaire',
+			'post_status'    => 'publish',
+			'post_type'      => 'page',
+			'post_content'   => '',
+			'comment_status' => 'closed',
+			'ping_status'    => 'closed',
+		)
+	);
+
+	if ( ! is_wp_error( $page_id ) ) {
+		// Assigner le template
+		update_post_meta( $page_id, '_wp_page_template', 'page-gestionnaire.php' );
+		update_option( 'cgt_gestionnaire_page_created', true, false );
+		error_log( 'CGT: Page gestionnaire créée avec succès (ID: ' . $page_id . ')' );
+	} else {
+		error_log( 'CGT: Erreur lors de la création de la page gestionnaire: ' . $page_id->get_error_message() );
+	}
+}
+
+/**
+ * ✅ Créer automatiquement le compte gestionnaire par défaut
+ * S'exécute une seule fois lors de l'activation du thème
+ */
+add_action( 'after_switch_theme', 'cgt_create_default_gestionnaire_account' );
+add_action( 'init', 'cgt_create_default_gestionnaire_account' );
+
+function cgt_create_default_gestionnaire_account() {
+	// Vérifier si déjà créé
+	if ( get_option( 'cgt_gestionnaire_account_created', false ) ) {
+		return;
+	}
+
+	// Vérifier si l'utilisateur existe déjà
+	$existing_user = get_user_by( 'login', 'gestionnaire' );
+	if ( $existing_user ) {
+		// S'assurer que l'utilisateur a le bon rôle
+		$user = new WP_User( $existing_user->ID );
+		if ( ! in_array( 'gestionnaire', (array) $user->roles, true ) ) {
+			$user->set_role( 'gestionnaire' );
+		}
+		// Marquer comme créé
+		update_option( 'cgt_gestionnaire_account_created', true, false );
+		return;
+	}
+
+	// Créer le compte gestionnaire
+	$user_id = wp_create_user(
+		'gestionnaire',
+		'gestion123',
+		'gestionnaire@cgt-fsetud.local'
+	);
+
+	if ( ! is_wp_error( $user_id ) ) {
+		// Assigner le rôle gestionnaire
+		$user = new WP_User( $user_id );
+		$user->set_role( 'gestionnaire' );
+
+		// Mettre à jour les métadonnées
+		wp_update_user(
+			array(
+				'ID'           => $user_id,
+				'display_name' => 'Gestionnaire CGT',
+				'first_name'   => 'Gestionnaire',
+				'last_name'    => 'CGT',
+			)
+		);
+
+		// Marquer comme créé
+		update_option( 'cgt_gestionnaire_account_created', true, false );
+
+		error_log( 'CGT: Compte gestionnaire créé avec succès (ID: ' . $user_id . ')' );
+	} else {
+		error_log( 'CGT: Erreur lors de la création du compte gestionnaire: ' . $user_id->get_error_message() );
+	}
+}
+
 add_action(
 	'init',
 	function () {
@@ -102,7 +286,6 @@ add_action(
 			'author',
 			'contributor',
 			'subscriber',
-			'gestionnaire',
 			'administration',
 			'assistante',
 		);
