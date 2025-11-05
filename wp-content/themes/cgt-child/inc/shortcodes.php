@@ -757,7 +757,7 @@ function cgt_contact_form_shortcode() {
 					$message = __( 'Merci pour votre message. Notre équipe reviendra vers vous rapidement.', 'cgt' );
 					$name = $email = $phone = $branche = $subject = $content = '';
 				} else {
-					$errors[] = __( 'Une erreur est survenue lors de l'envoi. Merci de réessayer.', 'cgt' );
+					$errors[] = __( 'Une erreur est survenue lors de l\'envoi. Merci de réessayer.', 'cgt' );
 				}
 			}
 		}
