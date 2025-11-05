@@ -516,17 +516,145 @@
             });
         }
 
+        // Formatage code postal banque
+        const banqueCodePostal = document.getElementById('banque_code_postal');
+        if (banqueCodePostal) {
+            banqueCodePostal.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 5) {
+                    value = value.substring(0, 5);
+                }
+                e.target.value = value;
+            });
+        }
+
+        /**
+         * Auto-calculation: Montant de prélèvement = 2 x Cotisation mensuelle
+         */
+        const cotisationInput = document.getElementById('cotisation_mensuelle');
+        const prelevementInput = document.getElementById('prelevement_montant');
+
+        if (cotisationInput && prelevementInput) {
+            cotisationInput.addEventListener('input', function() {
+                const cotisation = parseFloat(cotisationInput.value) || 0;
+                const prelevement = (cotisation * 2).toFixed(2);
+                prelevementInput.value = prelevement;
+            });
+        }
+
+        /**
+         * Signature Pad Implementation
+         */
+        const signaturePad = document.getElementById('signature-pad');
+        const clearSignatureBtn = document.getElementById('clear-signature');
+        const signatureInput = document.getElementById('signature');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let ctx = null;
+
+        if (signaturePad) {
+            ctx = signaturePad.getContext('2d');
+            ctx.strokeStyle = '#111111';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Mouse events
+            signaturePad.addEventListener('mousedown', startDrawing);
+            signaturePad.addEventListener('mousemove', draw);
+            signaturePad.addEventListener('mouseup', stopDrawing);
+            signaturePad.addEventListener('mouseout', stopDrawing);
+
+            // Touch events
+            signaturePad.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = signaturePad.getBoundingClientRect();
+                lastX = touch.clientX - rect.left;
+                lastY = touch.clientY - rect.top;
+                isDrawing = true;
+            });
+
+            signaturePad.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                if (!isDrawing) return;
+
+                const touch = e.touches[0];
+                const rect = signaturePad.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+
+                lastX = x;
+                lastY = y;
+
+                // Update hidden input
+                signatureInput.value = signaturePad.toDataURL();
+            });
+
+            signaturePad.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                isDrawing = false;
+            });
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = signaturePad.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+
+            const rect = signaturePad.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            lastX = x;
+            lastY = y;
+
+            // Update hidden input with signature data
+            signatureInput.value = signaturePad.toDataURL();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        // Clear signature
+        if (clearSignatureBtn) {
+            clearSignatureBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (ctx && signaturePad) {
+                    ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
+                    signatureInput.value = '';
+                }
+            });
+        }
+
         /**
          * Ouvrir automatiquement la modal si présent dans l'URL
          */
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('action') === 'adhesion' || urlParams.get('adhesion') === 'form') {
-            openModal();
+            openAdhesionModal();
         }
 
         // Si succès, afficher la modal avec le message
         if (urlParams.get('adhesion') === 'success') {
-            openModal();
+            openAdhesionModal();
         }
 
         /**

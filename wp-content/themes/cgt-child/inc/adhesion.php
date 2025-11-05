@@ -61,10 +61,22 @@ function cgt_adhesion_submit_handler() {
         'effectif'                     => sanitize_text_field( $_POST['effectif'] ?? '' ),
         'union_locale'                 => sanitize_text_field( $_POST['union_locale'] ?? '' ),
         'union_departementale'         => sanitize_text_field( $_POST['union_departementale'] ?? '' ),
+
+        // Cotisation
+        'cotisation_mensuelle'         => sanitize_text_field( $_POST['cotisation_mensuelle'] ?? '' ),
+        'prelevement_mois'             => sanitize_text_field( $_POST['prelevement_mois'] ?? '' ),
+        'prelevement_annee'            => sanitize_text_field( $_POST['prelevement_annee'] ?? '' ),
+        'prelevement_montant'          => sanitize_text_field( $_POST['prelevement_montant'] ?? '' ),
+        'banque_nom'                   => sanitize_text_field( $_POST['banque_nom'] ?? '' ),
+        'banque_adresse'               => sanitize_text_field( $_POST['banque_adresse'] ?? '' ),
+        'banque_code_postal'           => sanitize_text_field( $_POST['banque_code_postal'] ?? '' ),
+        'banque_ville'                 => sanitize_text_field( $_POST['banque_ville'] ?? '' ),
+        'rib'                          => sanitize_text_field( $_POST['rib'] ?? '' ),
+        'signature'                    => sanitize_textarea_field( $_POST['signature'] ?? '' ),
     );
 
     // Validation des champs obligatoires
-    $required_fields = array( 'nom', 'prenom', 'sexe', 'date_naissance', 'nationalite', 'adresse', 'code_postal', 'ville', 'tel', 'email', 'statut', 'categorie', 'entreprise_nom' );
+    $required_fields = array( 'nom', 'prenom', 'sexe', 'date_naissance', 'nationalite', 'adresse', 'code_postal', 'ville', 'tel', 'email', 'statut', 'categorie', 'entreprise_nom', 'cotisation_mensuelle', 'signature' );
     $errors = array();
 
     foreach ( $required_fields as $field ) {
@@ -116,6 +128,15 @@ function cgt_adhesion_submit_handler() {
         'effectif'                 => 100,
         'union_locale'             => 100,
         'union_departementale'     => 100,
+        'cotisation_mensuelle'     => 20,
+        'prelevement_mois'         => 2,
+        'prelevement_annee'        => 4,
+        'prelevement_montant'      => 20,
+        'banque_nom'               => 255,
+        'banque_adresse'           => 255,
+        'banque_code_postal'       => 10,
+        'banque_ville'             => 100,
+        'rib'                      => 255,
     );
 
     foreach ( $field_lengths as $field => $max_length ) {
@@ -147,6 +168,11 @@ function cgt_adhesion_submit_handler() {
     // ✅ Validation code postal entreprise (5 chiffres si fourni)
     if ( ! empty( $data['entreprise_code_postal'] ) && ! preg_match( '/^[0-9]{5}$/', $data['entreprise_code_postal'] ) ) {
         $errors[] = 'Le code postal de l\'entreprise doit contenir 5 chiffres.';
+    }
+
+    // ✅ Validation code postal banque (5 chiffres si fourni)
+    if ( ! empty( $data['banque_code_postal'] ) && ! preg_match( '/^[0-9]{5}$/', $data['banque_code_postal'] ) ) {
+        $errors[] = 'Le code postal de la banque doit contenir 5 chiffres.';
     }
 
     // Si des erreurs, rediriger avec message
@@ -253,6 +279,31 @@ function cgt_format_adhesion_content( $data ) {
         <?php endif; ?>
         <?php if ( ! empty( $data['union_departementale'] ) ) : ?>
             <li><strong>Union Départementale :</strong> <?php echo esc_html( $data['union_departementale'] ); ?></li>
+        <?php endif; ?>
+    </ul>
+
+    <h2>Cotisation</h2>
+    <ul>
+        <?php if ( ! empty( $data['cotisation_mensuelle'] ) ) : ?>
+            <li><strong>Montant cotisation mensuelle :</strong> <?php echo esc_html( $data['cotisation_mensuelle'] ); ?>€</li>
+        <?php endif; ?>
+        <?php if ( ! empty( $data['prelevement_mois'] ) && ! empty( $data['prelevement_annee'] ) ) : ?>
+            <li><strong>Date du 1er prélèvement :</strong> 05/<?php echo esc_html( $data['prelevement_mois'] ); ?>/<?php echo esc_html( $data['prelevement_annee'] ); ?></li>
+        <?php endif; ?>
+        <?php if ( ! empty( $data['prelevement_montant'] ) ) : ?>
+            <li><strong>Montant de prélèvement :</strong> <?php echo esc_html( $data['prelevement_montant'] ); ?>€</li>
+        <?php endif; ?>
+        <?php if ( ! empty( $data['banque_nom'] ) ) : ?>
+            <li><strong>Nom de la banque :</strong> <?php echo esc_html( $data['banque_nom'] ); ?></li>
+        <?php endif; ?>
+        <?php if ( ! empty( $data['banque_adresse'] ) ) : ?>
+            <li><strong>Adresse de la banque :</strong> <?php echo esc_html( $data['banque_adresse'] ); ?>, <?php echo esc_html( $data['banque_code_postal'] ); ?> <?php echo esc_html( $data['banque_ville'] ); ?></li>
+        <?php endif; ?>
+        <?php if ( ! empty( $data['rib'] ) ) : ?>
+            <li><strong>RIB :</strong> <?php echo esc_html( $data['rib'] ); ?></li>
+        <?php endif; ?>
+        <?php if ( ! empty( $data['signature'] ) ) : ?>
+            <li><strong>Signature :</strong> <br><img src="<?php echo esc_url( $data['signature'] ); ?>" alt="Signature" style="max-width: 400px; border: 1px solid #ddd; padding: 10px; margin-top: 5px;"></li>
         <?php endif; ?>
     </ul>
     <?php
@@ -653,6 +704,16 @@ function cgt_get_adhesion_details( $post_id ) {
 		'effectif',
 		'union_locale',
 		'union_departementale',
+		'cotisation_mensuelle',
+		'prelevement_mois',
+		'prelevement_annee',
+		'prelevement_montant',
+		'banque_nom',
+		'banque_adresse',
+		'banque_code_postal',
+		'banque_ville',
+		'rib',
+		'signature',
 	);
 
 	$data = array();
