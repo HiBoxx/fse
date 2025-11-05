@@ -176,35 +176,178 @@ $is_adresses_utiles = ( 'adresses-utiles' === $selected_class );
 		</header>
 
 		<?php if ( $is_adresses_utiles ) : ?>
-			<!-- Custom content for Adresses utiles -->
-			<div class="adresses-utiles-section" style="margin: 3rem 0; padding: 3rem; background: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center;">
-				<div style="margin-bottom: 2rem;">
-					<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#e30613" stroke-width="2" style="display: inline-block; margin-bottom: 1.5rem;">
-						<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-						<circle cx="12" cy="7" r="4"></circle>
-					</svg>
-					<h2 style="font-size: 2rem; font-weight: 700; color: #111827; margin: 0 0 1rem;"><?php esc_html_e( 'Carnet d\'adresse', 'cgt' ); ?></h2>
-					<p style="font-size: 1.125rem; color: #6b7280; margin: 0 0 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+			<!-- Custom content for Adresses utiles - Display expert cards -->
+			<?php
+			// Enqueue styles et scripts for expert cards
+			wp_enqueue_style( 'cgt-carnet-adresse', get_stylesheet_directory_uri() . '/assets/css/carnet-adresse.css', array(), '1.0' );
+			wp_enqueue_script( 'cgt-carnet-adresse', get_stylesheet_directory_uri() . '/assets/js/carnet-adresse.js', array( 'jquery' ), '1.0', true );
+
+			// Get all expertise terms
+			$expertises = get_terms(
+				array(
+					'taxonomy'   => 'expertise',
+					'hide_empty' => false,
+					'orderby'    => 'name',
+					'order'      => 'ASC',
+				)
+			);
+
+			// Get all experts
+			$experts_args = array(
+				'post_type'      => 'cgt_expert',
+				'posts_per_page' => -1,
+				'orderby'        => 'title',
+				'order'          => 'ASC',
+				'post_status'    => 'publish',
+			);
+
+			$experts_query = new WP_Query( $experts_args );
+			?>
+
+			<div class="carnet-hero" style="background: linear-gradient(135deg, #e30613 0%, #b00510 100%); padding: 3rem 0; margin: -2rem 0 3rem; border-radius: 0.75rem;">
+				<div style="max-width: 800px; margin: 0 auto; text-align: center; color: white; padding: 0 1.5rem;">
+					<div style="margin-bottom: 1rem;">
+						<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block;">
+							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+							<circle cx="12" cy="7" r="4"></circle>
+						</svg>
+					</div>
+					<h2 style="font-size: 2rem; font-weight: 700; color: white; margin: 0 0 1rem;"><?php esc_html_e( 'Carnet d\'adresse', 'cgt' ); ?></h2>
+					<p style="font-size: 1.125rem; color: rgba(255,255,255,0.9); margin: 0;">
 						<?php esc_html_e( 'Retrouvez nos experts et professionnels de confiance pour vous accompagner dans vos démarches juridiques, comptables et administratives.', 'cgt' ); ?>
 					</p>
-					<?php
-					// Get the carnet d'adresse page
-					$carnet_page = get_page_by_path( 'carnet-adresse', OBJECT, 'page' );
-					if ( $carnet_page ) :
-						$carnet_url = get_permalink( $carnet_page->ID );
-					?>
-						<a href="<?php echo esc_url( $carnet_url ); ?>" class="btn" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 2rem; background: #e30613; color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 1rem; transition: all 200ms;">
-							<?php esc_html_e( 'Consulter le carnet d\'adresse', 'cgt' ); ?>
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<line x1="5" y1="12" x2="19" y2="12"></line>
-								<polyline points="12 5 19 12 12 19"></polyline>
-							</svg>
-						</a>
-					<?php else : ?>
-						<p style="color: #dc2626;"><?php esc_html_e( 'La page du carnet d\'adresse n\'est pas encore créée.', 'cgt' ); ?></p>
-					<?php endif; ?>
 				</div>
 			</div>
+
+			<!-- Filters -->
+			<?php if ( ! empty( $expertises ) && ! is_wp_error( $expertises ) ) : ?>
+				<div class="carnet-filters" style="margin-bottom: 2rem;">
+					<div class="carnet-filters__buttons" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
+						<button class="filter-btn active" data-filter="all" style="padding: 0.5rem 1.25rem; border: 2px solid #e30613; background: #e30613; color: white; border-radius: 2rem; font-weight: 600; cursor: pointer; transition: all 200ms;">
+							<?php esc_html_e( 'Tous', 'cgt' ); ?>
+							<span class="filter-count" style="margin-left: 0.5rem; background: rgba(255,255,255,0.2); padding: 0.125rem 0.5rem; border-radius: 1rem; font-size: 0.875rem;"><?php echo esc_html( $experts_query->found_posts ); ?></span>
+						</button>
+						<?php foreach ( $expertises as $expertise ) : ?>
+							<?php
+							$count_args = array(
+								'post_type'      => 'cgt_expert',
+								'posts_per_page' => -1,
+								'post_status'    => 'publish',
+								'tax_query'      => array(
+									array(
+										'taxonomy' => 'expertise',
+										'field'    => 'term_id',
+										'terms'    => $expertise->term_id,
+									),
+								),
+							);
+							$count_query = new WP_Query( $count_args );
+							?>
+							<button class="filter-btn" data-filter="<?php echo esc_attr( $expertise->slug ); ?>" style="padding: 0.5rem 1.25rem; border: 2px solid #e5e7eb; background: white; color: #374151; border-radius: 2rem; font-weight: 600; cursor: pointer; transition: all 200ms;">
+								<?php echo esc_html( $expertise->name ); ?>
+								<span class="filter-count" style="margin-left: 0.5rem; background: #f3f4f6; padding: 0.125rem 0.5rem; border-radius: 1rem; font-size: 0.875rem;"><?php echo esc_html( $count_query->found_posts ); ?></span>
+							</button>
+							<?php wp_reset_postdata(); ?>
+						<?php endforeach; ?>
+					</div>
+				</div>
+			<?php endif; ?>
+
+			<!-- Expert cards grid -->
+			<?php if ( $experts_query->have_posts() ) : ?>
+				<div class="experts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+					<?php while ( $experts_query->have_posts() ) : $experts_query->the_post(); ?>
+						<?php
+						$post_id     = get_the_ID();
+						$prenom      = get_post_meta( $post_id, '_expert_prenom', true );
+						$telephone   = get_post_meta( $post_id, '_expert_telephone', true );
+						$email       = get_post_meta( $post_id, '_expert_email', true );
+						$adresse     = get_post_meta( $post_id, '_expert_adresse', true );
+						$description = get_post_meta( $post_id, '_expert_description', true );
+						$terms       = get_the_terms( $post_id, 'expertise' );
+						$expertise_slugs = array();
+						if ( $terms && ! is_wp_error( $terms ) ) {
+							foreach ( $terms as $term ) {
+								$expertise_slugs[] = $term->slug;
+							}
+						}
+						?>
+						<div class="expert-card" data-expertise="<?php echo esc_attr( implode( ' ', $expertise_slugs ) ); ?>" style="background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 200ms;">
+							<div class="expert-card__header" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+								<div class="expert-card__photo" style="flex-shrink: 0;">
+									<?php if ( has_post_thumbnail() ) : ?>
+										<?php the_post_thumbnail( 'thumbnail', array( 'class' => 'expert-photo', 'style' => 'width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem;' ) ); ?>
+									<?php else : ?>
+										<div class="expert-photo-placeholder" style="width: 80px; height: 80px; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+											<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
+												<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+												<circle cx="12" cy="7" r="4"></circle>
+											</svg>
+										</div>
+									<?php endif; ?>
+								</div>
+								<div class="expert-card__info" style="flex: 1; min-width: 0;">
+									<h3 class="expert-card__name" style="font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; overflow: hidden; text-overflow: ellipsis;">
+										<?php echo esc_html( $prenom . ' ' . get_the_title() ); ?>
+									</h3>
+									<?php if ( $terms && ! is_wp_error( $terms ) ) : ?>
+										<div class="expert-card__expertises" style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+											<?php foreach ( $terms as $term ) : ?>
+												<span class="expert-badge" style="display: inline-block; padding: 0.25rem 0.75rem; background: #fef2f2; color: #e30613; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+													<?php echo esc_html( $term->name ); ?>
+												</span>
+											<?php endforeach; ?>
+										</div>
+									<?php endif; ?>
+								</div>
+							</div>
+							<?php if ( $description ) : ?>
+								<p class="expert-card__description" style="color: #6b7280; font-size: 0.875rem; margin: 0 0 1rem; line-height: 1.5;">
+									<?php echo esc_html( wp_trim_words( $description, 20 ) ); ?>
+								</p>
+							<?php endif; ?>
+							<div class="expert-card__contact" style="display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #f3f4f6;">
+								<?php if ( $telephone ) : ?>
+									<a href="tel:<?php echo esc_attr( $telephone ); ?>" style="display: flex; align-items: center; gap: 0.5rem; color: #374151; text-decoration: none; font-size: 0.875rem;">
+										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+										</svg>
+										<?php echo esc_html( $telephone ); ?>
+									</a>
+								<?php endif; ?>
+								<?php if ( $email ) : ?>
+									<a href="mailto:<?php echo esc_attr( $email ); ?>" style="display: flex; align-items: center; gap: 0.5rem; color: #374151; text-decoration: none; font-size: 0.875rem; word-break: break-all;">
+										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+											<polyline points="22,6 12,13 2,6"></polyline>
+										</svg>
+										<?php echo esc_html( $email ); ?>
+									</a>
+								<?php endif; ?>
+								<?php if ( $adresse ) : ?>
+									<div style="display: flex; align-items: flex-start; gap: 0.5rem; color: #6b7280; font-size: 0.875rem;">
+										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 0.125rem;">
+											<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+											<circle cx="12" cy="10" r="3"></circle>
+										</svg>
+										<?php echo esc_html( $adresse ); ?>
+									</div>
+								<?php endif; ?>
+							</div>
+						</div>
+					<?php endwhile; ?>
+					<?php wp_reset_postdata(); ?>
+				</div>
+			<?php else : ?>
+				<div class="experts-empty" style="text-align: center; padding: 3rem; background: #f9fafb; border-radius: 0.75rem;">
+					<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2" style="display: inline-block; margin-bottom: 1rem;">
+						<circle cx="12" cy="12" r="10"></circle>
+						<line x1="12" y1="8" x2="12" y2="12"></line>
+						<line x1="12" y1="16" x2="12.01" y2="16"></line>
+					</svg>
+					<p style="color: #6b7280; font-size: 1rem;"><?php esc_html_e( 'Aucun expert n\'a été ajouté pour le moment.', 'cgt' ); ?></p>
+				</div>
+			<?php endif; ?>
 		<?php else : ?>
 		<!-- Normal filter form for other classes -->
 		<form class="classes-filters" method="get" action="<?php echo esc_url( $current_url ); ?>">
