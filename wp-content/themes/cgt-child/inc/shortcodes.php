@@ -701,6 +701,7 @@ function cgt_contact_form_shortcode() {
 			$name    = isset( $_POST['cgt_contact_name'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_contact_name'] ) ) : '';
 			$email   = isset( $_POST['cgt_contact_email'] ) ? sanitize_email( wp_unslash( $_POST['cgt_contact_email'] ) ) : '';
 			$phone   = isset( $_POST['cgt_contact_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_contact_phone'] ) ) : '';
+			$branche = isset( $_POST['cgt_contact_branche'] ) ? absint( $_POST['cgt_contact_branche'] ) : 0;
 			$subject = isset( $_POST['cgt_contact_subject'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_contact_subject'] ) ) : '';
 			$content = isset( $_POST['cgt_contact_message'] ) ? wp_kses_post( wp_unslash( $_POST['cgt_contact_message'] ) ) : '';
 
@@ -735,11 +736,16 @@ function cgt_contact_form_shortcode() {
 					update_post_meta( $post_id, 'cgt_submission_name', $name );
 					update_post_meta( $post_id, 'cgt_submission_email', $email );
 					update_post_meta( $post_id, 'cgt_submission_phone', $phone );
+					update_post_meta( $post_id, 'cgt_submission_branche', $branche );
 					update_post_meta( $post_id, 'cgt_submission_subject', $subject );
 					update_post_meta( $post_id, 'cgt_submission_message', $content );
 					update_post_meta( $post_id, 'cgt_contact_type', 'contact' );
 					if ( is_user_logged_in() ) {
 						update_post_meta( $post_id, 'cgt_contact_user', get_current_user_id() );
+					}
+					// Assign branche taxonomy if selected
+					if ( $branche ) {
+						wp_set_object_terms( $post_id, $branche, 'branche' );
 					}
 
 					wp_mail(
@@ -749,13 +755,23 @@ function cgt_contact_form_shortcode() {
 					);
 
 					$message = __( 'Merci pour votre message. Notre équipe reviendra vers vous rapidement.', 'cgt' );
-					$name = $email = $phone = $subject = $content = '';
+					$name = $email = $phone = $branche = $subject = $content = '';
 				} else {
-					$errors[] = __( 'Une erreur est survenue lors de l’envoi. Merci de réessayer.', 'cgt' );
+					$errors[] = __( 'Une erreur est survenue lors de l'envoi. Merci de réessayer.', 'cgt' );
 				}
 			}
 		}
 	}
+
+	// Get branches for select field
+	$branches = get_terms(
+		array(
+			'taxonomy'   => 'branche',
+			'hide_empty' => false,
+			'orderby'    => 'name',
+			'order'      => 'ASC',
+		)
+	);
 
 	ob_start();
 	if ( $message ) {
@@ -782,6 +798,19 @@ function cgt_contact_form_shortcode() {
 		<label>
 			<span class="sr-only"><?php esc_html_e( 'Téléphone', 'cgt' ); ?></span>
 			<input type="tel" name="cgt_contact_phone" value="<?php echo isset( $phone ) ? esc_attr( $phone ) : ''; ?>" placeholder="<?php esc_attr_e( 'Téléphone', 'cgt' ); ?>">
+		</label>
+		<label>
+			<span class="sr-only"><?php esc_html_e( 'Branche', 'cgt' ); ?></span>
+			<select name="cgt_contact_branche">
+				<option value=""><?php esc_html_e( 'Sélectionner une branche (optionnel)', 'cgt' ); ?></option>
+				<?php if ( ! empty( $branches ) && ! is_wp_error( $branches ) ) : ?>
+					<?php foreach ( $branches as $branch ) : ?>
+						<option value="<?php echo esc_attr( $branch->term_id ); ?>" <?php selected( isset( $branche ) ? $branche : '', $branch->term_id ); ?>>
+							<?php echo esc_html( $branch->name ); ?>
+						</option>
+					<?php endforeach; ?>
+				<?php endif; ?>
+			</select>
 		</label>
 		<label>
 			<span class="sr-only"><?php esc_html_e( 'Sujet *', 'cgt' ); ?></span>

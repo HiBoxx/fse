@@ -419,7 +419,6 @@ get_header();
                                         <option value="">Sélectionner</option>
                                         <option value="Femme">Femme</option>
                                         <option value="Homme">Homme</option>
-                                        <option value="Autre">Autre</option>
                                     </select>
                                 </div>
                                 <div class="form-group col-4">
