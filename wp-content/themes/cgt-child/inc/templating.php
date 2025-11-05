@@ -215,7 +215,7 @@ function cgt_setup_pages_and_menus() {
 		),
 		'categories' => array(
 			'post_title'   => __( 'Catégories', 'cgt' ),
-			'post_content' => '<!-- Liste des catégories internes pour l'éditeur -->',
+			'post_content' => '<!-- Liste des catégories internes pour l\'éditeur -->',
 		),
 		'carnet-adresse'       => array(
 			'post_title'        => __( 'Carnet d\'adresse', 'cgt' ),
