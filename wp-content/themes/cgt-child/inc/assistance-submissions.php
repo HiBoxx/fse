@@ -64,7 +64,7 @@ function cgt_assistance_handle_article_submission() {
 	$post_id = wp_insert_post(
 		array(
 			'post_type'    => 'post',
-			'post_status'  => 'pending',
+			'post_status'  => 'draft',
 			'post_author'  => get_current_user_id(),
 			'post_title'   => $title,
 			'post_content' => $content,
@@ -155,7 +155,7 @@ function cgt_assistance_handle_tract_submission() {
 	$post_id = wp_insert_post(
 		array(
 			'post_type'    => 'tracts',
-			'post_status'  => 'pending',
+			'post_status'  => 'draft',
 			'post_author'  => get_current_user_id(),
 			'post_title'   => $title,
 			'post_content' => $content,
@@ -248,7 +248,7 @@ function cgt_assistance_handle_event_submission() {
 	$post_id = wp_insert_post(
 		array(
 			'post_type'    => 'cgt_agenda',
-			'post_status'  => 'pending',
+			'post_status'  => 'draft',
 			'post_author'  => get_current_user_id(),
 			'post_title'   => $title,
 			'post_content' => $content,
