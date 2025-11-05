@@ -990,6 +990,58 @@ input[type="date"].form-control {
 }
 
 /* ================================
+   DATE INPUT GROUP
+   ================================ */
+.date-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+.date-input-group .date-day {
+    width: 70px !important;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.date-input-group .date-month {
+    flex: 1;
+    min-width: 140px;
+    max-width: 180px;
+    width: 100% !important;
+}
+
+.date-input-group .date-year {
+    width: 120px !important;
+    flex-shrink: 0;
+}
+
+.date-separator {
+    color: var(--color-gray-dark);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .date-input-group {
+        flex-wrap: wrap;
+    }
+
+    .date-input-group .date-month {
+        flex: 1;
+        min-width: calc(50% - 1rem);
+    }
+
+    .date-input-group .date-year {
+        width: calc(50% - 1rem);
+    }
+}
+
+/* ================================
    UTILITY CLASSES
    ================================ */
 .text-center {

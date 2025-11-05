@@ -593,45 +593,37 @@ get_header();
                             <div class="form-subsection">
                                 <h4 class="subsection-title">En cas de prélèvement</h4>
 
-                                <div class="form-row form-row--gapped">
-                                    <div class="form-group col-12">
-                                        <label for="prelevement_date">Date du 1er prélèvement</label>
-                                        <div class="form-row form-row--tight">
-                                            <div class="col-2">
-                                                <input type="text" class="form-control text-center" value="05" readonly>
-                                            </div>
-                                            <div class="col-1 text-center" style="line-height: 2.5;">/</div>
-                                            <div class="col-4">
-                                                <select name="prelevement_mois" id="prelevement_mois" class="form-control">
-                                                    <option value="">Mois</option>
-                                                    <option value="01">Janvier</option>
-                                                    <option value="02">Février</option>
-                                                    <option value="03">Mars</option>
-                                                    <option value="04">Avril</option>
-                                                    <option value="05">Mai</option>
-                                                    <option value="06">Juin</option>
-                                                    <option value="07">Juillet</option>
-                                                    <option value="08">Août</option>
-                                                    <option value="09">Septembre</option>
-                                                    <option value="10">Octobre</option>
-                                                    <option value="11">Novembre</option>
-                                                    <option value="12">Décembre</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-1 text-center" style="line-height: 2.5;">/</div>
-                                            <div class="col-4">
-                                                <select name="prelevement_annee" id="prelevement_annee" class="form-control">
-                                                    <option value="">Année</option>
-                                                    <?php
-                                                    $current_year = date('Y');
-                                                    for ($i = 0; $i <= 5; $i++) {
-                                                        $year = $current_year + $i;
-                                                        echo '<option value="' . esc_attr($year) . '">' . esc_html($year) . '</option>';
-                                                    }
-                                                    ?>
-                                                </select>
-                                            </div>
-                                        </div>
+                                <div class="form-group">
+                                    <label for="prelevement_date">Date du 1er prélèvement</label>
+                                    <div class="date-input-group">
+                                        <input type="text" class="form-control date-day" value="05" readonly>
+                                        <span class="date-separator">/</span>
+                                        <select name="prelevement_mois" id="prelevement_mois" class="form-control date-month">
+                                            <option value="">Mois</option>
+                                            <option value="01">Janvier</option>
+                                            <option value="02">Février</option>
+                                            <option value="03">Mars</option>
+                                            <option value="04">Avril</option>
+                                            <option value="05">Mai</option>
+                                            <option value="06">Juin</option>
+                                            <option value="07">Juillet</option>
+                                            <option value="08">Août</option>
+                                            <option value="09">Septembre</option>
+                                            <option value="10">Octobre</option>
+                                            <option value="11">Novembre</option>
+                                            <option value="12">Décembre</option>
+                                        </select>
+                                        <span class="date-separator">/</span>
+                                        <select name="prelevement_annee" id="prelevement_annee" class="form-control date-year">
+                                            <option value="">Année</option>
+                                            <?php
+                                            $current_year = date('Y');
+                                            for ($i = 0; $i <= 5; $i++) {
+                                                $year = $current_year + $i;
+                                                echo '<option value="' . esc_attr($year) . '">' . esc_html($year) . '</option>';
+                                            }
+                                            ?>
+                                        </select>
                                     </div>
                                 </div>
 
