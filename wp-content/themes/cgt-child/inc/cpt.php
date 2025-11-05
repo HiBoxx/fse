@@ -585,3 +585,218 @@ function cgt_force_private_articles( $data, $postarr ) {
 	return $data;
 }
 add_filter( 'wp_insert_post_data', 'cgt_force_private_articles', 10, 2 );
+
+/**
+ * Register Nos Experts Custom Post Type
+ */
+function cgt_register_experts_cpt() {
+	register_post_type(
+		'cgt_expert',
+		array(
+			'label'               => __( 'Nos Experts', 'cgt' ),
+			'labels'              => array(
+				'name'               => __( 'Nos Experts', 'cgt' ),
+				'singular_name'      => __( 'Expert', 'cgt' ),
+				'add_new'            => __( 'Ajouter un expert', 'cgt' ),
+				'add_new_item'       => __( 'Ajouter un nouvel expert', 'cgt' ),
+				'edit_item'          => __( 'Modifier l\'expert', 'cgt' ),
+				'new_item'           => __( 'Nouvel expert', 'cgt' ),
+				'view_item'          => __( 'Voir l\'expert', 'cgt' ),
+				'search_items'       => __( 'Rechercher un expert', 'cgt' ),
+				'not_found'          => __( 'Aucun expert trouvé', 'cgt' ),
+				'not_found_in_trash' => __( 'Aucun expert dans la corbeille', 'cgt' ),
+				'all_items'          => __( 'Tous les experts', 'cgt' ),
+			),
+			'public'              => true,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'menu_icon'           => 'dashicons-businessman',
+			'menu_position'       => 25,
+			'supports'            => array( 'title', 'thumbnail' ),
+			'show_in_rest'        => true,
+			'has_archive'         => false,
+			'publicly_queryable'  => true,
+			'capability_type'     => 'post',
+			'map_meta_cap'        => true,
+			'rewrite'             => array(
+				'slug'       => 'expert',
+				'with_front' => false,
+			),
+		)
+	);
+}
+add_action( 'init', 'cgt_register_experts_cpt' );
+
+/**
+ * Add meta boxes for expert fields
+ */
+function cgt_expert_meta_boxes() {
+	add_meta_box(
+		'cgt_expert_details',
+		__( 'Informations de l\'expert', 'cgt' ),
+		'cgt_expert_meta_box_callback',
+		'cgt_expert',
+		'normal',
+		'high'
+	);
+}
+add_action( 'add_meta_boxes', 'cgt_expert_meta_boxes' );
+
+/**
+ * Display expert meta box
+ */
+function cgt_expert_meta_box_callback( $post ) {
+	wp_nonce_field( 'cgt_expert_meta_box', 'cgt_expert_meta_box_nonce' );
+
+	$prenom      = get_post_meta( $post->ID, '_expert_prenom', true );
+	$telephone   = get_post_meta( $post->ID, '_expert_telephone', true );
+	$email       = get_post_meta( $post->ID, '_expert_email', true );
+	$adresse     = get_post_meta( $post->ID, '_expert_adresse', true );
+	$description = get_post_meta( $post->ID, '_expert_description', true );
+	$mots_cles   = get_post_meta( $post->ID, '_expert_mots_cles', true );
+	?>
+	<style>
+		.cgt-expert-field { margin-bottom: 20px; }
+		.cgt-expert-field label { display: block; font-weight: 600; margin-bottom: 5px; }
+		.cgt-expert-field input[type="text"],
+		.cgt-expert-field input[type="email"],
+		.cgt-expert-field input[type="tel"],
+		.cgt-expert-field textarea { width: 100%; padding: 8px; }
+		.cgt-expert-field textarea { min-height: 100px; }
+		.cgt-expert-field small { color: #666; font-style: italic; }
+	</style>
+
+	<div class="cgt-expert-field">
+		<label for="expert_prenom"><?php esc_html_e( 'Prénom', 'cgt' ); ?> <span style="color: red;">*</span></label>
+		<input type="text" id="expert_prenom" name="expert_prenom" value="<?php echo esc_attr( $prenom ); ?>" required>
+	</div>
+
+	<div class="cgt-expert-field">
+		<label for="expert_telephone"><?php esc_html_e( 'Numéro de téléphone', 'cgt' ); ?></label>
+		<input type="tel" id="expert_telephone" name="expert_telephone" value="<?php echo esc_attr( $telephone ); ?>" placeholder="Ex: 01 23 45 67 89">
+	</div>
+
+	<div class="cgt-expert-field">
+		<label for="expert_email"><?php esc_html_e( 'Email', 'cgt' ); ?></label>
+		<input type="email" id="expert_email" name="expert_email" value="<?php echo esc_attr( $email ); ?>" placeholder="expert@exemple.fr">
+	</div>
+
+	<div class="cgt-expert-field">
+		<label for="expert_adresse"><?php esc_html_e( 'Adresse', 'cgt' ); ?></label>
+		<input type="text" id="expert_adresse" name="expert_adresse" value="<?php echo esc_attr( $adresse ); ?>" placeholder="123 rue de la République, 75001 Paris">
+	</div>
+
+	<div class="cgt-expert-field">
+		<label for="expert_description"><?php esc_html_e( 'Description', 'cgt' ); ?></label>
+		<textarea id="expert_description" name="expert_description" placeholder="Décrivez l'expertise et l'expérience de cette personne..."><?php echo esc_textarea( $description ); ?></textarea>
+	</div>
+
+	<div class="cgt-expert-field">
+		<label for="expert_mots_cles"><?php esc_html_e( 'Mots-clés de recherche', 'cgt' ); ?></label>
+		<input type="text" id="expert_mots_cles" name="expert_mots_cles" value="<?php echo esc_attr( $mots_cles ); ?>" placeholder="droit du travail, licenciement, accident...">
+		<small><?php esc_html_e( 'Séparez les mots-clés par des virgules', 'cgt' ); ?></small>
+	</div>
+
+	<p><strong><?php esc_html_e( 'Note:', 'cgt' ); ?></strong> <?php esc_html_e( 'Le nom de famille est le titre de l\'article. L\'expertise se sélectionne dans la colonne de droite "Expertise".', 'cgt' ); ?></p>
+	<p><strong><?php esc_html_e( 'Image:', 'cgt' ); ?></strong> <?php esc_html_e( 'Utilisez "Image à la une" dans la colonne de droite. Si aucune image n\'est définie, une image grise par défaut sera affichée.', 'cgt' ); ?></p>
+	<?php
+}
+
+/**
+ * Save expert meta data
+ */
+function cgt_save_expert_meta( $post_id ) {
+	// Check nonce
+	if ( ! isset( $_POST['cgt_expert_meta_box_nonce'] ) || ! wp_verify_nonce( $_POST['cgt_expert_meta_box_nonce'], 'cgt_expert_meta_box' ) ) {
+		return;
+	}
+
+	// Check autosave
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	// Check permissions
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// Save fields
+	$fields = array(
+		'expert_prenom'      => '_expert_prenom',
+		'expert_telephone'   => '_expert_telephone',
+		'expert_email'       => '_expert_email',
+		'expert_adresse'     => '_expert_adresse',
+		'expert_description' => '_expert_description',
+		'expert_mots_cles'   => '_expert_mots_cles',
+	);
+
+	foreach ( $fields as $field => $meta_key ) {
+		if ( isset( $_POST[ $field ] ) ) {
+			if ( 'expert_description' === $field ) {
+				update_post_meta( $post_id, $meta_key, sanitize_textarea_field( wp_unslash( $_POST[ $field ] ) ) );
+			} elseif ( 'expert_email' === $field ) {
+				update_post_meta( $post_id, $meta_key, sanitize_email( wp_unslash( $_POST[ $field ] ) ) );
+			} else {
+				update_post_meta( $post_id, $meta_key, sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) );
+			}
+		}
+	}
+}
+add_action( 'save_post_cgt_expert', 'cgt_save_expert_meta' );
+
+/**
+ * Customize admin columns for experts
+ */
+function cgt_expert_admin_columns( $columns ) {
+	$new_columns = array();
+	$new_columns['cb']         = $columns['cb'];
+	$new_columns['thumbnail']  = __( 'Photo', 'cgt' );
+	$new_columns['title']      = __( 'Nom', 'cgt' );
+	$new_columns['prenom']     = __( 'Prénom', 'cgt' );
+	$new_columns['expertise']  = __( 'Expertise', 'cgt' );
+	$new_columns['telephone']  = __( 'Téléphone', 'cgt' );
+	$new_columns['email']      = __( 'Email', 'cgt' );
+	$new_columns['date']       = $columns['date'];
+	return $new_columns;
+}
+add_filter( 'manage_cgt_expert_posts_columns', 'cgt_expert_admin_columns' );
+
+/**
+ * Populate custom admin columns
+ */
+function cgt_expert_admin_column_content( $column, $post_id ) {
+	switch ( $column ) {
+		case 'thumbnail':
+			if ( has_post_thumbnail( $post_id ) ) {
+				echo get_the_post_thumbnail( $post_id, array( 50, 50 ) );
+			} else {
+				echo '<div style="width:50px;height:50px;background:#ddd;"></div>';
+			}
+			break;
+		case 'prenom':
+			echo esc_html( get_post_meta( $post_id, '_expert_prenom', true ) );
+			break;
+		case 'expertise':
+			$terms = get_the_terms( $post_id, 'expertise' );
+			if ( $terms && ! is_wp_error( $terms ) ) {
+				$expertise_names = array();
+				foreach ( $terms as $term ) {
+					$expertise_names[] = $term->name;
+				}
+				echo esc_html( implode( ', ', $expertise_names ) );
+			}
+			break;
+		case 'telephone':
+			echo esc_html( get_post_meta( $post_id, '_expert_telephone', true ) );
+			break;
+		case 'email':
+			$email = get_post_meta( $post_id, '_expert_email', true );
+			if ( $email ) {
+				echo '<a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>';
+			}
+			break;
+	}
+}
+add_action( 'manage_cgt_expert_posts_custom_column', 'cgt_expert_admin_column_content', 10, 2 );
+

@@ -77,8 +77,57 @@ function cgt_register_taxonomies() {
 			),
 		)
 	);
+
+	register_taxonomy(
+		'expertise',
+		array( 'cgt_expert' ),
+		array(
+			'label'             => __( 'Expertises', 'cgt' ),
+			'labels'            => array(
+				'name'          => __( 'Expertises', 'cgt' ),
+				'singular_name' => __( 'Expertise', 'cgt' ),
+				'search_items'  => __( 'Rechercher une expertise', 'cgt' ),
+				'all_items'     => __( 'Toutes les expertises', 'cgt' ),
+				'edit_item'     => __( 'Modifier l\'expertise', 'cgt' ),
+				'update_item'   => __( 'Mettre à jour l\'expertise', 'cgt' ),
+				'add_new_item'  => __( 'Ajouter une nouvelle expertise', 'cgt' ),
+				'new_item_name' => __( 'Nouvelle expertise', 'cgt' ),
+				'menu_name'     => __( 'Expertises', 'cgt' ),
+			),
+			'hierarchical'      => true,
+			'show_in_rest'      => true,
+			'show_admin_column' => true,
+			'show_ui'           => true,
+			'rewrite'           => array(
+				'slug'       => 'expertise',
+				'with_front' => false,
+			),
+		)
+	);
 }
 add_action( 'init', 'cgt_register_taxonomies' );
+
+/**
+ * Add default expertise terms
+ */
+function cgt_add_default_expertises() {
+	if ( ! term_exists( 'Avocats', 'expertise' ) ) {
+		wp_insert_term( 'Avocats', 'expertise', array( 'slug' => 'avocats' ) );
+	}
+	if ( ! term_exists( 'Juristes', 'expertise' ) ) {
+		wp_insert_term( 'Juristes', 'expertise', array( 'slug' => 'juristes' ) );
+	}
+	if ( ! term_exists( 'Comptables', 'expertise' ) ) {
+		wp_insert_term( 'Comptables', 'expertise', array( 'slug' => 'comptables' ) );
+	}
+	if ( ! term_exists( 'Expert en lois', 'expertise' ) ) {
+		wp_insert_term( 'Expert en lois', 'expertise', array( 'slug' => 'expert-en-lois' ) );
+	}
+	if ( ! term_exists( 'Inspecteurs', 'expertise' ) ) {
+		wp_insert_term( 'Inspecteurs', 'expertise', array( 'slug' => 'inspecteurs' ) );
+	}
+}
+add_action( 'init', 'cgt_add_default_expertises', 20 );
 
 /**
  * Add ID Brevo field to branche taxonomy
