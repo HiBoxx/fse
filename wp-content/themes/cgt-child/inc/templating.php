@@ -213,10 +213,15 @@ function cgt_setup_pages_and_menus() {
 			'_wp_page_template' => 'templates/page-rgpd.php',
 			'post_status'       => 'publish',
 		),
-	'categories' => array(
-		'post_title'   => __( 'Catégories', 'cgt' ),
-		'post_content' => '<!-- Liste des catégories internes pour l’éditeur -->',
-	),
+		'categories' => array(
+			'post_title'   => __( 'Catégories', 'cgt' ),
+			'post_content' => '<!-- Liste des catégories internes pour l'éditeur -->',
+		),
+		'carnet-adresse'       => array(
+			'post_title'        => __( 'Carnet d\'adresse', 'cgt' ),
+			'_wp_page_template' => 'page-carnet-adresse.php',
+			'post_status'       => 'publish',
+		),
 	);
 
 	$page_ids = array();
