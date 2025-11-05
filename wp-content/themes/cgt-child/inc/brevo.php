@@ -8,18 +8,23 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Ajout de la metabox Brevo sur les articles.
+ * Ajout de la metabox Brevo sur les articles (bulletins uniquement).
  */
 add_action( 'add_meta_boxes', 'cgt_brevo_register_metabox' );
 function cgt_brevo_register_metabox() {
-	add_meta_box(
-		'cgt-brevo-metabox',
-		__( 'Envoi Brevo', 'cgt' ),
-		'cgt_brevo_metabox_render',
-		'post',
-		'side',
-		'default'
-	);
+	global $post;
+
+	// Vérifier si l'article a la catégorie "bulletins"
+	if ( $post && has_category( 'bulletins', $post ) ) {
+		add_meta_box(
+			'cgt-brevo-metabox',
+			__( 'Envoi Brevo', 'cgt' ),
+			'cgt_brevo_metabox_render',
+			'post',
+			'side',
+			'default'
+		);
+	}
 }
 
 /**

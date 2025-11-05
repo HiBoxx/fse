@@ -79,3 +79,68 @@ function cgt_register_taxonomies() {
 	);
 }
 add_action( 'init', 'cgt_register_taxonomies' );
+
+/**
+ * Add ID Brevo field to branche taxonomy
+ */
+function cgt_branche_add_form_fields() {
+	?>
+	<div class="form-field">
+		<label for="branche_id_brevo"><?php esc_html_e( 'ID Brevo', 'cgt' ); ?></label>
+		<input type="text" name="branche_id_brevo" id="branche_id_brevo" value="">
+		<p class="description"><?php esc_html_e( 'Identifiant de la liste Brevo pour cette branche', 'cgt' ); ?></p>
+	</div>
+	<?php
+}
+add_action( 'branche_add_form_fields', 'cgt_branche_add_form_fields' );
+
+/**
+ * Add ID Brevo field to branche taxonomy edit form
+ */
+function cgt_branche_edit_form_fields( $term ) {
+	$id_brevo = get_term_meta( $term->term_id, 'branche_id_brevo', true );
+	?>
+	<tr class="form-field">
+		<th scope="row">
+			<label for="branche_id_brevo"><?php esc_html_e( 'ID Brevo', 'cgt' ); ?></label>
+		</th>
+		<td>
+			<input type="text" name="branche_id_brevo" id="branche_id_brevo" value="<?php echo esc_attr( $id_brevo ); ?>">
+			<p class="description"><?php esc_html_e( 'Identifiant de la liste Brevo pour cette branche', 'cgt' ); ?></p>
+		</td>
+	</tr>
+	<?php
+}
+add_action( 'branche_edit_form_fields', 'cgt_branche_edit_form_fields' );
+
+/**
+ * Save ID Brevo field for branche taxonomy
+ */
+function cgt_save_branche_meta( $term_id ) {
+	if ( isset( $_POST['branche_id_brevo'] ) ) {
+		update_term_meta( $term_id, 'branche_id_brevo', sanitize_text_field( wp_unslash( $_POST['branche_id_brevo'] ) ) );
+	}
+}
+add_action( 'created_branche', 'cgt_save_branche_meta' );
+add_action( 'edited_branche', 'cgt_save_branche_meta' );
+
+/**
+ * Add ID Brevo column to branche taxonomy admin table
+ */
+function cgt_branche_columns( $columns ) {
+	$columns['branche_id_brevo'] = __( 'ID Brevo', 'cgt' );
+	return $columns;
+}
+add_filter( 'manage_edit-branche_columns', 'cgt_branche_columns' );
+
+/**
+ * Display ID Brevo in branche taxonomy admin table
+ */
+function cgt_branche_column_content( $content, $column_name, $term_id ) {
+	if ( 'branche_id_brevo' === $column_name ) {
+		$id_brevo = get_term_meta( $term_id, 'branche_id_brevo', true );
+		$content = $id_brevo ? esc_html( $id_brevo ) : '—';
+	}
+	return $content;
+}
+add_filter( 'manage_branche_custom_column', 'cgt_branche_column_content', 10, 3 );
