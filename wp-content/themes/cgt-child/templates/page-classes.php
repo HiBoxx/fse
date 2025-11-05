@@ -151,6 +151,9 @@ if ( $selected_category_term && ! is_wp_error( $selected_category_term ) ) {
 if ( empty( $active_filters ) ) {
 	$subtitle = $default_intro;
 }
+
+// Check if we are on "Adresses utiles" page
+$is_adresses_utiles = ( 'adresses-utiles' === $selected_class );
 ?>
 
 <main id="primary" class="site-main classes-archive">
@@ -172,6 +175,38 @@ if ( empty( $active_filters ) ) {
 			<?php endif; ?>
 		</header>
 
+		<?php if ( $is_adresses_utiles ) : ?>
+			<!-- Custom content for Adresses utiles -->
+			<div class="adresses-utiles-section" style="margin: 3rem 0; padding: 3rem; background: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center;">
+				<div style="margin-bottom: 2rem;">
+					<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#e30613" stroke-width="2" style="display: inline-block; margin-bottom: 1.5rem;">
+						<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+						<circle cx="12" cy="7" r="4"></circle>
+					</svg>
+					<h2 style="font-size: 2rem; font-weight: 700; color: #111827; margin: 0 0 1rem;"><?php esc_html_e( 'Carnet d\'adresse', 'cgt' ); ?></h2>
+					<p style="font-size: 1.125rem; color: #6b7280; margin: 0 0 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+						<?php esc_html_e( 'Retrouvez nos experts et professionnels de confiance pour vous accompagner dans vos démarches juridiques, comptables et administratives.', 'cgt' ); ?>
+					</p>
+					<?php
+					// Get the carnet d'adresse page
+					$carnet_page = get_page_by_path( 'carnet-adresse', OBJECT, 'page' );
+					if ( $carnet_page ) :
+						$carnet_url = get_permalink( $carnet_page->ID );
+					?>
+						<a href="<?php echo esc_url( $carnet_url ); ?>" class="btn" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 2rem; background: #e30613; color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 1rem; transition: all 200ms;">
+							<?php esc_html_e( 'Consulter le carnet d\'adresse', 'cgt' ); ?>
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="5" y1="12" x2="19" y2="12"></line>
+								<polyline points="12 5 19 12 12 19"></polyline>
+							</svg>
+						</a>
+					<?php else : ?>
+						<p style="color: #dc2626;"><?php esc_html_e( 'La page du carnet d\'adresse n\'est pas encore créée.', 'cgt' ); ?></p>
+					<?php endif; ?>
+				</div>
+			</div>
+		<?php else : ?>
+		<!-- Normal filter form for other classes -->
 		<form class="classes-filters" method="get" action="<?php echo esc_url( $current_url ); ?>">
 			<div class="classes-filters__row">
 				<label for="classes-search">
@@ -231,8 +266,9 @@ if ( empty( $active_filters ) ) {
 				<?php endif; ?>
 			</div>
 		</form>
+		<?php endif; // End if not adresses-utiles ?>
 
-		<?php if ( $classes_query->have_posts() ) : ?>
+		<?php if ( ! $is_adresses_utiles && $classes_query->have_posts() ) : ?>
 			<div class="classes-results">
 				<?php
 				while ( $classes_query->have_posts() ) :
@@ -259,7 +295,7 @@ if ( empty( $active_filters ) ) {
 				</nav>
 			<?php endif; ?>
 
-		<?php else : ?>
+		<?php elseif ( ! $is_adresses_utiles ) : ?>
 			<p class="classes-empty"><?php esc_html_e( 'Aucun article ne correspond actuellement à cette sélection.', 'cgt' ); ?></p>
 		<?php endif; ?>
 	</div>
