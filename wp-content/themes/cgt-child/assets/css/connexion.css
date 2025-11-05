@@ -550,13 +550,16 @@
 .form-row {
     display: grid;
     gap: 1rem;
-    
-
 }
 
 .form-row.form-row--gapped {
 	column-gap: 1.6rem;
 	row-gap: 1.2rem;
+}
+
+.form-row.form-row--tight {
+    gap: 0.5rem;
+    align-items: center;
 }
 
 .form-control.form-control--offset {
@@ -569,6 +572,14 @@
     padding-right:31px!important;
 }
 
+.col-1 {
+    grid-column: span 1;
+}
+
+.col-2 {
+    grid-column: span 1;
+}
+
 .col-4 {
     grid-column: span 1;
 }
@@ -579,6 +590,10 @@
 
 .col-8 {
     grid-column: span 2;
+}
+
+.col-12 {
+    grid-column: span 3;
 }
 
 @media (min-width: 768px) {
@@ -892,6 +907,93 @@ input[type="date"].form-control {
     .section-title {
         font-size: 1.25rem;
     }
+}
+
+/* ================================
+   SUBSECTIONS
+   ================================ */
+.form-subsection {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-gray);
+}
+
+.subsection-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-black);
+    margin-bottom: 1rem;
+}
+
+/* ================================
+   INPUT WITH SUFFIX (€)
+   ================================ */
+.form-input-with-suffix {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.form-input-with-suffix input {
+    padding-right: 3rem;
+}
+
+.input-suffix {
+    position: absolute;
+    right: 1rem;
+    color: var(--color-gray-dark);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* ================================
+   FORM HELP TEXT
+   ================================ */
+.form-help {
+    display: block;
+    color: var(--color-gray-dark);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* ================================
+   SIGNATURE PAD
+   ================================ */
+.signature-pad-wrapper {
+    border: 2px solid var(--color-gray);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    background: var(--color-gray-light);
+}
+
+.signature-pad {
+    display: block;
+    width: 100%;
+    height: 200px;
+    border: 2px dashed var(--color-gray-dark);
+    border-radius: var(--radius-sm);
+    background: var(--color-white);
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.signature-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* ================================
+   UTILITY CLASSES
+   ================================ */
+.text-center {
+    text-align: center;
 }
 
 /* ================================

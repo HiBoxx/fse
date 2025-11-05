@@ -574,8 +574,130 @@ get_header();
                             </div>
                         </div>
 
-                        <!-- SECTION 3: VALIDATION -->
+                        <!-- SECTION 3: COTISATION -->
                         <div class="form-section">
+                            <h3 class="section-title">
+                                <span class="section-number">3</span>
+                                Cotisation
+                            </h3>
+
+                            <div class="form-group">
+                                <label for="cotisation_mensuelle">Montant cotisation mensuelle <span class="required">*</span></label>
+                                <div class="form-input-with-suffix">
+                                    <input type="number" name="cotisation_mensuelle" id="cotisation_mensuelle" class="form-control" required min="0" step="0.01">
+                                    <span class="input-suffix">€</span>
+                                </div>
+                                <small class="form-help">La cotisation est calculée sur 1% du salaire mensuel</small>
+                            </div>
+
+                            <div class="form-subsection">
+                                <h4 class="subsection-title">En cas de prélèvement</h4>
+
+                                <div class="form-row form-row--gapped">
+                                    <div class="form-group col-12">
+                                        <label for="prelevement_date">Date du 1er prélèvement</label>
+                                        <div class="form-row form-row--tight">
+                                            <div class="col-2">
+                                                <input type="text" class="form-control text-center" value="05" readonly>
+                                            </div>
+                                            <div class="col-1 text-center" style="line-height: 2.5;">/</div>
+                                            <div class="col-4">
+                                                <select name="prelevement_mois" id="prelevement_mois" class="form-control">
+                                                    <option value="">Mois</option>
+                                                    <option value="01">Janvier</option>
+                                                    <option value="02">Février</option>
+                                                    <option value="03">Mars</option>
+                                                    <option value="04">Avril</option>
+                                                    <option value="05">Mai</option>
+                                                    <option value="06">Juin</option>
+                                                    <option value="07">Juillet</option>
+                                                    <option value="08">Août</option>
+                                                    <option value="09">Septembre</option>
+                                                    <option value="10">Octobre</option>
+                                                    <option value="11">Novembre</option>
+                                                    <option value="12">Décembre</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-1 text-center" style="line-height: 2.5;">/</div>
+                                            <div class="col-4">
+                                                <select name="prelevement_annee" id="prelevement_annee" class="form-control">
+                                                    <option value="">Année</option>
+                                                    <?php
+                                                    $current_year = date('Y');
+                                                    for ($i = 0; $i <= 5; $i++) {
+                                                        $year = $current_year + $i;
+                                                        echo '<option value="' . esc_attr($year) . '">' . esc_html($year) . '</option>';
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="prelevement_montant">Montant de prélèvement</label>
+                                    <div class="form-input-with-suffix">
+                                        <input type="text" name="prelevement_montant" id="prelevement_montant" class="form-control" readonly>
+                                        <span class="input-suffix">€</span>
+                                    </div>
+                                    <small class="form-help">Égale à 2 fois le montant de la cotisation mensuelle</small>
+                                </div>
+                            </div>
+
+                            <div class="form-subsection">
+                                <h4 class="subsection-title">Domiciliation bancaire</h4>
+
+                                <div class="form-group">
+                                    <label for="banque_nom">Nom de la banque</label>
+                                    <input type="text" name="banque_nom" id="banque_nom" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="banque_adresse">Adresse postale</label>
+                                    <input type="text" name="banque_adresse" id="banque_adresse" class="form-control">
+                                </div>
+
+                                <div class="form-row form-row--gapped">
+                                    <div class="form-group col-4">
+                                        <label for="banque_code_postal">Code postal</label>
+                                        <input type="text" name="banque_code_postal" id="banque_code_postal" class="form-control" pattern="[0-9]{5}">
+                                    </div>
+                                    <div class="form-group col-8">
+                                        <label for="banque_ville">Ville</label>
+                                        <input type="text" name="banque_ville" id="banque_ville" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="rib">RIB</label>
+                                    <input type="text" name="rib" id="rib" class="form-control" placeholder="Relevé d'Identité Bancaire">
+                                </div>
+                            </div>
+
+                            <div class="form-subsection">
+                                <h4 class="subsection-title">Signature</h4>
+                                <div class="form-group">
+                                    <label for="signature">Votre signature <span class="required">*</span></label>
+                                    <div class="signature-pad-wrapper">
+                                        <canvas id="signature-pad" class="signature-pad" width="600" height="200"></canvas>
+                                        <div class="signature-actions">
+                                            <button type="button" class="btn btn-sm btn-outline" id="clear-signature">Effacer</button>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="signature" id="signature" required>
+                                    <small class="form-help">Dessinez votre signature avec votre souris ou votre doigt</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 4: VALIDATION -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <span class="section-number">4</span>
+                                Validation
+                            </h3>
+
                             <div class="form-group form-checkbox">
                                 <label>
                                     <input type="checkbox" name="accepte_conditions" id="accepte_conditions" required>
