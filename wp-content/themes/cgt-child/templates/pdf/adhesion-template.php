@@ -1,8 +1,7 @@
 <?php
 /**
- * Template HTML pour la génération du PDF d’adhésion.
- *
- * Les données du formulaire sont accessibles dans le tableau $data.
+ * Template HTML pour la génération du PDF d'adhésion FSETUD
+ * Design complet avec toutes les informations sur une page A4
  *
  * @var array $data
  */
@@ -13,221 +12,419 @@ $get_value = static function( $key, $default = '' ) use ( $data ) {
 	return ! empty( $data[ $key ] ) ? esc_html( $data[ $key ] ) : $default;
 };
 
-$formatted_address = trim( sprintf( '%s %s %s', $data['adresse'] ?? '', $data['code_postal'] ?? '', $data['ville'] ?? '' ) );
-$formatted_company_address = trim( sprintf( '%s %s %s', $data['entreprise_adresse'] ?? '', $data['entreprise_code_postal'] ?? '', $data['entreprise_ville'] ?? '' ) );
+$formatted_address = trim( sprintf( '%s, %s %s', $data['adresse'] ?? '', $data['code_postal'] ?? '', $data['ville'] ?? '' ) );
+$formatted_company_address = trim( sprintf( '%s, %s %s', $data['entreprise_adresse'] ?? '', $data['entreprise_code_postal'] ?? '', $data['entreprise_ville'] ?? '' ) );
+$formatted_bank_address = trim( sprintf( '%s, %s %s', $data['banque_adresse'] ?? '', $data['banque_code_postal'] ?? '', $data['banque_ville'] ?? '' ) );
 $submitted_on = ! empty( $data['date_soumission'] ) ? mysql2date( 'd/m/Y', $data['date_soumission'] ) : date_i18n( 'd/m/Y' );
+
+// Prélèvement date
+$prelevement_date = '';
+if ( ! empty( $data['prelevement_mois'] ) && ! empty( $data['prelevement_annee'] ) ) {
+	$mois_names = array(
+		'01' => 'Janvier', '02' => 'Février', '03' => 'Mars', '04' => 'Avril',
+		'05' => 'Mai', '06' => 'Juin', '07' => 'Juillet', '08' => 'Août',
+		'09' => 'Septembre', '10' => 'Octobre', '11' => 'Novembre', '12' => 'Décembre'
+	);
+	$mois_name = $mois_names[ $data['prelevement_mois'] ] ?? '';
+	$prelevement_date = '05 ' . $mois_name . ' ' . $data['prelevement_annee'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 	<meta charset="UTF-8">
-	<title><?php esc_html_e( 'Fiche d’adhésion – CGT', 'cgt' ); ?></title>
+	<title>Adhésion FSETUD</title>
 	<style>
 		@page {
 			size: A4;
-			margin: 14mm 16mm;
+			margin: 8mm 10mm;
 		}
 		* {
 			box-sizing: border-box;
-		}
-	body {
-		margin: 0;
-		padding: 0;
-		font-family: "DejaVu Sans", "Inter", "Helvetica Neue", Arial, sans-serif;
-		font-size: 10pt;
-		color: #1f2937;
-		line-height: 1.45;
-	}
-	.wrapper {
-			display: flex;
-			flex-direction: column;
-			min-height: 100vh;
-		}
-		header {
-			text-align: center;
-			padding-bottom: 14px;
-			margin-bottom: 12px;
-			border-bottom: 3px solid #d00000;
-		}
-		header h1 {
 			margin: 0;
-			font-size: 18pt;
-			text-transform: uppercase;
-			letter-spacing: 0.08em;
-			color: #d00000;
+			padding: 0;
 		}
-		header p {
-			margin: 6px 0 0;
-			font-size: 9.5pt;
-			color: #4b5563;
+		body {
+			font-family: "DejaVu Sans", Arial, sans-serif;
+			font-size: 8pt;
+			color: #1f2937;
+			line-height: 1.3;
+		}
+
+		/* Header */
+		.header {
+			text-align: center;
+			padding: 8px 0 10px;
+			margin-bottom: 8px;
+			border-bottom: 3px solid #e30613;
+			background: linear-gradient(135deg, #fff 0%, #f9fafb 100%);
+		}
+		.header h1 {
+			font-size: 16pt;
+			font-weight: 700;
+			color: #e30613;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			margin-bottom: 3px;
+		}
+		.header .subtitle {
+			font-size: 7.5pt;
+			color: #6b7280;
+			margin-bottom: 5px;
+		}
+		.header .contact {
+			font-size: 7pt;
+			color: #9ca3af;
 		}
 		.badge {
-			display: inline-flex;
-			margin-top: 8px;
-			padding: 4px 9px;
-			border-radius: 999px;
-			background: rgba(208, 0, 0, 0.12);
-			color: #d00000;
+			display: inline-block;
+			padding: 3px 10px;
+			background: #e30613;
+			color: white;
+			border-radius: 12px;
+			font-size: 7pt;
 			font-weight: 600;
-			font-size: 8.5pt;
-			letter-spacing: 0.05em;
+			margin-top: 5px;
+			letter-spacing: 0.5px;
 		}
-		h2 {
-			font-size: 10.5pt;
-			margin: 16px 0 8px;
-			text-transform: uppercase;
-			letter-spacing: 0.14em;
-			color: #d00000;
-		}
+
+		/* Sections */
 		.section {
-			border: 1px solid rgba(17, 17, 17, 0.12);
-			border-radius: 10px;
-			padding: 14px 16px;
-			background: rgba(229, 231, 235, 0.2);
+			margin-bottom: 6px;
+			page-break-inside: avoid;
 		}
-		.info-table {
+		.section-title {
+			font-size: 9pt;
+			font-weight: 700;
+			color: white;
+			background: #e30613;
+			padding: 4px 8px;
+			margin-bottom: 4px;
+			text-transform: uppercase;
+			letter-spacing: 0.8px;
+		}
+		.section-content {
+			border: 1px solid #e5e7eb;
+			border-radius: 4px;
+			padding: 6px 8px;
+			background: #f9fafb;
+		}
+
+		/* Grid Layout */
+		.grid {
+			display: table;
 			width: 100%;
 			border-collapse: collapse;
 		}
-		.info-table tr + tr {
-			border-top: 6px solid transparent;
+		.grid-row {
+			display: table-row;
 		}
-		.info-table th {
-			text-align: left;
-			font-size: 7.6pt;
-			font-weight: 600;
-			text-transform: uppercase;
-			letter-spacing: 0.05em;
-			color: #5b6474;
-			padding: 0 6px 2px 0;
-			width: 22%;
+		.grid-cell {
+			display: table-cell;
+			padding: 3px 4px;
 			vertical-align: top;
 		}
-		.info-table td {
-			padding: 5px 8px;
-			border: 1px solid rgba(17, 17, 17, 0.18);
-			border-radius: 6px;
-			background: #ffffff;
-			font-size: 9.4pt;
+		.grid-cell.label {
+			width: 28%;
+			font-size: 6.8pt;
+			font-weight: 600;
+			color: #6b7280;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+		}
+		.grid-cell.value {
+			width: 72%;
+			font-size: 7.8pt;
 			font-weight: 500;
-			color: #1f2937;
-			vertical-align: middle;
+			color: #111827;
+			padding: 3px 6px;
+			background: white;
+			border: 1px solid #d1d5db;
+			border-radius: 3px;
 		}
-		.info-table td.value-spacer {
-			border: none;
-			background: transparent;
-			padding: 0;
+
+		/* Two columns layout */
+		.two-cols {
+			display: table;
+			width: 100%;
 		}
-		.signature {
-			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 14px;
-			margin-top: 10px;
+		.col {
+			display: table-cell;
+			width: 50%;
+			padding: 0 3px;
+			vertical-align: top;
 		}
-		.signature .value {
-			height: 30px;
+		.col:first-child {
+			padding-left: 0;
 		}
-		footer {
-			margin-top: auto;
+		.col:last-child {
+			padding-right: 0;
+		}
+
+		/* Three columns */
+		.three-cols {
+			display: table;
+			width: 100%;
+		}
+		.three-cols .col {
+			width: 33.33%;
+		}
+
+		/* Field inline */
+		.field-inline {
+			display: table;
+			width: 100%;
+			margin-bottom: 3px;
+		}
+		.field-inline .label {
+			display: table-cell;
+			width: 35%;
+			font-size: 6.8pt;
+			font-weight: 600;
+			color: #6b7280;
+			text-transform: uppercase;
+			padding: 3px 4px 3px 0;
+		}
+		.field-inline .value {
+			display: table-cell;
+			font-size: 7.8pt;
+			color: #111827;
+			padding: 3px 6px;
+			background: white;
+			border: 1px solid #d1d5db;
+			border-radius: 3px;
+		}
+
+		/* Signature */
+		.signature-img {
+			max-width: 100%;
+			max-height: 40px;
+			border: 1px solid #d1d5db;
+			border-radius: 3px;
+			padding: 2px;
+			background: white;
+		}
+
+		/* Footer */
+		.footer {
+			margin-top: 8px;
+			padding-top: 5px;
+			border-top: 1px solid #e5e7eb;
 			text-align: center;
-			font-size: 8.5pt;
-			color: #475569;
-			padding-top: 10px;
-			border-top: 1px solid rgba(17, 17, 17, 0.1);
+			font-size: 6.5pt;
+			color: #9ca3af;
+		}
+
+		/* Compact spacing */
+		.compact {
+			margin-bottom: 4px;
 		}
 	</style>
 </head>
 <body>
-	<div class="wrapper">
-		<header>
-			<h1><?php esc_html_e( 'Fédération des Sociétés d’Études – CGT', 'cgt' ); ?></h1>
-			<p><?php esc_html_e( 'Case 421 – 263 rue de Paris – 93514 Montreuil Cedex', 'cgt' ); ?><br><?php esc_html_e( 'Tél : 01 55 82 89 41', 'cgt' ); ?></p>
-			<span class="badge"><?php echo esc_html( sprintf( __( 'Soumis le %s', 'cgt' ), $submitted_on ) ); ?></span>
-		</header>
+	<!-- Header -->
+	<div class="header">
+		<h1>ADHÉSION FSETUD</h1>
+		<div class="subtitle">Fédération des Sociétés d'Études et du Développement – CGT</div>
+		<div class="contact">Case 421 – 263 rue de Paris – 93514 Montreuil Cedex – Tél : 01 55 82 89 41</div>
+		<span class="badge">SOUMIS LE <?php echo strtoupper( $submitted_on ); ?></span>
+	</div>
 
-		<h2><?php esc_html_e( 'Informations personnelles', 'cgt' ); ?></h2>
-		<div class="section">
-			<table class="info-table">
-				<tr>
-					<th><?php esc_html_e( 'Nom', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'nom', '—' ); ?></td>
-					<th><?php esc_html_e( 'Prénom', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'prenom', '—' ); ?></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Sexe', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'sexe', '—' ); ?></td>
-					<th><?php esc_html_e( 'Date de naissance', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'date_naissance', '—' ); ?></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Nationalité', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'nationalite', '—' ); ?></td>
-					<th><?php esc_html_e( 'Téléphone', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'tel', '—' ); ?></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Email', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'email', '—' ); ?></td>
-					<th><?php esc_html_e( 'Statut', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'statut', '—' ); ?></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Catégorie', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'categorie', '—' ); ?></td>
-					<th><?php esc_html_e( 'Adresse postale', 'cgt' ); ?></th>
-					<td><?php echo ! empty( $formatted_address ) ? esc_html( $formatted_address ) : '—'; ?></td>
-				</tr>
-			</table>
-		</div>
-
-		<h2><?php esc_html_e( 'Informations professionnelles', 'cgt' ); ?></h2>
-		<div class="section">
-			<table class="info-table">
-				<tr>
-					<th><?php esc_html_e( 'Entreprise', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'entreprise_nom', '—' ); ?></td>
-					<th><?php esc_html_e( 'SIRET', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'entreprise_siret', '—' ); ?></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Secteur', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'secteur', '—' ); ?></td>
-					<th><?php esc_html_e( 'Téléphone entreprise', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'entreprise_tel', '—' ); ?></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Email entreprise', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'entreprise_email', '—' ); ?></td>
-					<th><?php esc_html_e( 'Adresse de l’entreprise', 'cgt' ); ?></th>
-					<td><?php echo ! empty( $formatted_company_address ) ? esc_html( $formatted_company_address ) : '—'; ?></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Union locale', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'union_locale', '—' ); ?></td>
-					<th><?php esc_html_e( 'Union départementale', 'cgt' ); ?></th>
-					<td><?php echo $get_value( 'union_departementale', '—' ); ?></td>
-				</tr>
-			</table>
-		</div>
-
-		<h2><?php esc_html_e( 'Signature', 'cgt' ); ?></h2>
-		<div class="section">
-			<div class="signature">
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Fait à', 'cgt' ); ?></div>
-					<div class="value">&nbsp;</div>
+	<!-- SECTION 1: Informations Personnelles -->
+	<div class="section compact">
+		<div class="section-title">1. INFORMATIONS PERSONNELLES</div>
+		<div class="section-content">
+			<div class="two-cols">
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Nom</div>
+						<div class="value"><?php echo $get_value( 'nom', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Prénom</div>
+						<div class="value"><?php echo $get_value( 'prenom', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Sexe</div>
+						<div class="value"><?php echo $get_value( 'sexe', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Date naissance</div>
+						<div class="value"><?php echo $get_value( 'date_naissance', '—' ); ?></div>
+					</div>
 				</div>
-				<div class="field">
-					<div class="label"><?php esc_html_e( 'Date', 'cgt' ); ?></div>
-					<div class="value">&nbsp;</div>
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Nationalité</div>
+						<div class="value"><?php echo $get_value( 'nationalite', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Téléphone</div>
+						<div class="value"><?php echo $get_value( 'tel', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Email</div>
+						<div class="value"><?php echo $get_value( 'email', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Adresse</div>
+						<div class="value"><?php echo ! empty( $formatted_address ) ? esc_html( $formatted_address ) : '—'; ?></div>
+					</div>
+				</div>
+			</div>
+			<div class="two-cols" style="margin-top: 3px;">
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Statut</div>
+						<div class="value"><?php echo $get_value( 'statut', '—' ); ?></div>
+					</div>
+				</div>
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Catégorie</div>
+						<div class="value"><?php echo $get_value( 'categorie', '—' ); ?></div>
+					</div>
 				</div>
 			</div>
 		</div>
+	</div>
 
-		<footer>
-			<p><?php esc_html_e( 'Ce document est généré automatiquement à partir des données fournies par l’adhérent.', 'cgt' ); ?><br><?php esc_html_e( '© Fédération des Sociétés d’Études – CGT', 'cgt' ); ?></p>
-		</footer>
+	<!-- SECTION 2: Informations Entreprise -->
+	<div class="section compact">
+		<div class="section-title">2. INFORMATIONS ENTREPRISE</div>
+		<div class="section-content">
+			<div class="two-cols">
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Entreprise</div>
+						<div class="value"><?php echo $get_value( 'entreprise_nom', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">SIRET</div>
+						<div class="value"><?php echo $get_value( 'entreprise_siret', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Groupe</div>
+						<div class="value"><?php echo $get_value( 'appartient_groupe', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Secteur</div>
+						<div class="value"><?php echo $get_value( 'secteur', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Code APE/NAF</div>
+						<div class="value"><?php echo $get_value( 'code_ape_naf', '—' ); ?></div>
+					</div>
+				</div>
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Adresse</div>
+						<div class="value"><?php echo ! empty( $formatted_company_address ) ? esc_html( $formatted_company_address ) : '—'; ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Téléphone</div>
+						<div class="value"><?php echo $get_value( 'entreprise_tel', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Email</div>
+						<div class="value"><?php echo $get_value( 'entreprise_email', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Convention collective</div>
+						<div class="value"><?php echo $get_value( 'convention_collective', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Effectif</div>
+						<div class="value"><?php echo $get_value( 'effectif', '—' ); ?></div>
+					</div>
+				</div>
+			</div>
+			<div class="two-cols" style="margin-top: 3px;">
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Union locale</div>
+						<div class="value"><?php echo $get_value( 'union_locale', '—' ); ?></div>
+					</div>
+				</div>
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Union départ.</div>
+						<div class="value"><?php echo $get_value( 'union_departementale', '—' ); ?></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- SECTION 3: Cotisation -->
+	<div class="section compact">
+		<div class="section-title">3. COTISATION ET PRÉLÈVEMENT</div>
+		<div class="section-content">
+			<div class="three-cols">
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Cotisation mensuelle</div>
+						<div class="value"><?php echo $get_value( 'cotisation_mensuelle', '—' ); ?> €</div>
+					</div>
+				</div>
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Date prélèvement</div>
+						<div class="value"><?php echo ! empty( $prelevement_date ) ? esc_html( $prelevement_date ) : '—'; ?></div>
+					</div>
+				</div>
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Montant prélèvement</div>
+						<div class="value"><?php echo $get_value( 'prelevement_montant', '—' ); ?> €</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- SECTION 4: Domiciliation Bancaire -->
+	<div class="section compact">
+		<div class="section-title">4. DOMICILIATION BANCAIRE</div>
+		<div class="section-content">
+			<div class="two-cols">
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">Nom de la banque</div>
+						<div class="value"><?php echo $get_value( 'banque_nom', '—' ); ?></div>
+					</div>
+					<div class="field-inline">
+						<div class="label">Adresse banque</div>
+						<div class="value"><?php echo ! empty( $formatted_bank_address ) ? esc_html( $formatted_bank_address ) : '—'; ?></div>
+					</div>
+				</div>
+				<div class="col">
+					<div class="field-inline">
+						<div class="label">RIB</div>
+						<div class="value"><?php echo $get_value( 'rib', '—' ); ?></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- SECTION 5: Signature -->
+	<div class="section">
+		<div class="section-title">5. SIGNATURE</div>
+		<div class="section-content">
+			<?php if ( ! empty( $data['signature'] ) ) : ?>
+				<img src="<?php echo esc_url( $data['signature'] ); ?>" class="signature-img" alt="Signature">
+			<?php else : ?>
+				<div style="padding: 10px; text-align: center; color: #9ca3af; font-size: 7pt; border: 1px dashed #d1d5db; border-radius: 3px; background: white;">
+					Signature non fournie
+				</div>
+			<?php endif; ?>
+		</div>
+	</div>
+
+	<!-- Footer -->
+	<div class="footer">
+		<p>Document généré automatiquement le <?php echo date_i18n( 'd/m/Y à H:i' ); ?> | © <?php echo date( 'Y' ); ?> FSETUD-CGT | Tous droits réservés</p>
 	</div>
 </body>
 </html>
