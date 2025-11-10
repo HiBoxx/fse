@@ -221,7 +221,7 @@ function cgt_register_cpts() {
 			'menu_icon'           => 'dashicons-chart-pie',
 			'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'author' ),
 			'rewrite'             => array(
-				'slug'       => 'enquetes',
+				'slug'       => 'consultations',
 				'with_front' => false,
 			),
 		)
@@ -1695,4 +1695,3 @@ function cgt_enquete_handle_vote() {
 }
 add_action( 'wp_ajax_cgt_enquete_vote', 'cgt_enquete_handle_vote' );
 add_action( 'wp_ajax_nopriv_cgt_enquete_vote', 'cgt_enquete_handle_vote' );
-
