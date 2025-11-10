@@ -201,6 +201,46 @@ function cgt_register_cpts() {
 		)
 	);
 
+	register_post_type(
+		'cgt_enquete',
+		array(
+			'label'               => __( 'Enquêtes', 'cgt' ),
+			'labels'              => array(
+				'name'          => __( 'Enquêtes', 'cgt' ),
+				'singular_name' => __( 'Enquête', 'cgt' ),
+				'add_new'       => __( 'Créer une enquête', 'cgt' ),
+				'add_new_item'  => __( 'Ajouter une nouvelle enquête', 'cgt' ),
+				'all_items'     => __( 'Toutes les enquêtes', 'cgt' ),
+			),
+			'public'              => true,
+			'publicly_queryable'  => true,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'show_in_rest'        => true,
+			'has_archive'         => true,
+			'menu_icon'           => 'dashicons-chart-pie',
+			'supports'            => array( 'title', 'editor', 'excerpt', 'thumbnail', 'author' ),
+			'rewrite'             => array(
+				'slug'       => 'enquetes',
+				'with_front' => false,
+			),
+		)
+	);
+
+	register_post_type(
+		'cgt_enquete_response',
+		array(
+			'label'               => __( 'Réponses d’enquête', 'cgt' ),
+			'public'              => false,
+			'show_ui'             => false,
+			'show_in_menu'        => false,
+			'show_in_rest'        => false,
+			'capability_type'     => 'post',
+			'supports'            => array( 'title', 'author' ),
+			'map_meta_cap'        => true,
+		)
+	);
+
 }
 add_action( 'init', 'cgt_register_cpts' );
 
@@ -332,8 +372,123 @@ function cgt_register_meta_fields() {
 			'auth_callback'     => $auth_callback,
 		)
 	);
+
+	register_post_meta(
+		'cgt_enquete',
+		'cgt_enquete_questions',
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'sanitize_callback' => 'cgt_sanitize_enquete_meta_string',
+			'show_in_rest'      => false,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'cgt_enquete',
+		'cgt_enquete_pdf_id',
+		array(
+			'type'              => 'integer',
+			'single'            => true,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'cgt_enquete',
+		'cgt_enquete_total_responses',
+		array(
+			'type'              => 'integer',
+			'single'            => true,
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'cgt_enquete',
+		'cgt_enquete_last_response',
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'sanitize_callback' => 'sanitize_text_field',
+			'show_in_rest'      => true,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'cgt_enquete_response',
+		'cgt_enquete_id',
+		array(
+			'type'              => 'integer',
+			'single'            => true,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => false,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'cgt_enquete_response',
+		'cgt_enquete_user_id',
+		array(
+			'type'              => 'integer',
+			'single'            => true,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => false,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'cgt_enquete_response',
+		'cgt_enquete_answers',
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'sanitize_callback' => 'cgt_sanitize_enquete_meta_string',
+			'show_in_rest'      => false,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'cgt_enquete_response',
+		'cgt_enquete_branch',
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'sanitize_callback' => 'sanitize_text_field',
+			'show_in_rest'      => false,
+			'auth_callback'     => $auth_callback,
+		)
+	);
 }
 add_action( 'init', 'cgt_register_meta_fields' );
+
+/**
+ * Sanitize JSON meta stored as string for enquêtes.
+ *
+ * @param mixed $value Meta value.
+ * @return string
+ */
+function cgt_sanitize_enquete_meta_string( $value ) {
+	if ( is_array( $value ) || is_object( $value ) ) {
+		$value = wp_json_encode( $value );
+	}
+
+	if ( ! is_string( $value ) ) {
+		return '';
+	}
+
+	return wp_kses_post( $value );
+}
 
 /**
  * Customize admin list columns for contact messages.
