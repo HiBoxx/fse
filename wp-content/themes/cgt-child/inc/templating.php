@@ -23,6 +23,7 @@ function cgt_template_loader( $template ) {
 		'page-espace-adherent.php' => is_page( 'espace-adherent' ) || 'templates/page-espace-adherent.php' === $page_template,
 		'page-espace-presse.php'   => is_page( 'espace-presse' ) || 'templates/page-espace-presse.php' === $page_template,
 		'page-branches.php'        => is_page( 'branches' ) || 'templates/page-branches.php' === $page_template,
+		'page-enquetes.php'        => is_page( 'enquetes' ) || 'templates/page-enquetes.php' === $page_template,
 		'single-branch.php'        => is_singular( 'branch' ),
 	);
 
@@ -191,6 +192,11 @@ function cgt_setup_pages_and_menus() {
 			'post_title'   => __( 'Médiathèque', 'cgt' ),
 			'post_content' => '<div class="placeholder" aria-hidden="true"></div><p>' . esc_html__( 'Logos, photos officielles et éléments de charte graphique.', 'cgt' ) . '</p>',
 			'_wp_page_template' => 'templates/page-bibliotheque.php',
+		),
+		'enquetes'            => array(
+			'post_title'        => __( 'Enquêtes', 'cgt' ),
+			'_wp_page_template' => 'templates/page-enquetes.php',
+			'post_status'       => 'publish',
 		),
 		'contacts-presse'     => array(
 			'post_title'   => __( 'Contacts presse', 'cgt' ),
@@ -397,6 +403,36 @@ function cgt_ensure_actualites_page_exists() {
 	}
 }
 add_action( 'init', 'cgt_ensure_actualites_page_exists', 15 );
+
+/**
+ * Garantit l'existence de la page Enquêtes.
+ */
+function cgt_ensure_enquetes_page_exists() {
+	$page = get_page_by_path( 'enquetes', OBJECT, 'page' );
+
+	if ( ! $page ) {
+		$page_id = wp_insert_post(
+			array(
+				'post_type'      => 'page',
+				'post_title'     => __( 'Enquêtes', 'cgt' ),
+				'post_name'      => 'enquetes',
+				'post_status'    => 'publish',
+				'comment_status' => 'closed',
+			)
+		);
+
+		if ( is_wp_error( $page_id ) ) {
+			return;
+		}
+
+		$page = get_post( $page_id );
+	}
+
+	if ( $page && 'templates/page-enquetes.php' !== get_page_template_slug( $page->ID ) ) {
+		update_post_meta( $page->ID, '_wp_page_template', 'templates/page-enquetes.php' );
+	}
+}
+add_action( 'init', 'cgt_ensure_enquetes_page_exists', 15 );
 
 /**
  * Garantit l'existence de la page Classes (filtres).

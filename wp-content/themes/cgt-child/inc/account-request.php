@@ -40,6 +40,7 @@ function cgt_handle_account_request() {
 	$password   = isset( $posted['password'] ) ? (string) $posted['password'] : '';
 	$confirm    = isset( $posted['password_confirm'] ) ? (string) $posted['password_confirm'] : '';
 	$company    = isset( $posted['entreprise'] ) ? sanitize_text_field( $posted['entreprise'] ) : '';
+	$member_id  = isset( $posted['numero_adherent'] ) ? sanitize_text_field( $posted['numero_adherent'] ) : '';
 	$branch_id  = isset( $posted['branche'] ) ? absint( $posted['branche'] ) : 0;
 	$terms_ok   = isset( $posted['accept_terms'] ) && '1' === $posted['accept_terms'];
 
@@ -93,6 +94,10 @@ function cgt_handle_account_request() {
 		update_user_meta( $user_id, 'cgt_user_company', $company );
 	}
 
+	if ( $member_id ) {
+		update_user_meta( $user_id, 'cgt_member_id', $member_id );
+	}
+
 	/**
 	 * Permet aux extensions de réagir à la création d'un compte adhérent.
 	 *
@@ -109,6 +114,7 @@ function cgt_handle_account_request() {
 			'username'   => $username,
 			'company'    => $company,
 			'branch_id'  => $branch_id,
+			'member_id'  => $member_id,
 		)
 	);
 

@@ -1,0 +1,219 @@
+=== Documentation Fonctionnelle du thème "cgt-child" ===
+
+Ce document résume l’architecture et les principales fonctionnalités développées dans le thème enfant.
+Chaque section est commentée pour préciser le rôle exact des fichiers et des flux de données.
+
+-----------------------------------------------------------------
+1. Structure générale du thème
+-----------------------------------------------------------------
+- Le thème enfant "cgt-child" étend Twenty Twenty-Five et organise
+  son code en modules chargés via `functions.php` (répertoire `inc/`).
+- Les styles se trouvent dans `assets/css/`, les scripts dans `assets/js/`.
+- Les gabarits spécifiques (connexion, assistance, gestionnaire, etc.)
+  sont situés à la racine du thème ou dans `templates/`.
+
+-----------------------------------------------------------------
+2. Données : Custom Post Types & Taxonomies
+-----------------------------------------------------------------
+Fichier : `inc/cpt.php`
+- Déclare les CPT suivants :
+  * `communiques_de_presse` et `dossiers_de_presse` pour la presse.
+  * `tracts` pour les documents PDF/tracts.
+  * `articles_adherents` (contenu privé réservé aux membres).
+  * `branch` (pages de branches syndicales).
+  * `cgt_question` (questions posées via l’espace adhérent).
+  * `cgt_contact` (messages issus du formulaire contact).
+  * `cgt_agenda` (événements fédéraux).
+  * `cgt_enquete` (consultations) + `cgt_enquete_response` (réponses adhérents).
+
+Fichier : `inc/taxonomies.php`
+- Taxonomie hiérarchique `branche` partagée par plusieurs CPT.
+- Taxonomie `thematique` (classes) pour articles et contenus membres.
+- Taxonomie `zone_internationale` (zones, UI masquée par défaut).
+
+-----------------------------------------------------------------
+3. Rôles & accès
+-----------------------------------------------------------------
+Fichier : `inc/roles.php`
+- Rôle `adherent` : autorisations de lecture du contenu privé.
+- Rôle `gestionnaire` : gestion des adhésions via l’espace dédié.
+- Rôle `assistance` : gestion éditoriale depuis l’espace assistance.
+- Redirections automatiques après connexion et restrictions admin.
+- Sur `/espace-adherent`, les gestionnaires/assistance sont redirigés
+  vers leurs interfaces (pas d’espace adhérent affiché).
+
+-----------------------------------------------------------------
+4. Connexion & création de compte
+-----------------------------------------------------------------
+Fichier : `page-connexion.php`
+- Page de connexion entièrement personnalisée (design dans `assets/css/connexion.css`).
+- Modal "Je suis déjà adhérent·e" soumettant vers `admin-post.php?action=cgt_request_account`.
+- JavaScript (`assets/js/connexion.js`) gère l’ouverture du modal, la validation
+  des champs (mot de passe, email) et l’affichage conditionnel des messages.
+
+Fichier : `inc/account-request.php`
+- Traitement du formulaire modal : vérifications, anti-spam, création d’un compte `adherent`.
+- Stocke la branche, l’entreprise, puis connecte l’utilisateur et le redirige
+  vers `/espace-adherent` avec un message de succès.
+
+-----------------------------------------------------------------
+5. Formulaire d’adhésion
+-----------------------------------------------------------------
+Fichiers : `page-connexion.php` (modal) + `inc/adhesion.php`
+- Formulaire complet : informations personnelles, professionnelles, cotisation
+  et coordonnées bancaires.
+- Crée un CPT `cgt_adhesion`, envoie des notifications (admin, adhérent),
+  génère un PDF via Dompdf (HTML dans `templates/pdf/adhesion-template.php`).
+- Anti-spam : honeypot et rate limiting.
+
+-----------------------------------------------------------------
+6. Espace adhérent
+-----------------------------------------------------------------
+Fichier : `templates/page-espace-adherent.php`
+- Tableau de bord pour les adhérents : tracts privés, questions, articles,
+  actualités par branche.
+- Sélection de la branche (une seule fois) via `admin-post.php?action=cgt_select_user_branch`.
+- Scripts associés : `assets/js/espace-adherent.js`; styles : `assets/css/espace-adherent.css`.
+- Les utilisateurs `gestionnaire` et `assistance` n’utilisent pas ce parcours
+  (pas de formulaire de branche, accès direct à leurs interfaces).
+
+-----------------------------------------------------------------
+7. Modernisation des espaces internes
+-----------------------------------------------------------------
+Espace Gestionnaire : `page-gestionnaire.php`
+- Accès réservé au rôle `gestionnaire`.
+- Dashboard : statistiques, recherche, tableau des adhésions (lecture, statut,
+  téléchargement PDF), design spécifique.
+
+Espace Assistance : `page-assistance.php` + `inc/assistance/*.php`
+- Interface tabulaire (Dashboard, Articles, Tracts, Événements, Médiathèque, Messages, Adhérents).
+- Formulaires internes (voir point 8) pour publier du contenu à valider.
+- Styles dédiés intégrés en bas de page.
+- Onglet « Enquêtes » : création via `inc/assistance/enquetes.php`, builder JS (`assets/js/assistance-enquetes.js`)
+  et consultation des réponses stockées dans `cgt_enquete_response`.
+
+Modern Media Library : `inc/media-library-modern.php`
+- Page moderne dans le back-office pour gérer images/PDF.
+- CSS : `assets/css/admin-media.css`; JS : `assets/js/admin-media.js` (filtres Images/PDF).
+- Le menu natif "Médias" est masqué et redirigé vers cette nouvelle page.
+
+Admin Agenda : `inc/agenda.php` + `assets/css/admin-agenda.css`
+- Metabox personnalisée pour les événements (`cgt_agenda`).
+- Thématisation complète de l’interface d’édition.
+
+-----------------------------------------------------------------
+8. Soumissions Assistance (articles, tracts, événements, enquêtes)
+-----------------------------------------------------------------
+Fichier : `inc/assistance-submissions.php`
+- Opérations `admin_post_cgt_assistance_article_submit`, `..._tract_submit`, `..._event_submit`, `..._enquete_submit`.
+- Commun : vérification nonce + permissions `assistance`, création d’un contenu
+  en statut `pending`, traitement des champs (titre, description, extrait, branche,
+  mots-clés, sources), gestion d’uploads (image/PDF), notification admin.
+- Articles -> CPT `post`; Tracts -> CPT `tracts`; Événements -> CPT `cgt_agenda` (avec date & lieu);
+  Enquêtes -> CPT `cgt_enquete` (questions multi-choix en JSON + PDF briefing).
+- Message de confirmation/erreur renvoyé via query string `status`.
+
+Sections Assistance :
+- `inc/assistance/articles.php` : formulaire + listing des articles.
+- `inc/assistance/tracts.php` : idem pour tracts.
+- `inc/assistance/events.php` : idem pour événements (datetime, lieu).
+- `inc/assistance/enquetes.php` : builder drag-free, compteur de réponses, tableau des participations.
+- `inc/assistance/media.php/messages.php/adherents.php` : autres onglets de gestion.
+
+-----------------------------------------------------------------
+9. Shortcodes & front-end
+-----------------------------------------------------------------
+Fichier : `inc/shortcodes.php`
+- `[cgt_tracts]` : liste filtrable (branche, thématique, zone) avec pagination.
+- `[cgt_communiques]` : trois derniers communiqués.
+- `[cgt_questions]` : formulaire pour poser une question (CPT `cgt_question`).
+
+Templates publics :
+- `front-page.php` : hero CTA, communiqués récents, tracts, newsletter.
+- `page-contact.php` : formulaire styled, coordonnées, carte Google Maps.
+- `page-la-federation.php` : sections éditorialisées.
+- `templates/page-enquetes.php` : page Ressources > Enquêtes avec formulaire réservé aux adhérents autorisés.
+- Archives/singles pour communiqués, tracts, dossiers, événements.
+
+-----------------------------------------------------------------
+10. Newsletter & communications
+-----------------------------------------------------------------
+Fichiers : `inc/newsletter.php`, `inc/brevo.php`
+- Gestion des inscriptions newsletter (Brevo/Sendinblue).
+- Récupération des champs (prénom, nom, email, régions, branches). 
+- Envoi ou stockage selon configuration (mailing externe à paramétrer).
+
+-----------------------------------------------------------------
+11. Sécurité & conformité
+-----------------------------------------------------------------
+Fichier : `inc/security.php`
+- Désactive XML-RPC, anonymise les erreurs de login.
+- Empêche l’énumération d’auteurs anonymes.
+- Bannière cookies (affichée toutes les 1h grâce à localStorage).
+- Gestion cookie banner dans CSS principal (`cgt.css` -> classe `cookie-banner`).
+
+Fichier : `inc/rate-limiting.php`
+- Limitation du nombre de soumissions par heure (adhésion, création de compte…)
+  via transients ou même logique (réduis les spam bots).
+
+Fichier : `inc/pdf-validation.php`
+- Vérifie les PDF uploadés (type, taille) avant acceptation.
+
+-----------------------------------------------------------------
+12. Optimisations & divers
+-----------------------------------------------------------------
+Fichier : `inc/optimizations.php`
+- Tweaks front : suppression emojis, désactivation flux inutiles, etc.
+
+Fichier : `inc/content-reset.php`
+- Nettoyage des contenus par défaut lors de l’activation du thème.
+- Mise en place des pages obligatoires (accueil, branches, etc.) et menus
+  si besoin.
+
+Fichier : `inc/autoload-audit.php`
+- Outil de diagnostic pour détecter des conflits de classes/autoloaders.
+
+Fichier : `inc/home-slider.php`
+- Gestion du slider d’accueil si activé (CPT ou ACF selon configuration).
+
+-----------------------------------------------------------------
+13. Styles & ressources
+-----------------------------------------------------------------
+- `assets/css/cgt.css` : feuille de styles principale (variables `--cgt-red` etc.).
+- Styles par page : `connexion.css`, `contact.css`, `federation.css`,
+  `espace-adherent.css`, `admin-adhesions.css`, `admin-media.css`,
+  `admin-agenda.css`, `home-slider.css`, etc.
+- `assets/js/connexion.js`, `espace-adherent.js`, `admin-media.js`,
+  `home-slider.js` : interactions spécifiques.
+- Images placeholders gris, fallback image par défaut définie dans `functions.php`.
+
+-----------------------------------------------------------------
+14. Points d’extension recommandés
+-----------------------------------------------------------------
+- `cgt_assistance_notify_admin()` (dans `assistance-submissions.php`) :
+  ajuster pour ajouter Slack/email multiples.
+- Filtres `apply_filters( 'cgt_child_logo_url', ... )`, `cgt_child_default_image_url`
+  pour personnaliser logo/fallback via un plugin.
+- Ajouter des validations supplémentaires (ex: taille max PDF) si besoin.
+- Internationalisation : textes déjà i18n (domain `cgt`).
+
+-----------------------------------------------------------------
+15. Tests / validation
+-----------------------------------------------------------------
+- Vérifier les formulaires (connexion, adhésion, assistance) en condition réelle;
+  les soumissions utilisent `admin-post.php` et renvoient par `status` (success, error…).
+- Contrôler l’envoi d’emails (adhésion, assistance, account-request) selon
+  l’environnement (mailcatcher/SMTP recommandé).
+- Vérifier la génération de PDF d’adhésion (caractères accentués, mises en page A4).
+- Media Library moderne : s’assurer que l’utilisateur assistance dispose de `upload_files`.
+
+-----------------------------------------------------------------
+16. Dépendances externes
+-----------------------------------------------------------------
+- Dompdf (intégré dans `vendor/dompdf/` ou via composer) pour génération PDF.
+- Sendinblue/Brevo (si API configurée) pour newsletters.
+- Google Maps (iframe) sur page contact.
+
+-----------------------------------------------------------------
+Ce document doit être mis à jour à chaque évolution majeure (ajout de role,
+modification de formulaire, nouveau CPT, etc.).
