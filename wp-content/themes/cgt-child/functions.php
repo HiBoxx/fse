@@ -70,6 +70,7 @@ $cgt_inc_files = array(
 	'admin-post-creation.php',
 	'admin-menu-reorganization.php',
 	'content-reset.php',
+	'enquetes.php',
 	'assistance-submissions.php',
 );
 

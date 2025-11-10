@@ -316,6 +316,78 @@ function cgt_assistance_handle_event_submission() {
 	exit;
 }
 add_action( 'admin_post_cgt_assistance_event_submit', 'cgt_assistance_handle_event_submission' );
+
+/**
+ * Handle assistance enquête submission.
+ */
+function cgt_assistance_handle_enquete_submission() {
+	cgt_assistance_assert_permissions();
+
+	if ( ! isset( $_POST['cgt_assistance_enquete_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['cgt_assistance_enquete_nonce'] ), 'cgt_assistance_enquete' ) ) {
+		wp_safe_redirect( cgt_assistance_redirect_url( array( 'section' => 'enquetes', 'status' => 'nonce' ) ) );
+		exit;
+	}
+
+	$title       = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+	$description = isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '';
+	$excerpt     = isset( $_POST['excerpt'] ) ? sanitize_textarea_field( wp_unslash( $_POST['excerpt'] ) ) : '';
+	$questions   = isset( $_POST['questions'] ) ? cgt_normalize_enquete_questions_input( wp_unslash( $_POST['questions'] ) ) : array();
+
+	if ( empty( $title ) || empty( $description ) || empty( $questions ) ) {
+		wp_safe_redirect( cgt_assistance_redirect_url( array( 'section' => 'enquetes', 'status' => 'missing' ) ) );
+		exit;
+	}
+
+	$post_id = wp_insert_post(
+		array(
+			'post_type'    => 'cgt_enquete',
+			'post_status'  => 'draft',
+			'post_author'  => get_current_user_id(),
+			'post_title'   => $title,
+			'post_content' => $description,
+			'post_excerpt' => $excerpt,
+		),
+		true
+	);
+
+	if ( is_wp_error( $post_id ) ) {
+		wp_safe_redirect( cgt_assistance_redirect_url( array( 'section' => 'enquetes', 'status' => 'error' ) ) );
+		exit;
+	}
+
+	update_post_meta( $post_id, 'cgt_enquete_questions', wp_json_encode( $questions ) );
+	update_post_meta( $post_id, 'cgt_enquete_total_responses', 0 );
+
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+
+	if ( ! empty( $_FILES['featured_image']['name'] ) ) {
+		$attachment_id = media_handle_upload( 'featured_image', $post_id );
+		if ( ! is_wp_error( $attachment_id ) ) {
+			set_post_thumbnail( $post_id, $attachment_id );
+		}
+	}
+
+	if ( ! empty( $_FILES['pdf_file']['name'] ) ) {
+		$pdf_id = media_handle_upload( 'pdf_file', $post_id );
+		if ( ! is_wp_error( $pdf_id ) ) {
+			update_post_meta( $post_id, 'cgt_enquete_pdf_id', $pdf_id );
+		}
+	}
+
+	cgt_assistance_notify_admin(
+		array(
+			'type'    => 'enquete',
+			'post_id' => $post_id,
+			'title'   => $title,
+		)
+	);
+
+	wp_safe_redirect( cgt_assistance_redirect_url( array( 'section' => 'enquetes', 'status' => 'success' ) ) );
+	exit;
+}
+add_action( 'admin_post_cgt_assistance_enquete_submit', 'cgt_assistance_handle_enquete_submission' );
 /**
  * Notify site admin when a new submission is created.
  *
@@ -333,7 +405,20 @@ function cgt_assistance_notify_admin( $args ) {
 
 	$post_edit_link = $post_id ? get_edit_post_link( $post_id, '' ) : '';
 
-	$label = in_array( $type, array( 'post', 'article' ), true ) ? __( 'article', 'cgt' ) : __( 'tract', 'cgt' );
+	switch ( $type ) {
+		case 'tract':
+			$label = __( 'tract', 'cgt' );
+			break;
+		case 'event':
+			$label = __( 'événement', 'cgt' );
+			break;
+		case 'enquete':
+			$label = __( 'enquête', 'cgt' );
+			break;
+		default:
+			$label = __( 'article', 'cgt' );
+			break;
+	}
 
 	$subject = sprintf(
 		/* translators: %s: content type label */

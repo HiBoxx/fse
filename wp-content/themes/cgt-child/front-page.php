@@ -529,7 +529,7 @@ $communiques_tabs = array(
 								</svg>
 							</div>
 							<h3><?php esc_html_e( 'Se syndiquer', 'cgt' ); ?></h3>
-							<p><?php esc_html_e( 'Adhérez à la CGT et bénéficiez d\'un accompagnement syndical complet.', 'cgt' ); ?></p>
+							<p><?php esc_html_e( 'Adhérez à la CGT et renforcez la voix collective de la FSETUD dans chaque entreprise.', 'cgt' ); ?></p>
 							<a href="<?php echo esc_url( home_url( '/connexion' ) ); ?>" class="btn btn-compact"><?php esc_html_e( 'Adhérer maintenant', 'cgt' ); ?></a>
 						</div>
 

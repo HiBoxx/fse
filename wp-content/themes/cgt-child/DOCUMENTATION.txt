@@ -24,6 +24,7 @@ Fichier : `inc/cpt.php`
   * `cgt_question` (questions posées via l’espace adhérent).
   * `cgt_contact` (messages issus du formulaire contact).
   * `cgt_agenda` (événements fédéraux).
+  * `cgt_enquete` (consultations) + `cgt_enquete_response` (réponses adhérents).
 
 Fichier : `inc/taxonomies.php`
 - Taxonomie hiérarchique `branche` partagée par plusieurs CPT.
@@ -88,6 +89,8 @@ Espace Assistance : `page-assistance.php` + `inc/assistance/*.php`
 - Interface tabulaire (Dashboard, Articles, Tracts, Événements, Médiathèque, Messages, Adhérents).
 - Formulaires internes (voir point 8) pour publier du contenu à valider.
 - Styles dédiés intégrés en bas de page.
+- Onglet « Enquêtes » : création via `inc/assistance/enquetes.php`, builder JS (`assets/js/assistance-enquetes.js`)
+  et consultation des réponses stockées dans `cgt_enquete_response`.
 
 Modern Media Library : `inc/media-library-modern.php`
 - Page moderne dans le back-office pour gérer images/PDF.
@@ -99,20 +102,22 @@ Admin Agenda : `inc/agenda.php` + `assets/css/admin-agenda.css`
 - Thématisation complète de l’interface d’édition.
 
 -----------------------------------------------------------------
-8. Soumissions Assistance (articles, tracts, événements)
+8. Soumissions Assistance (articles, tracts, événements, enquêtes)
 -----------------------------------------------------------------
 Fichier : `inc/assistance-submissions.php`
-- Opérations `admin_post_cgt_assistance_article_submit`, `..._tract_submit`, `..._event_submit`.
+- Opérations `admin_post_cgt_assistance_article_submit`, `..._tract_submit`, `..._event_submit`, `..._enquete_submit`.
 - Commun : vérification nonce + permissions `assistance`, création d’un contenu
   en statut `pending`, traitement des champs (titre, description, extrait, branche,
   mots-clés, sources), gestion d’uploads (image/PDF), notification admin.
-- Articles -> CPT `post`; Tracts -> CPT `tracts`; Événements -> CPT `cgt_agenda` (avec date & lieu).
+- Articles -> CPT `post`; Tracts -> CPT `tracts`; Événements -> CPT `cgt_agenda` (avec date & lieu);
+  Enquêtes -> CPT `cgt_enquete` (questions multi-choix en JSON + PDF briefing).
 - Message de confirmation/erreur renvoyé via query string `status`.
 
 Sections Assistance :
 - `inc/assistance/articles.php` : formulaire + listing des articles.
 - `inc/assistance/tracts.php` : idem pour tracts.
 - `inc/assistance/events.php` : idem pour événements (datetime, lieu).
+- `inc/assistance/enquetes.php` : builder drag-free, compteur de réponses, tableau des participations.
 - `inc/assistance/media.php/messages.php/adherents.php` : autres onglets de gestion.
 
 -----------------------------------------------------------------
@@ -127,6 +132,7 @@ Templates publics :
 - `front-page.php` : hero CTA, communiqués récents, tracts, newsletter.
 - `page-contact.php` : formulaire styled, coordonnées, carte Google Maps.
 - `page-la-federation.php` : sections éditorialisées.
+- `templates/page-enquetes.php` : page Ressources > Enquêtes avec formulaire réservé aux adhérents autorisés.
 - Archives/singles pour communiqués, tracts, dossiers, événements.
 
 -----------------------------------------------------------------
@@ -211,4 +217,3 @@ Fichier : `inc/home-slider.php`
 -----------------------------------------------------------------
 Ce document doit être mis à jour à chaque évolution majeure (ajout de role,
 modification de formulaire, nouveau CPT, etc.).
-

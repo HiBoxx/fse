@@ -38,6 +38,16 @@ $current_section = isset( $_GET['section'] ) ? sanitize_key( $_GET['section'] ) 
 
 $initials = strtoupper( substr( $user->display_name, 0, 2 ) );
 
+if ( 'enquetes' === $current_section ) {
+	wp_enqueue_script(
+		'cgt-assistance-enquetes',
+		get_stylesheet_directory_uri() . '/assets/js/assistance-enquetes.js',
+		array(),
+		CGT_CHILD_VERSION,
+		true
+	);
+}
+
 get_header();
 ?>
 
@@ -117,6 +127,15 @@ get_header();
 			</svg>
 			Événements
 		</a>
+		<a href="?section=enquetes" class="cgt-tab <?php echo 'enquetes' === $current_section ? 'active' : ''; ?>">
+			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<path d="M11 19.4l-7-4.2V8.8l7-4.2 7 4.2v6.4z"></path>
+				<path d="M11 10.3l7-4.2"></path>
+				<path d="M4 6.1l7 4.2"></path>
+				<path d="M11 18.9V22"></path>
+			</svg>
+			Enquêtes
+		</a>
 		<a href="?section=media" class="cgt-tab <?php echo 'media' === $current_section ? 'active' : ''; ?>">
 			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 				<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -172,6 +191,9 @@ get_header();
 				break;
 			case 'events':
 				include __DIR__ . '/inc/assistance/events.php';
+				break;
+			case 'enquetes':
+				include __DIR__ . '/inc/assistance/enquetes.php';
 				break;
 			case 'media':
 				include __DIR__ . '/inc/assistance/media.php';
