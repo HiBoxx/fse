@@ -954,3 +954,470 @@ function cgt_expert_admin_column_content( $column, $post_id ) {
 	}
 }
 add_action( 'manage_cgt_expert_posts_custom_column', 'cgt_expert_admin_column_content', 10, 2 );
+
+/**
+ * Register Enquêtes (Surveys) Custom Post Type
+ */
+function cgt_register_enquetes_cpt() {
+	register_post_type(
+		'cgt_enquete',
+		array(
+			'label'               => __( 'Enquêtes', 'cgt' ),
+			'labels'              => array(
+				'name'               => __( 'Enquêtes', 'cgt' ),
+				'singular_name'      => __( 'Enquête', 'cgt' ),
+				'add_new'            => __( 'Ajouter une enquête', 'cgt' ),
+				'add_new_item'       => __( 'Ajouter une nouvelle enquête', 'cgt' ),
+				'edit_item'          => __( 'Modifier l\'enquête', 'cgt' ),
+				'all_items'          => __( 'Toutes les enquêtes', 'cgt' ),
+				'view_item'          => __( 'Voir l\'enquête', 'cgt' ),
+				'search_items'       => __( 'Rechercher une enquête', 'cgt' ),
+				'not_found'          => __( 'Aucune enquête trouvée', 'cgt' ),
+			),
+			'public'              => true,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'menu_icon'           => 'dashicons-chart-bar',
+			'menu_position'       => 26,
+			'supports'            => array( 'title', 'editor' ),
+			'show_in_rest'        => true,
+			'has_archive'         => true,
+			'publicly_queryable'  => true,
+			'capability_type'     => 'post',
+			'map_meta_cap'        => true,
+			'rewrite'             => array(
+				'slug'       => 'enquetes',
+				'with_front' => false,
+			),
+		)
+	);
+}
+add_action( 'init', 'cgt_register_enquetes_cpt' );
+
+/**
+ * Add meta box for survey questions
+ */
+function cgt_enquete_add_meta_boxes() {
+	add_meta_box(
+		'cgt_enquete_questions',
+		__( 'Questions de l\'enquête', 'cgt' ),
+		'cgt_enquete_questions_meta_box_callback',
+		'cgt_enquete',
+		'normal',
+		'high'
+	);
+
+	add_meta_box(
+		'cgt_enquete_settings',
+		__( 'Paramètres', 'cgt' ),
+		'cgt_enquete_settings_meta_box_callback',
+		'cgt_enquete',
+		'side',
+		'default'
+	);
+
+	add_meta_box(
+		'cgt_enquete_results',
+		__( 'Résultats', 'cgt' ),
+		'cgt_enquete_results_meta_box_callback',
+		'cgt_enquete',
+		'side',
+		'default'
+	);
+}
+add_action( 'add_meta_boxes', 'cgt_enquete_add_meta_boxes' );
+
+/**
+ * Questions meta box callback
+ */
+function cgt_enquete_questions_meta_box_callback( $post ) {
+	wp_nonce_field( 'cgt_enquete_questions_meta_box', 'cgt_enquete_questions_meta_box_nonce' );
+
+	$questions = get_post_meta( $post->ID, '_enquete_questions', true );
+	if ( ! is_array( $questions ) ) {
+		$questions = array();
+	}
+	?>
+	<div class="cgt-enquete-questions-wrapper">
+		<style>
+			.cgt-enquete-questions-wrapper { padding: 15px; }
+			.cgt-enquete-question { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
+			.cgt-enquete-question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+			.cgt-enquete-question-title { font-weight: 600; font-size: 14px; }
+			.cgt-enquete-question input[type="text"] { width: 100%; padding: 8px; margin-bottom: 10px; }
+			.cgt-enquete-option { display: flex; gap: 10px; margin-bottom: 8px; }
+			.cgt-enquete-option input { flex: 1; padding: 6px; }
+			.cgt-enquete-options { margin-left: 20px; margin-top: 10px; }
+			.btn-add-option, .btn-remove-option, .btn-remove-question { padding: 6px 12px; background: #2271b1; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; }
+			.btn-remove-question { background: #dc3545; }
+			.btn-remove-option { background: #dc3545; padding: 4px 8px; }
+			.btn-add-question { padding: 10px 20px; background: #00a32a; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; margin-top: 10px; }
+			.btn-add-option:hover, .btn-add-question:hover { opacity: 0.9; }
+		</style>
+
+		<div id="enquete-questions-container">
+			<?php if ( ! empty( $questions ) ) : ?>
+				<?php foreach ( $questions as $index => $question ) : ?>
+					<div class="cgt-enquete-question" data-index="<?php echo esc_attr( $index ); ?>">
+						<div class="cgt-enquete-question-header">
+							<span class="cgt-enquete-question-title"><?php echo esc_html( sprintf( __( 'Question %d', 'cgt' ), $index + 1 ) ); ?></span>
+							<button type="button" class="btn-remove-question" onclick="removeQuestion(this)"><?php esc_html_e( 'Supprimer', 'cgt' ); ?></button>
+						</div>
+						<input type="text" name="enquete_questions[<?php echo esc_attr( $index ); ?>][question]" value="<?php echo esc_attr( $question['question'] ?? '' ); ?>" placeholder="<?php esc_attr_e( 'Tapez votre question ici...', 'cgt' ); ?>" required>
+
+						<div class="cgt-enquete-options">
+							<strong><?php esc_html_e( 'Options de réponse :', 'cgt' ); ?></strong>
+							<div class="options-list">
+								<?php if ( ! empty( $question['options'] ) ) : ?>
+									<?php foreach ( $question['options'] as $opt_index => $option ) : ?>
+										<div class="cgt-enquete-option">
+											<input type="text" name="enquete_questions[<?php echo esc_attr( $index ); ?>][options][]" value="<?php echo esc_attr( $option ); ?>" placeholder="<?php esc_attr_e( 'Option de réponse', 'cgt' ); ?>" required>
+											<button type="button" class="btn-remove-option" onclick="removeOption(this)">×</button>
+										</div>
+									<?php endforeach; ?>
+								<?php endif; ?>
+							</div>
+							<button type="button" class="btn-add-option" onclick="addOption(this)"><?php esc_html_e( '+ Ajouter une option', 'cgt' ); ?></button>
+						</div>
+					</div>
+				<?php endforeach; ?>
+			<?php endif; ?>
+		</div>
+
+		<button type="button" class="btn-add-question" onclick="addQuestion()"><?php esc_html_e( '+ Ajouter une question', 'cgt' ); ?></button>
+	</div>
+
+	<script>
+		let questionIndex = <?php echo count( $questions ); ?>;
+
+		function addQuestion() {
+			const container = document.getElementById('enquete-questions-container');
+			const questionDiv = document.createElement('div');
+			questionDiv.className = 'cgt-enquete-question';
+			questionDiv.setAttribute('data-index', questionIndex);
+
+			questionDiv.innerHTML = `
+				<div class="cgt-enquete-question-header">
+					<span class="cgt-enquete-question-title"><?php esc_html_e( 'Question', 'cgt' ); ?> ${questionIndex + 1}</span>
+					<button type="button" class="btn-remove-question" onclick="removeQuestion(this)"><?php esc_html_e( 'Supprimer', 'cgt' ); ?></button>
+				</div>
+				<input type="text" name="enquete_questions[${questionIndex}][question]" placeholder="<?php esc_attr_e( 'Tapez votre question ici...', 'cgt' ); ?>" required>
+				<div class="cgt-enquete-options">
+					<strong><?php esc_html_e( 'Options de réponse :', 'cgt' ); ?></strong>
+					<div class="options-list">
+						<div class="cgt-enquete-option">
+							<input type="text" name="enquete_questions[${questionIndex}][options][]" placeholder="<?php esc_attr_e( 'Option de réponse', 'cgt' ); ?>" required>
+							<button type="button" class="btn-remove-option" onclick="removeOption(this)">×</button>
+						</div>
+					</div>
+					<button type="button" class="btn-add-option" onclick="addOption(this)"><?php esc_html_e( '+ Ajouter une option', 'cgt' ); ?></button>
+				</div>
+			`;
+
+			container.appendChild(questionDiv);
+			questionIndex++;
+		}
+
+		function removeQuestion(button) {
+			if (confirm('<?php esc_html_e( 'Êtes-vous sûr de vouloir supprimer cette question ?', 'cgt' ); ?>')) {
+				button.closest('.cgt-enquete-question').remove();
+			}
+		}
+
+		function addOption(button) {
+			const optionsList = button.previousElementSibling;
+			const questionDiv = button.closest('.cgt-enquete-question');
+			const qIndex = questionDiv.getAttribute('data-index');
+
+			const optionDiv = document.createElement('div');
+			optionDiv.className = 'cgt-enquete-option';
+			optionDiv.innerHTML = `
+				<input type="text" name="enquete_questions[${qIndex}][options][]" placeholder="<?php esc_attr_e( 'Option de réponse', 'cgt' ); ?>" required>
+				<button type="button" class="btn-remove-option" onclick="removeOption(this)">×</button>
+			`;
+
+			optionsList.appendChild(optionDiv);
+		}
+
+		function removeOption(button) {
+			const optionsList = button.closest('.options-list');
+			if (optionsList.children.length > 1) {
+				button.closest('.cgt-enquete-option').remove();
+			} else {
+				alert('<?php esc_html_e( 'Une question doit avoir au moins une option de réponse.', 'cgt' ); ?>');
+			}
+		}
+	</script>
+	<?php
+}
+
+/**
+ * Settings meta box callback
+ */
+function cgt_enquete_settings_meta_box_callback( $post ) {
+	wp_nonce_field( 'cgt_enquete_settings_meta_box', 'cgt_enquete_settings_meta_box_nonce' );
+
+	$date_fin = get_post_meta( $post->ID, '_enquete_date_fin', true );
+	$actif = get_post_meta( $post->ID, '_enquete_active', true );
+	$multiple_votes = get_post_meta( $post->ID, '_enquete_multiple_votes', true );
+	?>
+	<div style="padding: 10px;">
+		<p>
+			<label>
+				<input type="checkbox" name="enquete_active" value="1" <?php checked( $actif, '1' ); ?>>
+				<strong><?php esc_html_e( 'Enquête active', 'cgt' ); ?></strong>
+			</label>
+		</p>
+
+		<p>
+			<label>
+				<input type="checkbox" name="enquete_multiple_votes" value="1" <?php checked( $multiple_votes, '1' ); ?>>
+				<strong><?php esc_html_e( 'Autoriser plusieurs votes par personne', 'cgt' ); ?></strong>
+			</label>
+		</p>
+
+		<p>
+			<label for="enquete_date_fin"><strong><?php esc_html_e( 'Date de fin (optionnel)', 'cgt' ); ?></strong></label>
+			<input type="date" id="enquete_date_fin" name="enquete_date_fin" value="<?php echo esc_attr( $date_fin ); ?>" style="width: 100%; margin-top: 5px;">
+		</p>
+	</div>
+	<?php
+}
+
+/**
+ * Results meta box callback
+ */
+function cgt_enquete_results_meta_box_callback( $post ) {
+	$questions = get_post_meta( $post->ID, '_enquete_questions', true );
+	$results = get_post_meta( $post->ID, '_enquete_results', true );
+
+	if ( empty( $questions ) ) {
+		echo '<p style="padding: 10px;">' . esc_html__( 'Aucune question définie.', 'cgt' ) . '</p>';
+		return;
+	}
+
+	if ( ! is_array( $results ) ) {
+		$results = array();
+	}
+
+	$total_votes = 0;
+	foreach ( $results as $question_results ) {
+		if ( is_array( $question_results ) ) {
+			$total_votes += array_sum( $question_results );
+		}
+	}
+	?>
+	<div style="padding: 10px;">
+		<p><strong><?php echo esc_html( sprintf( __( 'Total des votes : %d', 'cgt' ), $total_votes ) ); ?></strong></p>
+
+		<?php foreach ( $questions as $q_index => $question ) : ?>
+			<div style="margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px;">
+				<strong><?php echo esc_html( $question['question'] ); ?></strong>
+				<?php if ( ! empty( $question['options'] ) ) : ?>
+					<ul style="margin: 10px 0 0 0; padding: 0; list-style: none;">
+						<?php foreach ( $question['options'] as $opt_index => $option ) : ?>
+							<?php $votes = isset( $results[ $q_index ][ $opt_index ] ) ? (int) $results[ $q_index ][ $opt_index ] : 0; ?>
+							<li style="margin: 5px 0; padding: 5px; background: white; border-left: 3px solid #2271b1;">
+								<?php echo esc_html( $option ); ?>: <strong><?php echo esc_html( $votes ); ?></strong> vote<?php echo $votes > 1 ? 's' : ''; ?>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+			</div>
+		<?php endforeach; ?>
+
+		<p style="margin-top: 15px;">
+			<a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="button" target="_blank"><?php esc_html_e( 'Voir l\'enquête publique', 'cgt' ); ?></a>
+		</p>
+	</div>
+	<?php
+}
+
+/**
+ * Save enquete meta boxes data
+ */
+function cgt_save_enquete_meta_boxes( $post_id ) {
+	// Check nonces
+	if ( ! isset( $_POST['cgt_enquete_questions_meta_box_nonce'] ) ||
+	     ! wp_verify_nonce( $_POST['cgt_enquete_questions_meta_box_nonce'], 'cgt_enquete_questions_meta_box' ) ) {
+		return;
+	}
+
+	if ( ! isset( $_POST['cgt_enquete_settings_meta_box_nonce'] ) ||
+	     ! wp_verify_nonce( $_POST['cgt_enquete_settings_meta_box_nonce'], 'cgt_enquete_settings_meta_box' ) ) {
+		return;
+	}
+
+	// Check autosave
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	// Check permissions
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// Save questions
+	if ( isset( $_POST['enquete_questions'] ) && is_array( $_POST['enquete_questions'] ) ) {
+		$questions = array();
+		foreach ( $_POST['enquete_questions'] as $question_data ) {
+			if ( ! empty( $question_data['question'] ) && ! empty( $question_data['options'] ) ) {
+				$questions[] = array(
+					'question' => sanitize_text_field( $question_data['question'] ),
+					'options'  => array_map( 'sanitize_text_field', $question_data['options'] ),
+				);
+			}
+		}
+		update_post_meta( $post_id, '_enquete_questions', $questions );
+	}
+
+	// Save settings
+	update_post_meta( $post_id, '_enquete_active', isset( $_POST['enquete_active'] ) ? '1' : '0' );
+	update_post_meta( $post_id, '_enquete_multiple_votes', isset( $_POST['enquete_multiple_votes'] ) ? '1' : '0' );
+
+	if ( isset( $_POST['enquete_date_fin'] ) ) {
+		update_post_meta( $post_id, '_enquete_date_fin', sanitize_text_field( $_POST['enquete_date_fin'] ) );
+	}
+}
+add_action( 'save_post_cgt_enquete', 'cgt_save_enquete_meta_boxes' );
+
+/**
+ * Add custom admin columns for enquetes
+ */
+function cgt_enquete_admin_columns( $columns ) {
+	$new_columns = array();
+	$new_columns['cb']     = $columns['cb'];
+	$new_columns['title']  = $columns['title'];
+	$new_columns['active'] = __( 'Active', 'cgt' );
+	$new_columns['votes']  = __( 'Votes', 'cgt' );
+	$new_columns['date']   = $columns['date'];
+	return $new_columns;
+}
+add_filter( 'manage_cgt_enquete_posts_columns', 'cgt_enquete_admin_columns' );
+
+/**
+ * Populate custom admin columns for enquetes
+ */
+function cgt_enquete_admin_column_content( $column, $post_id ) {
+	switch ( $column ) {
+		case 'active':
+			$actif = get_post_meta( $post_id, '_enquete_active', true );
+			if ( $actif === '1' ) {
+				echo '<span style="color: #00a32a;">✓ ' . esc_html__( 'Active', 'cgt' ) . '</span>';
+			} else {
+				echo '<span style="color: #999;">✗ ' . esc_html__( 'Inactive', 'cgt' ) . '</span>';
+			}
+			break;
+		case 'votes':
+			$results = get_post_meta( $post_id, '_enquete_results', true );
+			$total_votes = 0;
+			if ( is_array( $results ) ) {
+				foreach ( $results as $question_results ) {
+					if ( is_array( $question_results ) ) {
+						$total_votes += array_sum( $question_results );
+					}
+				}
+			}
+			echo '<strong>' . esc_html( $total_votes ) . '</strong>';
+			break;
+	}
+}
+add_action( 'manage_cgt_enquete_posts_custom_column', 'cgt_enquete_admin_column_content', 10, 2 );
+
+/**
+ * AJAX handler for survey votes
+ */
+function cgt_enquete_handle_vote() {
+	// Check nonce
+	if ( ! isset( $_POST['nonce'] ) || ! isset( $_POST['post_id'] ) ) {
+		wp_send_json_error( array( 'message' => __( 'Données manquantes.', 'cgt' ) ) );
+	}
+
+	$post_id = absint( $_POST['post_id'] );
+
+	if ( ! wp_verify_nonce( $_POST['nonce'], 'cgt_enquete_vote_' . $post_id ) ) {
+		wp_send_json_error( array( 'message' => __( 'Erreur de sécurité.', 'cgt' ) ) );
+	}
+
+	// Check if enquete exists and is active
+	$enquete = get_post( $post_id );
+	if ( ! $enquete || $enquete->post_type !== 'cgt_enquete' ) {
+		wp_send_json_error( array( 'message' => __( 'Enquête introuvable.', 'cgt' ) ) );
+	}
+
+	$actif = get_post_meta( $post_id, '_enquete_active', true );
+	if ( $actif !== '1' ) {
+		wp_send_json_error( array( 'message' => __( 'Cette enquête n\'est plus active.', 'cgt' ) ) );
+	}
+
+	// Check date limit
+	$date_fin = get_post_meta( $post_id, '_enquete_date_fin', true );
+	if ( $date_fin && strtotime( $date_fin ) < time() ) {
+		wp_send_json_error( array( 'message' => __( 'Cette enquête est terminée.', 'cgt' ) ) );
+	}
+
+	// Check if multiple votes allowed
+	$multiple_votes = get_post_meta( $post_id, '_enquete_multiple_votes', true );
+	if ( $multiple_votes !== '1' ) {
+		$vote_cookie_name = 'cgt_enquete_' . $post_id . '_voted';
+		if ( isset( $_COOKIE[ $vote_cookie_name ] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Vous avez déjà voté pour cette enquête.', 'cgt' ) ) );
+		}
+	}
+
+	// Get votes from request
+	if ( ! isset( $_POST['votes'] ) || ! is_array( $_POST['votes'] ) ) {
+		wp_send_json_error( array( 'message' => __( 'Aucune réponse fournie.', 'cgt' ) ) );
+	}
+
+	$votes = array_map( 'absint', $_POST['votes'] );
+
+	// Get existing results
+	$results = get_post_meta( $post_id, '_enquete_results', true );
+	if ( ! is_array( $results ) ) {
+		$results = array();
+	}
+
+	// Update results
+	foreach ( $votes as $question_index => $option_index ) {
+		$question_index = absint( $question_index );
+		$option_index = absint( $option_index );
+
+		if ( ! isset( $results[ $question_index ] ) ) {
+			$results[ $question_index ] = array();
+		}
+
+		if ( ! isset( $results[ $question_index ][ $option_index ] ) ) {
+			$results[ $question_index ][ $option_index ] = 0;
+		}
+
+		$results[ $question_index ][ $option_index ]++;
+	}
+
+	// Save updated results
+	update_post_meta( $post_id, '_enquete_results', $results );
+
+	// Set cookie to prevent multiple votes (if not allowed)
+	if ( $multiple_votes !== '1' ) {
+		setcookie(
+			'cgt_enquete_' . $post_id . '_voted',
+			'1',
+			time() + ( 365 * 24 * 60 * 60 ), // 1 year
+			COOKIEPATH,
+			COOKIE_DOMAIN,
+			is_ssl(),
+			true // httponly
+		);
+	}
+
+	wp_send_json_success(
+		array(
+			'message' => __( 'Merci pour votre participation !', 'cgt' ),
+			'results' => $results,
+		)
+	);
+}
+add_action( 'wp_ajax_cgt_enquete_vote', 'cgt_enquete_handle_vote' );
+add_action( 'wp_ajax_nopriv_cgt_enquete_vote', 'cgt_enquete_handle_vote' );
+
