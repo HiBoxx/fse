@@ -88,6 +88,7 @@ if ( ! function_exists( 'cgt_classes_link' ) ) {
 						<li><a href="<?php echo cgt_classes_link( 'modeles-lettre', $classes_base ); ?>"><?php esc_html_e( 'Modèles de lettre', 'cgt' ); ?></a></li>
 						<li><a href="<?php echo cgt_classes_link( 'guides', $classes_base ); ?>"><?php esc_html_e( 'Guides', 'cgt' ); ?></a></li>
 						<li><a href="<?php echo cgt_classes_link( 'adresses-utiles', $classes_base ); ?>"><?php esc_html_e( 'Adresses utiles', 'cgt' ); ?></a></li>
+						<li><a href="<?php echo home_url( '/enquetes/' ); ?>"><?php esc_html_e( 'Enquêtes', 'cgt' ); ?></a></li>
 						<li><a href="<?php echo cgt_classes_link( 'simulateur-calcul', $classes_base ); ?>"><?php esc_html_e( 'Simulateur de calcul', 'cgt' ); ?></a></li>
 					</ul>
 				</li>

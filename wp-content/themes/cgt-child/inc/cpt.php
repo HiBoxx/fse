@@ -840,6 +840,26 @@ function cgt_register_enquetes_cpt() {
 add_action( 'init', 'cgt_register_enquetes_cpt' );
 
 /**
+ * Flush rewrite rules when enquetes CPT is registered
+ */
+function cgt_enquetes_flush_rewrite_rules() {
+	$flag = get_option( 'cgt_enquetes_flush_rewrite_rules_flag' );
+	if ( $flag ) {
+		flush_rewrite_rules();
+		delete_option( 'cgt_enquetes_flush_rewrite_rules_flag' );
+	}
+}
+add_action( 'init', 'cgt_enquetes_flush_rewrite_rules', 20 );
+
+/**
+ * Set flag to flush rewrite rules
+ */
+function cgt_enquetes_set_flush_flag() {
+	update_option( 'cgt_enquetes_flush_rewrite_rules_flag', true );
+}
+add_action( 'after_switch_theme', 'cgt_enquetes_set_flush_flag' );
+
+/**
  * Add meta box for survey questions
  */
 function cgt_enquete_add_meta_boxes() {
@@ -885,20 +905,193 @@ function cgt_enquete_questions_meta_box_callback( $post ) {
 	?>
 	<div class="cgt-enquete-questions-wrapper">
 		<style>
-			.cgt-enquete-questions-wrapper { padding: 15px; }
-			.cgt-enquete-question { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
-			.cgt-enquete-question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-			.cgt-enquete-question-title { font-weight: 600; font-size: 14px; }
-			.cgt-enquete-question input[type="text"] { width: 100%; padding: 8px; margin-bottom: 10px; }
-			.cgt-enquete-option { display: flex; gap: 10px; margin-bottom: 8px; }
-			.cgt-enquete-option input { flex: 1; padding: 6px; }
-			.cgt-enquete-options { margin-left: 20px; margin-top: 10px; }
-			.btn-add-option, .btn-remove-option, .btn-remove-question { padding: 6px 12px; background: #2271b1; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; }
-			.btn-remove-question { background: #dc3545; }
-			.btn-remove-option { background: #dc3545; padding: 4px 8px; }
-			.btn-add-question { padding: 10px 20px; background: #00a32a; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; margin-top: 10px; }
-			.btn-add-option:hover, .btn-add-question:hover { opacity: 0.9; }
+			.cgt-enquete-questions-wrapper {
+				padding: 15px;
+				background: white;
+			}
+			.cgt-enquete-intro {
+				background: linear-gradient(135deg, #e30613 0%, #b00510 100%);
+				color: white;
+				padding: 20px;
+				border-radius: 8px;
+				margin-bottom: 20px;
+				box-shadow: 0 2px 8px rgba(227, 6, 19, 0.2);
+			}
+			.cgt-enquete-intro h3 {
+				margin: 0 0 10px;
+				font-size: 18px;
+				color: white;
+			}
+			.cgt-enquete-intro p {
+				margin: 0;
+				font-size: 14px;
+				opacity: 0.95;
+			}
+			.cgt-enquete-question {
+				background: #f9f9f9;
+				border: 2px solid #e5e7eb;
+				padding: 20px;
+				margin-bottom: 20px;
+				border-radius: 8px;
+				transition: all 0.2s;
+				box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+			}
+			.cgt-enquete-question:hover {
+				border-color: #e30613;
+				box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+			}
+			.cgt-enquete-question-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 15px;
+				padding-bottom: 10px;
+				border-bottom: 2px solid #e5e7eb;
+			}
+			.cgt-enquete-question-title {
+				font-weight: 600;
+				font-size: 15px;
+				color: #e30613;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+			}
+			.cgt-enquete-question input[type="text"] {
+				width: 100%;
+				padding: 10px 12px;
+				margin-bottom: 15px;
+				border: 2px solid #e5e7eb;
+				border-radius: 6px;
+				font-size: 14px;
+				transition: border-color 0.2s;
+			}
+			.cgt-enquete-question input[type="text"]:focus {
+				outline: none;
+				border-color: #e30613;
+				box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.1);
+			}
+			.cgt-enquete-option {
+				display: flex;
+				gap: 10px;
+				margin-bottom: 10px;
+				align-items: center;
+			}
+			.cgt-enquete-option input {
+				flex: 1;
+				padding: 8px 10px;
+				border: 1px solid #e5e7eb;
+				border-radius: 6px;
+				transition: border-color 0.2s;
+			}
+			.cgt-enquete-option input:focus {
+				outline: none;
+				border-color: #e30613;
+			}
+			.cgt-enquete-options {
+				margin-left: 20px;
+				margin-top: 15px;
+				background: white;
+				padding: 15px;
+				border-radius: 6px;
+				border: 1px solid #e5e7eb;
+			}
+			.cgt-enquete-options strong {
+				display: block;
+				margin-bottom: 10px;
+				color: #374151;
+				font-size: 13px;
+			}
+			.btn-add-option, .btn-remove-option, .btn-remove-question {
+				padding: 8px 16px;
+				background: #2271b1;
+				color: white;
+				border: none;
+				border-radius: 6px;
+				cursor: pointer;
+				font-size: 13px;
+				font-weight: 500;
+				transition: all 0.2s;
+				box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+			}
+			.btn-add-option:hover {
+				background: #135e96;
+				transform: translateY(-1px);
+				box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+			}
+			.btn-remove-question {
+				background: #dc3545;
+			}
+			.btn-remove-question:hover {
+				background: #c82333;
+			}
+			.btn-remove-option {
+				background: #dc3545;
+				padding: 6px 12px;
+				font-size: 16px;
+				line-height: 1;
+			}
+			.btn-remove-option:hover {
+				background: #c82333;
+			}
+			.btn-add-question {
+				padding: 12px 24px;
+				background: linear-gradient(135deg, #00a32a 0%, #008a24 100%);
+				color: white;
+				border: none;
+				border-radius: 8px;
+				cursor: pointer;
+				font-size: 15px;
+				font-weight: 600;
+				margin-top: 15px;
+				width: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 8px;
+				transition: all 0.2s;
+				box-shadow: 0 2px 8px rgba(0, 163, 42, 0.3);
+			}
+			.btn-add-question:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 4px 12px rgba(0, 163, 42, 0.4);
+			}
+			.btn-add-question::before {
+				content: '+';
+				font-size: 20px;
+				font-weight: bold;
+			}
+			.cgt-enquete-empty-state {
+				text-align: center;
+				padding: 40px 20px;
+				background: #f9fafb;
+				border: 2px dashed #d1d5db;
+				border-radius: 8px;
+				margin-bottom: 20px;
+			}
+			.cgt-enquete-empty-state svg {
+				color: #9ca3af;
+				margin-bottom: 15px;
+			}
+			.cgt-enquete-empty-state p {
+				color: #6b7280;
+				font-size: 14px;
+				margin: 0;
+			}
 		</style>
+
+		<!-- Introduction Banner -->
+		<?php if ( empty( $questions ) ) : ?>
+			<div class="cgt-enquete-intro">
+				<h3>✨ Créez votre première enquête</h3>
+				<p>Ajoutez des questions avec plusieurs options de réponse. Les utilisateurs pourront voter et vous verrez les résultats en temps réel.</p>
+			</div>
+			<div class="cgt-enquete-empty-state">
+				<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M9 11H3v2h6m1 0a1 1 0 001 1h2a1 1 0 001-1m-4 0V9a1 1 0 011-1h2a1 1 0 011 1v2m0 0h6v2h-6"></path>
+					<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+				</svg>
+				<p>Aucune question ajoutée. Cliquez sur le bouton ci-dessous pour commencer.</p>
+			</div>
+		<?php endif; ?>
 
 		<div id="enquete-questions-container">
 			<?php if ( ! empty( $questions ) ) : ?>
@@ -1006,25 +1199,107 @@ function cgt_enquete_settings_meta_box_callback( $post ) {
 	$actif = get_post_meta( $post->ID, '_enquete_active', true );
 	$multiple_votes = get_post_meta( $post->ID, '_enquete_multiple_votes', true );
 	?>
-	<div style="padding: 10px;">
-		<p>
-			<label>
-				<input type="checkbox" name="enquete_active" value="1" <?php checked( $actif, '1' ); ?>>
-				<strong><?php esc_html_e( 'Enquête active', 'cgt' ); ?></strong>
-			</label>
-		</p>
+	<style>
+		.cgt-settings-box {
+			padding: 15px;
+		}
+		.cgt-settings-box label {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 12px;
+			background: #f9fafb;
+			border-radius: 6px;
+			margin-bottom: 10px;
+			cursor: pointer;
+			transition: background 0.2s;
+		}
+		.cgt-settings-box label:hover {
+			background: #f3f4f6;
+		}
+		.cgt-settings-box input[type="checkbox"] {
+			width: 18px;
+			height: 18px;
+			cursor: pointer;
+		}
+		.cgt-settings-box .date-field {
+			margin-top: 10px;
+			padding: 12px;
+			background: #f9fafb;
+			border-radius: 6px;
+		}
+		.cgt-settings-box .date-field label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 600;
+			color: #374151;
+		}
+		.cgt-settings-box input[type="date"] {
+			width: 100%;
+			padding: 8px;
+			border: 2px solid #e5e7eb;
+			border-radius: 6px;
+			font-size: 14px;
+		}
+		.cgt-settings-box input[type="date"]:focus {
+			outline: none;
+			border-color: #e30613;
+		}
+		.cgt-view-public-btn {
+			display: block;
+			width: 100%;
+			padding: 12px;
+			background: linear-gradient(135deg, #e30613 0%, #b00510 100%);
+			color: white;
+			text-align: center;
+			text-decoration: none;
+			border-radius: 6px;
+			font-weight: 600;
+			margin-top: 15px;
+			transition: all 0.2s;
+			box-shadow: 0 2px 8px rgba(227, 6, 19, 0.3);
+		}
+		.cgt-view-public-btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(227, 6, 19, 0.4);
+			color: white;
+		}
+		.cgt-view-public-btn svg {
+			display: inline-block;
+			vertical-align: middle;
+			margin-left: 5px;
+		}
+	</style>
+	<div class="cgt-settings-box">
+		<label>
+			<input type="checkbox" name="enquete_active" value="1" <?php checked( $actif, '1' ); ?>>
+			<strong><?php esc_html_e( 'Enquête active', 'cgt' ); ?></strong>
+		</label>
 
-		<p>
-			<label>
-				<input type="checkbox" name="enquete_multiple_votes" value="1" <?php checked( $multiple_votes, '1' ); ?>>
-				<strong><?php esc_html_e( 'Autoriser plusieurs votes par personne', 'cgt' ); ?></strong>
-			</label>
-		</p>
+		<label>
+			<input type="checkbox" name="enquete_multiple_votes" value="1" <?php checked( $multiple_votes, '1' ); ?>>
+			<strong><?php esc_html_e( 'Autoriser plusieurs votes', 'cgt' ); ?></strong>
+		</label>
 
-		<p>
-			<label for="enquete_date_fin"><strong><?php esc_html_e( 'Date de fin (optionnel)', 'cgt' ); ?></strong></label>
-			<input type="date" id="enquete_date_fin" name="enquete_date_fin" value="<?php echo esc_attr( $date_fin ); ?>" style="width: 100%; margin-top: 5px;">
-		</p>
+		<div class="date-field">
+			<label for="enquete_date_fin"><?php esc_html_e( 'Date de fin (optionnel)', 'cgt' ); ?></label>
+			<input type="date" id="enquete_date_fin" name="enquete_date_fin" value="<?php echo esc_attr( $date_fin ); ?>">
+		</div>
+
+		<?php if ( $post->post_status === 'publish' ) : ?>
+			<a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="cgt-view-public-btn" target="_blank">
+				<?php esc_html_e( 'Voir l\'enquête publique', 'cgt' ); ?>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+					<polyline points="15 3 21 3 21 9"></polyline>
+					<line x1="10" y1="14" x2="21" y2="3"></line>
+				</svg>
+			</a>
+		<?php else : ?>
+			<p style="text-align: center; color: #6b7280; font-size: 13px; margin-top: 15px; padding: 12px; background: #f9fafb; border-radius: 6px;">
+				<?php esc_html_e( 'Publiez l\'enquête pour voir le lien public', 'cgt' ); ?>
+			</p>
+		<?php endif; ?>
 	</div>
 	<?php
 }
