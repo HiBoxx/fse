@@ -29,7 +29,8 @@ while ( have_posts() ) :
 					$branches = wp_get_post_terms( get_the_ID(), 'branche' );
 					if ( ! empty( $branches ) && ! is_wp_error( $branches ) ) {
 						foreach ( $branches as $branch ) {
-							printf( '<span class="tract-chip tract-branch">%s</span>', esc_html( $branch->name ) );
+							$hierarchy = cgt_get_branch_hierarchy( $branch );
+							printf( '<span class="tract-chip tract-branch">%s</span>', esc_html( $hierarchy ) );
 						}
 					}
 					?>

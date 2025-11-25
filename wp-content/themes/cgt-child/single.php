@@ -33,7 +33,8 @@ while ( have_posts() ) :
 					$branches = wp_get_post_terms( get_the_ID(), 'branche' );
 					if ( ! empty( $branches ) ) {
 						foreach ( $branches as $branch ) {
-							echo '<span class="article-branch">' . esc_html( $branch->name ) . '</span>';
+							$hierarchy = cgt_get_branch_hierarchy( $branch );
+							echo '<span class="article-branch">' . esc_html( $hierarchy ) . '</span>';
 						}
 					}
 					?>

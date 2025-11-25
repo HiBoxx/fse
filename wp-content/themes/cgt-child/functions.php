@@ -930,3 +930,58 @@ function cgt_add_security_headers() {
 	// Permissions Policy (anciennement Feature Policy)
 	header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
 }
+
+/**
+ * Get full branch hierarchy as a formatted string
+ *
+ * @param WP_Term|int $term Term object or term ID
+ * @return string Formatted branch hierarchy (e.g., "Parent — Child — Subchild")
+ */
+function cgt_get_branch_hierarchy( $term ) {
+	if ( is_numeric( $term ) ) {
+		$term = get_term( $term, 'branche' );
+	}
+
+	if ( ! $term || is_wp_error( $term ) ) {
+		return '';
+	}
+
+	$hierarchy = array( $term->name );
+	$parent_id = $term->parent;
+
+	// Build hierarchy from child to parent
+	while ( $parent_id ) {
+		$parent_term = get_term( $parent_id, 'branche' );
+		if ( ! $parent_term || is_wp_error( $parent_term ) ) {
+			break;
+		}
+		array_unshift( $hierarchy, $parent_term->name );
+		$parent_id = $parent_term->parent;
+	}
+
+	return implode( ' — ', $hierarchy );
+}
+
+/**
+ * Display branch hierarchy for a post
+ *
+ * @param int    $post_id   Post ID
+ * @param string $before    HTML before the branch display
+ * @param string $after     HTML after the branch display
+ * @param string $separator Separator between multiple branches
+ * @return string HTML output
+ */
+function cgt_display_post_branches( $post_id, $before = '', $after = '', $separator = ', ' ) {
+	$branches = wp_get_post_terms( $post_id, 'branche' );
+
+	if ( empty( $branches ) || is_wp_error( $branches ) ) {
+		return '';
+	}
+
+	$output = array();
+	foreach ( $branches as $branch ) {
+		$output[] = cgt_get_branch_hierarchy( $branch );
+	}
+
+	return $before . implode( $separator, $output ) . $after;
+}
