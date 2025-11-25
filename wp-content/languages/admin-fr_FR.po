@@ -552,10 +552,6 @@ msgstr "Si vous êtes l’auteur ou l’autrice d’une extension, vous pouvez e
 msgid "See everything new"
 msgstr "Découvrez toutes les nouveautés"
 
-#: wp-admin/about.php:260
-msgid "https://wordpress.org/download/releases/6-8/"
-msgstr "https://wordpress.org/download/releases/6-8/"
-
 #. translators: %s: Version number.
 #: wp-admin/about.php:252
 msgid "For a comprehensive overview of all the new features and enhancements in WordPress %s, please visit the feature-showcase website."
@@ -1475,14 +1471,6 @@ msgstr "Avec un thème basé sur des blocs, vous pouvez disposer et modifier les
 #: wp-admin/theme-install.php:142
 msgid "A block theme is a theme that uses blocks for all parts of a site including navigation menus, header, content, and site footer. These themes are built for the features that allow you to edit and customize all parts of your site."
 msgstr "Un thème basé sur des blocs est un thème qui utilise des blocs pour tous les éléments du site, ce qui comprend les menus de navigation, l’entête, le contenu ou encore le pied de page du site. Ces thèmes sont conçus pour prendre en charge les fonctionnalités qui vous permettent de modifier et de personnaliser toutes les parties de votre site."
-
-#: wp-admin/site-health.php:277
-msgid "Recommended items are considered beneficial to your site, although not as important to prioritize as a critical issue, they may include improvements to things such as; Performance, user experience, and more."
-msgstr "Les éléments recommandés sont considérés comme bénéfiques pour votre site. Bien qu’ils ne soient pas aussi prioritaires que les anomalies critiques, ils peuvent inclure des améliorations de performances, d’expérience d’utilisation, et bien plus encore."
-
-#: wp-admin/site-health.php:264
-msgid "Critical issues are items that may have a high impact on your sites performance or security, and resolving these issues should be prioritized."
-msgstr "Les anomalies critiques sont des éléments qui peuvent avoir un impact important sur les performances ou la sécurité de votre site, et la résolution de ces problèmes doit être une priorité."
 
 #. translators: %s: wp-config.php
 #: wp-admin/setup-config.php:441
@@ -10245,11 +10233,6 @@ msgstr "Répétez le nouveau mot de passe"
 msgid "Add menu items from the column on the left."
 msgstr "Ajouter des éléments de menu depuis la colonne de gauche."
 
-#. translators: %s: https://wordpress.org/plugins
-#: wp-admin/includes/plugin-install.php:404
-msgid "Plugins extend and expand the functionality of WordPress. You may install plugins in the <a href=\"%s\">WordPress Plugin Directory</a> right from here, or upload a plugin in .zip format by clicking the button at the top of this page."
-msgstr "Les extensions étendent les fonctionnalités de WordPress, et en ajoutent de nouvelles. Vous pouvez installer des extensions automatiquement en provenance du <a href=\"%s\">répertoire des extensions WordPress</a>, ou téléverser une extension au format .zip en cliquant sur le bouton en haut de cette page."
-
 #. Plugin URI of the plugin
 #: hello.php
 msgid "http://wordpress.org/plugins/hello-dolly/"
@@ -10864,10 +10847,6 @@ msgstr "Prévisualisation et installation"
 #: wp-admin/theme-install.php:129
 msgid "Once you have generated a list of themes, you can preview and install any of them. Click on the thumbnail of the theme you are interested in previewing. It will open up in a full-screen Preview page to give you a better idea of how that theme will look."
 msgstr "Une fois que vous avez généré une liste de thèmes, vous pouvez les prévisualiser et les installer. Cliquez sur la miniature du thème que vous souhaitez prévisualiser. Cela ouvrira une page de prévisualisation en plein écran, afin de vous donner une meilleure idée de l’aspect de ce thème."
-
-#: wp-admin/includes/media.php:3066
-msgid "You are using the browser&#8217;s built-in file uploader. The WordPress uploader includes multiple file selection and drag and drop capability. <a href=\"#\">Switch to the multi-file uploader</a>."
-msgstr "Vous utilisez l’outil de téléversement du navigateur. Le nouvel outil de téléversement de WordPress inclut la possibilité de téléverser plusieurs fichiers à la fois par glisser/déposer. <a href=\"#\">Passer au nouvel outil de téléversement</a>."
 
 #: wp-admin/tools.php:50
 msgid "The Categories and Tags Converter link on this screen will take you to the Import screen, where that Converter is one of the plugins you can install. Once that plugin is installed, the Activate Plugin &amp; Run Importer link will take you to a screen where you can choose to convert tags into categories or vice versa."

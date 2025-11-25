@@ -348,7 +348,7 @@ function cgt_render_modern_media_page() {
 									<button onclick="cgtCopyMediaUrl('<?php echo esc_js( $file_url ); ?>')" class="media-btn" title="Copier l'URL">
 										<span class="dashicons dashicons-admin-links"></span>
 									</button>
-									<button onclick="cgtDeleteMedia(<?php echo esc_js( $attachment_id ); ?>)" class="media-btn danger" title="Supprimer">
+								<button type="button" onclick="cgtDeleteMedia(<?php echo esc_js( $attachment_id ); ?>, '<?php echo esc_js( wp_create_nonce( 'cgt_delete_media_' . $attachment_id ) ); ?>')" class="media-btn danger" title="Supprimer">
 										<span class="dashicons dashicons-trash"></span>
 									</button>
 								</div>
@@ -415,17 +415,26 @@ function cgt_render_modern_media_page() {
 		});
 	}
 
-	function cgtDeleteMedia(id) {
+	function cgtDeleteMedia(id, nonce) {
 		if (!confirm('Êtes-vous sûr de vouloir supprimer ce fichier ?')) {
 			return;
 		}
 
 		jQuery.post(ajaxurl, {
-			action: 'delete-post',
-			id: id,
-			_ajax_nonce: '<?php echo wp_create_nonce( "delete-post_" . get_the_ID() ); ?>'
-		}, function() {
-			location.reload();
+			action: 'cgt_delete_media',
+			attachment_id: id,
+			nonce: nonce
+		})
+		.done(function(response) {
+			if (response && response.success) {
+				location.reload();
+			} else {
+				var message = response && response.data && response.data.message ? response.data.message : 'Suppression impossible.';
+				alert('⚠️ ' + message);
+			}
+		})
+		.fail(function() {
+			alert('⚠️ Erreur réseau, veuillez réessayer.');
 		});
 	}
 	</script>
@@ -905,4 +914,32 @@ function cgt_get_media_custom_css() {
  */
 function cgt_get_media_custom_js() {
 	return "";
+}
+
+add_action( 'wp_ajax_cgt_delete_media', 'cgt_handle_delete_media' );
+
+function cgt_handle_delete_media() {
+	if ( ! isset( $_POST['attachment_id'], $_POST['nonce'] ) ) {
+		wp_send_json_error( array( 'message' => __( 'Requête incomplète.', 'cgt' ) ) );
+	}
+
+	$attachment_id = absint( $_POST['attachment_id'] );
+	if ( ! $attachment_id ) {
+		wp_send_json_error( array( 'message' => __( 'Identifiant invalide.', 'cgt' ) ) );
+	}
+
+	if ( ! check_ajax_referer( 'cgt_delete_media_' . $attachment_id, 'nonce', false ) ) {
+		wp_send_json_error( array( 'message' => __( 'Jeton de sécurité invalide.', 'cgt' ) ) );
+	}
+
+	if ( ! current_user_can( 'delete_post', $attachment_id ) ) {
+		wp_send_json_error( array( 'message' => __( 'Permissions insuffisantes.', 'cgt' ) ) );
+	}
+
+	$deleted = wp_delete_attachment( $attachment_id, true );
+	if ( ! $deleted ) {
+		wp_send_json_error( array( 'message' => __( 'Impossible de supprimer ce fichier.', 'cgt' ) ) );
+	}
+
+	wp_send_json_success();
 }

@@ -11,20 +11,31 @@ if ( ! defined( 'CGT_CHILD_VERSION' ) ) {
 	define( 'CGT_CHILD_VERSION', '1.0.0' );
 }
 
+if ( ! function_exists( 'cgt_child_upload_url' ) ) {
+	function cgt_child_upload_url( $relative_path ) {
+		$uploads = wp_get_upload_dir();
+		if ( empty( $uploads['baseurl'] ) ) {
+			return '';
+		}
+
+		return trailingslashit( $uploads['baseurl'] ) . ltrim( $relative_path, '/' );
+	}
+}
+
 if ( ! defined( 'CGT_CHILD_DEFAULT_LOGO_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_LOGO_URL', 'http://fse.local/wp-content/uploads/2025/10/logo2.png' );
+	define( 'CGT_CHILD_DEFAULT_LOGO_URL', esc_url_raw( cgt_child_upload_url( '2025/10/logo2.png' ) ) );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_FAVICON_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_FAVICON_URL', 'http://fse.local/wp-content/uploads/2025/10/telechargement.png' );
+	define( 'CGT_CHILD_DEFAULT_FAVICON_URL', esc_url_raw( cgt_child_upload_url( '2025/10/telechargement.png' ) ) );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_IMAGE_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_IMAGE_URL', 'http://fse.local/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-10_49_55.png' );
+	define( 'CGT_CHILD_DEFAULT_IMAGE_URL', esc_url_raw( cgt_child_upload_url( '2025/11/ChatGPT-Image-4-nov.-2025-10_49_55.png' ) ) );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL', 'http://fse.local/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-11_00_16.png' );
+	define( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL', esc_url_raw( cgt_child_upload_url( '2025/11/ChatGPT-Image-4-nov.-2025-11_00_16.png' ) ) );
 }
 
 // Charge l'autoloader Dompdf si disponible.

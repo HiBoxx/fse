@@ -917,10 +917,6 @@ msgstr "ID du site non valide."
 msgid "Sorry, you are not allowed to delete the site %s."
 msgstr "Désolé, vous n’avez pas l’autorisation de supprimer le site %s."
 
-#: wp-admin/network/sites.php:37
-msgid "Delete which is a permanent action after the confirmation screen."
-msgstr "« Supprimer » est une action irréversible une fois passé l’écran de confirmation."
-
 #: wp-admin/network/sites.php:35
 msgid "Dashboard leads to the Dashboard for that site."
 msgstr "« Tableau de bord » envoie vers le tableau de bord du site."
@@ -1112,10 +1108,6 @@ msgstr "Avertissement ! Le compte %s ne peut être modifié car c’est un admi
 #: wp-admin/network/site-new.php:26
 msgid "If the admin email for the new site does not exist in the database, a new user will also be created."
 msgstr "Si l’adresse de contact du nouveau site n’existe pas dans la base de données, un nouveau compte sera créé pour l’occasion."
-
-#: wp-admin/network/sites.php:36
-msgid "Deactivate, Archive, and Spam which lead to confirmation screens. These actions can be reversed later."
-msgstr "« Désactiver », « Archiver » et « Indésirable » envoient chacun à des écrans de confirmation. Ces actions peuvent être annulées par la suite."
 
 #: wp-admin/network/sites.php:33
 msgid "Hovering over each site reveals seven options (three for the primary site):"

@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the WordPress - 6.8.x - Development package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-11-04 16:55:42+0000\n"
+"PO-Revision-Date: 2025-11-14 09:25:54+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -430,11 +430,6 @@ msgstr "L‘élément de contexte doit être une balise de début."
 msgid "No valid context element was detected."
 msgstr "Aucun élément de contexte valide n’a été détecté."
 
-#. translators: %s: parameter name.
-#: wp-includes/functions.php:9198
-msgid "The %s argument must not be empty."
-msgstr "L’argument %s ne doit pas être vide."
-
 #: wp-includes/customize/class-wp-customize-header-image-control.php:249
 msgid "Add Image"
 msgstr "Ajouter une image"
@@ -567,11 +562,6 @@ msgstr " mailer n’est pas pris en charge."
 msgid "Invalid host: "
 msgstr "Hôte invalide : "
 
-#. translators: There is a space after the colon.
-#: wp-includes/class-wp-phpmailer.php:68
-msgid "Invalid hostentry: "
-msgstr "Entrée d’hôte invalide : "
-
 #: wp-includes/class-wp-phpmailer.php:66
 msgid "Invalid header name or value"
 msgstr "Nom ou valeur de l‘entête invalide"
@@ -618,10 +608,6 @@ msgstr "Encodage inconnu : "
 #: wp-includes/class-wp-phpmailer.php:50
 msgid "Message body empty"
 msgstr "Corps du message vide"
-
-#: wp-includes/class-wp-phpmailer.php:49
-msgid "SMTP Error: data not accepted."
-msgstr "Erreur SMTP : données non acceptées."
 
 #: wp-includes/class-wp-phpmailer.php:48
 msgid "SMTP Error: Could not connect to SMTP host."
@@ -3956,10 +3942,6 @@ msgstr "Styles globaux."
 #: wp-includes/rest-api/endpoints/class-wp-rest-global-styles-controller.php:466
 msgid "ID of global styles config."
 msgstr "ID de la configuration de styles globaux."
-
-#: wp-includes/rest-api/endpoints/class-wp-rest-global-styles-controller.php:142
-msgid "No global styles config exist with that id."
-msgstr "Aucune configuration de styles globaux n’existe avec cet identifiant."
 
 #: wp-includes/rest-api/endpoints/class-wp-rest-global-styles-controller.php:184
 msgid "Sorry, you are not allowed to view this global style."
@@ -16381,10 +16363,6 @@ msgctxt "Comma-separated list of search stopwords in your language"
 msgid "about,an,are,as,at,be,by,com,for,from,how,in,is,it,of,on,or,that,the,this,to,was,what,when,where,who,will,with,www"
 msgstr "le,la,les,de,des,un,uns,une,unes,et,a,à,il,elle,on,ne,je,tu,nous,vous,ils,elles,son,sa,ses,que,quoi,se,qui,ce,cette,dans,en,du,au,aux,pour,pas,sur,y,ou,où,si,ton,ta,te,mon,ma,tout,toute,tous,toutes,ça,ni,www,com,fr,par,sur,par,dans,mais,vos,votre,vôtre,c,d,j,,l,m,n,s,t,sans,toi,moi,lui,leur,leurs"
 
-#: wp-includes/post-template.php:1810
-msgid "This content is password protected. To view it please enter your password below:"
-msgstr "Cette publication est protégée par un mot de passe. Pour la voir, veuillez saisir votre mot de passe ci-dessous :"
-
 #: wp-includes/class-wp-http-curl.php:283
 #: wp-includes/class-wp-http-streams.php:336
 msgid "Failed to write request to temporary file."
@@ -19172,6 +19150,10 @@ msgstr "%s [Version actuelle]"
 #: wp-includes/post-template.php:1926 wp-includes/post-template.php:1987
 msgid "%s [Autosave]"
 msgstr "%s [Sauvegarde automatique]"
+
+#: wp-includes/post-template.php:1810
+msgid "This content is password protected. To view it please enter your password below:"
+msgstr "Cet article est protégé par un mot de passe. Pour le lire, veuillez saisir votre mot de passe ci-dessous :"
 
 #. translators: 'Home' as in a website's home page.
 #: wp-includes/blocks/home-link.php:140 wp-includes/post-template.php:1471

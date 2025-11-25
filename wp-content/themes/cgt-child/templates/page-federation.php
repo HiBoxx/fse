@@ -34,8 +34,8 @@ get_header();
 		<!-- Story Section -->
 		<section class="federation-story">
 			<div class="federation-story__image">
-				<img
-					src="<?php echo esc_url( 'http://fse.local/wp-content/uploads/2025/10/federation.png' ); ?>"
+		<img
+			src="<?php echo esc_url( cgt_child_upload_url( '2025/10/federation.png' ) ); ?>"
 					alt="<?php esc_attr_e( 'Militants de la Fédération CGT des Sociétés d\'Études', 'cgt' ); ?>"
 					loading="lazy"
 				>
