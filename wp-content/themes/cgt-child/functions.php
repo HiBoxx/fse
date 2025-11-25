@@ -27,6 +27,51 @@ if ( ! defined( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL' ) ) {
 	define( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL', 'http://217.182.67.130/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-11_00_16.png' );
 }
 
+if ( ! function_exists( 'cgt_child_get_media_url' ) ) {
+	/**
+	 * Retrieve a media URL by its relative uploads path.
+	 *
+	 * @param string $relative_path Example: 2025/11/slider.png.
+	 * @return string
+	 */
+	function cgt_child_get_media_url( $relative_path ) {
+		static $cache = array();
+
+		$relative_path = ltrim( (string) $relative_path, '/' );
+
+		if ( isset( $cache[ $relative_path ] ) ) {
+			return $cache[ $relative_path ];
+		}
+
+		$attachment = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_query'     => array(
+					array(
+						'key'     => '_wp_attached_file',
+						'value'   => $relative_path,
+						'compare' => '=',
+					),
+				),
+			)
+		);
+
+		if ( ! empty( $attachment ) ) {
+			$url = wp_get_attachment_url( $attachment[0] );
+		} else {
+			$uploads = wp_get_upload_dir();
+			$url     = ! empty( $uploads['baseurl'] ) ? trailingslashit( $uploads['baseurl'] ) . $relative_path : '';
+		}
+
+		$cache[ $relative_path ] = $url ? esc_url_raw( $url ) : '';
+
+		return $cache[ $relative_path ];
+	}
+}
+
 // Charge l'autoloader Dompdf si disponible.
 $cgt_child_dompdf_autoloaders = array(
 	get_stylesheet_directory() . '/vendor/dompdf/autoload.inc.php',

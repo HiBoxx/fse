@@ -83,6 +83,10 @@ $actualites_page = get_page_by_path( 'actualites', OBJECT, 'page' );
 $actualites_link = $actualites_page ? get_permalink( $actualites_page ) : get_post_type_archive_link( 'post' );
 $mediatheque_page = get_page_by_path( 'mediatheque', OBJECT, 'page' );
 $mediatheque_link = $mediatheque_page ? get_permalink( $mediatheque_page ) : home_url( '/mediatheque' );
+$home_slider_image = cgt_child_get_media_url( '2025/11/slider.png' );
+if ( empty( $home_slider_image ) ) {
+	$home_slider_image = 'http://217.182.67.130/wp-content/uploads/2025/11/slider.png';
+}
 ?>
 
 <main id="primary" class="site-main">
@@ -105,7 +109,7 @@ $mediatheque_link = $mediatheque_page ? get_permalink( $mediatheque_page ) : hom
 			<div class="home-hero__media" aria-hidden="true">
 			<img
 				class="home-hero__image"
-				src="<?php echo esc_url( 'http://217.182.67.130/wp-content/uploads/2025/10/slider.png' ); ?>"
+				src="<?php echo esc_url( $home_slider_image ); ?>"
 					alt="<?php esc_attr_e( 'Visuel illustrant la mobilisation de la Fédération CGT des Sociétés d’Études', 'cgt' ); ?>"
 					loading="lazy"
 				>
