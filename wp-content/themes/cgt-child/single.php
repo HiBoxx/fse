@@ -12,6 +12,7 @@ while ( have_posts() ) :
 
 	// Récupérer les métadonnées
 	$sources = get_post_meta( get_the_ID(), 'cgt_submission_sources', true );
+	$pdf_url = get_post_meta( get_the_ID(), 'cgt_fichier_pdf', true );
 	?>
 
 	<article id="post-<?php the_ID(); ?>" <?php post_class( 'cgt-single-article' ); ?>>
@@ -74,6 +75,22 @@ while ( have_posts() ) :
 			<div class="article-content">
 				<?php the_content(); ?>
 			</div>
+
+			<!-- PDF Download Section -->
+			<?php if ( $pdf_url ) : ?>
+				<div class="article-pdf-download">
+					<div class="pdf-icon">📄</div>
+					<div class="pdf-info">
+						<h3 class="pdf-title">Télécharger le document PDF</h3>
+						<p class="pdf-description">
+							Téléchargez la version PDF de cet article pour l'imprimer ou la partager.
+						</p>
+						<a class="pdf-download-button" href="<?php echo esc_url( $pdf_url ); ?>" download>
+							Télécharger le PDF
+						</a>
+					</div>
+				</div>
+			<?php endif; ?>
 
 			<!-- Sources et références -->
 			<?php if ( $sources ) : ?>
@@ -281,13 +298,83 @@ while ( have_posts() ) :
 		}
 
 		.article-content a {
-			color: #ffffffff;
+			color: #ce1010;
 			text-decoration: underline;
 			font-weight: 600;
 		}
 
 		.article-content a:hover {
 			color: #a30f0f;
+		}
+
+		.article-pdf-download {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			gap: 20px;
+			align-items: center;
+			padding: 25px;
+			background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+			border: 2px solid #fca5a5;
+			border-radius: 12px;
+			margin-bottom: 35px;
+			transition: all 0.3s ease;
+		}
+
+		.article-pdf-download:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 16px rgba(206, 16, 16, 0.15);
+		}
+
+		.article-pdf-download .pdf-icon {
+			font-size: 48px;
+			flex-shrink: 0;
+		}
+
+		.article-pdf-download .pdf-info {
+			display: grid;
+			gap: 10px;
+		}
+
+		.article-pdf-download .pdf-title {
+			margin: 0;
+			font-size: 22px;
+			font-weight: 700;
+			color: #1f2937;
+		}
+
+		.article-pdf-download .pdf-description {
+			margin: 0;
+			color: #6b7280;
+			font-size: 15px;
+			line-height: 1.6;
+		}
+
+		.article-pdf-download .pdf-download-button {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			padding: 12px 24px;
+			background: #ce1010;
+			color: white;
+			text-decoration: none;
+			border-radius: 8px;
+			font-weight: 600;
+			font-size: 15px;
+			transition: all 0.2s;
+			width: fit-content;
+		}
+
+		.article-pdf-download .pdf-download-button:hover {
+			background: #a30f0f;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(206, 16, 16, 0.3);
+			color: white;
+		}
+
+		.article-pdf-download .pdf-download-button::before {
+			content: '⬇';
+			font-size: 18px;
 		}
 
 		.article-sources {
@@ -428,6 +515,19 @@ while ( have_posts() ) :
 			.article-excerpt {
 				flex-direction: column;
 				padding: 20px;
+			}
+
+			.article-pdf-download {
+				grid-template-columns: 1fr;
+				padding: 20px;
+			}
+
+			.article-pdf-download .pdf-icon {
+				font-size: 36px;
+			}
+
+			.article-pdf-download .pdf-download-button {
+				width: 100%;
 			}
 
 			.article-navigation {
