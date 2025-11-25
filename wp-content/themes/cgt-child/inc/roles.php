@@ -114,6 +114,20 @@ function cgt_register_assistance_role() {
 			'delete_posts'           => true,
 			'delete_published_posts' => true,
 
+			// Articles privés des adhérents
+			'read_private_articles_adherents'   => true,
+			'edit_article_adherent'            => true,
+			'edit_articles_adherents'          => true,
+			'edit_others_articles_adherents'   => true,
+			'edit_private_articles_adherents'  => true,
+			'edit_published_articles_adherents'=> true,
+			'publish_articles_adherents'       => true,
+			'delete_article_adherent'          => true,
+			'delete_articles_adherents'        => true,
+			'delete_others_articles_adherents' => true,
+			'delete_private_articles_adherents'=> true,
+			'delete_published_articles_adherents'=> true,
+
 			// Tracts (utilise les caps de post par défaut)
 			'edit_tracts'            => true,
 			'edit_others_tracts'     => true,
