@@ -674,18 +674,18 @@ get_header();
                                             <label for="banque_code_postal">Code postal</label>
                                             <input type="text" name="banque_code_postal" id="banque_code_postal" class="form-control" pattern="[0-9]{5}">
                                         </div>
-                                        <div class="form-group col-8">
-                                            <label for="banque_ville">Ville</label>
-                                            <input type="text" name="banque_ville" id="banque_ville" class="form-control">
-                                        </div>
+                                    <div class="form-group col-8">
+                                        <label for="banque_ville">Ville</label>
+                                        <input type="text" name="banque_ville" id="banque_ville" class="form-control">
                                     </div>
                                 </div>
-                            </fieldset>
+                                </div>
 
                                 <div class="form-group">
                                     <label for="rib">RIB</label>
                                     <input type="text" name="rib" id="rib" class="form-control" placeholder="Relevé d'Identité Bancaire">
                                 </div>
+                            </fieldset>
                             </div>
 
                             <div class="form-subsection">
