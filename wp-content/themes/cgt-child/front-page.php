@@ -83,9 +83,9 @@ $actualites_page = get_page_by_path( 'actualites', OBJECT, 'page' );
 $actualites_link = $actualites_page ? get_permalink( $actualites_page ) : get_post_type_archive_link( 'post' );
 $mediatheque_page = get_page_by_path( 'mediatheque', OBJECT, 'page' );
 $mediatheque_link = $mediatheque_page ? get_permalink( $mediatheque_page ) : home_url( '/mediatheque' );
-$home_slider_image = cgt_child_get_media_url( '2025/11/slider.png' );
+$home_slider_image = cgt_child_get_media_url( '2025/11/slider2.jpeg' );
 if ( empty( $home_slider_image ) ) {
-	$home_slider_image = 'http://217.182.67.130/wp-content/uploads/2025/11/slider.png';
+	$home_slider_image = 'http://217.182.67.130/wp-content/uploads/2025/11/slider2.jpeg';
 }
 ?>
 
