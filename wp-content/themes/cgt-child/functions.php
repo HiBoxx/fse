@@ -12,19 +12,19 @@ if ( ! defined( 'CGT_CHILD_VERSION' ) ) {
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_LOGO_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_LOGO_URL', 'http://217.182.67.130/wp-content/uploads/2025/10/logo2.png' );
+	define( 'CGT_CHILD_DEFAULT_LOGO_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/10/logo2.png' );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_FAVICON_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_FAVICON_URL', 'http://217.182.67.130/wp-content/uploads/2025/10/telechargement.png' );
+	define( 'CGT_CHILD_DEFAULT_FAVICON_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/10/telechargement.png' );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_IMAGE_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_IMAGE_URL', 'http://217.182.67.130/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-10_49_55.png' );
+	define( 'CGT_CHILD_DEFAULT_IMAGE_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-10_49_55.png' );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL', 'http://217.182.67.130/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-11_00_16.png' );
+	define( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-11_00_16.png' );
 }
 
 if ( ! function_exists( 'cgt_child_get_media_url' ) ) {
