@@ -307,8 +307,7 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 						$user_branch = get_term( $user_branch_id, 'branche' );
 						if ( $user_branch && ! is_wp_error( $user_branch ) ) {
 							echo '<div class="member-dashboard__branch-container">';
-							$hierarchy = cgt_get_branch_hierarchy( $user_branch );
-							echo '<p class="member-dashboard__branch">' . esc_html( $hierarchy ) . '</p>';
+							echo '<p class="member-dashboard__branch">' . esc_html( $user_branch->name ) . '</p>';
 							echo '<button type="button" class="btn-change-branch" id="changeBranchBtn">';
 							echo '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
 							esc_html_e( 'Modifier la branche', 'cgt' );
@@ -335,8 +334,7 @@ $tract_submission_link   = add_query_arg( 'type', 'tract', $article_submission_l
 						if ( ! is_wp_error( $branch_terms ) ) {
 							foreach ( $branch_terms as $branch ) {
 								$selected = ( $user_branch_id && $branch->term_id == $user_branch_id ) ? ' selected' : '';
-								$hierarchy = cgt_get_branch_hierarchy( $branch );
-								echo '<option value="' . esc_attr( $branch->term_id ) . '"' . $selected . '>' . esc_html( $hierarchy ) . '</option>';
+								echo '<option value="' . esc_attr( $branch->term_id ) . '"' . $selected . '>' . esc_html( $branch->name ) . '</option>';
 							}
 						}
 						?>
