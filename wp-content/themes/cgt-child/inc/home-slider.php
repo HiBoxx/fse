@@ -29,6 +29,7 @@ function cgt_add_slider_settings_page() {
 add_action( 'admin_init', 'cgt_register_slider_settings' );
 function cgt_register_slider_settings() {
 	register_setting( 'cgt_home_slider_group', 'cgt_home_slider_images' );
+	register_setting( 'cgt_home_slider_group', 'cgt_home_slider_links' );
 }
 
 /**
@@ -39,6 +40,7 @@ function cgt_render_slider_settings_page() {
 	wp_enqueue_media();
 
 	$slider_images = get_option( 'cgt_home_slider_images', array() );
+	$slider_links  = get_option( 'cgt_home_slider_links', array() );
 
 	?>
 	<div class="wrap">
@@ -59,12 +61,17 @@ function cgt_render_slider_settings_page() {
 								foreach ( $slider_images as $index => $image_id ) {
 									if ( $image_id ) {
 										$image_url = wp_get_attachment_image_url( $image_id, 'thumbnail' );
+										$link_url  = isset( $slider_links[ $index ] ) ? $slider_links[ $index ] : '';
 										echo '<div class="cgt-slider-image-item" data-index="' . esc_attr( $index ) . '">';
 										echo '<img src="' . esc_url( $image_url ) . '" style="max-width: 150px; height: auto; display: block; margin-bottom: 10px;">';
 										echo '<input type="hidden" name="cgt_home_slider_images[]" value="' . esc_attr( $image_id ) . '">';
+										echo '<label style="display: block; margin: 10px 0 5px 0; font-weight: 600;">🔗 ' . esc_html__( 'Lien de redirection', 'cgt' ) . '</label>';
+										echo '<input type="url" name="cgt_home_slider_links[]" value="' . esc_url( $link_url ) . '" placeholder="https://example.com" style="width: 100%; margin-bottom: 10px;" class="regular-text">';
+										echo '<div style="margin-top: 10px;">';
 										echo '<button type="button" class="button cgt-remove-slider-image">' . esc_html__( 'Supprimer', 'cgt' ) . '</button>';
 										echo '<button type="button" class="button cgt-move-slider-image-up" style="margin-left: 5px;">' . esc_html__( '↑', 'cgt' ) . '</button>';
 										echo '<button type="button" class="button cgt-move-slider-image-down" style="margin-left: 5px;">' . esc_html__( '↓', 'cgt' ) . '</button>';
+										echo '</div>';
 										echo '</div>';
 									}
 								}
@@ -105,6 +112,7 @@ function cgt_render_slider_settings_page() {
 			vertical-align: top;
 			transition: all 0.3s ease;
 			box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+			max-width: 280px;
 		}
 		.cgt-slider-image-item:hover {
 			border-color: #2271b1;
@@ -115,6 +123,21 @@ function cgt_render_slider_settings_page() {
 			border: 1px solid #ddd;
 			border-radius: 4px;
 			background: #f9f9f9;
+		}
+		.cgt-slider-image-item label {
+			color: #2271b1;
+			font-size: 13px;
+		}
+		.cgt-slider-image-item input[type="url"] {
+			font-size: 13px;
+			padding: 6px 10px;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+		}
+		.cgt-slider-image-item input[type="url"]:focus {
+			border-color: #2271b1;
+			box-shadow: 0 0 0 1px #2271b1;
+			outline: none;
 		}
 		#cgt-slider-images-container {
 			margin-bottom: 15px;
@@ -199,9 +222,13 @@ function cgt_render_slider_settings_page() {
 					var imageItem = $('<div class="cgt-slider-image-item">');
 					imageItem.append('<img src="' + imageUrl + '" style="max-width: 150px; height: auto; display: block; margin-bottom: 10px;">');
 					imageItem.append('<input type="hidden" name="cgt_home_slider_images[]" value="' + attachment.id + '">');
+					imageItem.append('<label style="display: block; margin: 10px 0 5px 0; font-weight: 600;">🔗 <?php esc_html_e( 'Lien de redirection', 'cgt' ); ?></label>');
+					imageItem.append('<input type="url" name="cgt_home_slider_links[]" value="" placeholder="https://example.com" style="width: 100%; margin-bottom: 10px;" class="regular-text">');
+					imageItem.append('<div style="margin-top: 10px;">');
 					imageItem.append('<button type="button" class="button cgt-remove-slider-image"><?php esc_html_e( 'Supprimer', 'cgt' ); ?></button>');
 					imageItem.append('<button type="button" class="button cgt-move-slider-image-up" style="margin-left: 5px;">↑</button>');
 					imageItem.append('<button type="button" class="button cgt-move-slider-image-down" style="margin-left: 5px;">↓</button>');
+					imageItem.append('</div>');
 					$('#cgt-slider-images-container').append(imageItem);
 				});
 
