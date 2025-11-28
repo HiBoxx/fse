@@ -89,6 +89,7 @@ if ( false === $branch_terms ) {
     );
     wp_cache_set( 'cgt_branch_terms', $branch_terms, '', HOUR_IN_SECONDS );
 }
+$branch_groups = cgt_get_branch_groups();
 
 $category_terms = wp_cache_get( 'cgt_category_terms' );
 if ( false === $category_terms ) {
@@ -380,13 +381,7 @@ $is_adresses_utiles = ( 'adresses-utiles' === $selected_class );
 				<label for="classes-filter-branch"><?php esc_html_e( 'Branches', 'cgt' ); ?></label>
 				<select id="classes-filter-branch" name="branche">
 					<option value=""><?php esc_html_e( 'Toutes les branches', 'cgt' ); ?></option>
-					<?php if ( ! is_wp_error( $branch_terms ) ) : ?>
-						<?php foreach ( $branch_terms as $term ) : ?>
-							<option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $selected_branch, $term->slug ); ?>>
-								<?php echo esc_html( $term->name ); ?>
-							</option>
-						<?php endforeach; ?>
-					<?php endif; ?>
+					<?php cgt_render_branch_options( $selected_branch ); ?>
 				</select>
 			</div>
 			<div class="classes-filters__row">

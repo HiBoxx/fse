@@ -30,7 +30,7 @@ if ( ! empty( $search ) ) {
 
 $query        = new WP_Query( $args );
 $status_param = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
-$branches     = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
+$branches     = cgt_get_branch_groups();
 ?>
 
 <div class="cgt-articles-section">
@@ -96,9 +96,7 @@ $branches     = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false
 					<span><?php esc_html_e( 'Branche', 'cgt' ); ?></span>
 					<select name="branch">
 						<option value=""><?php esc_html_e( '-- Choisir une branche --', 'cgt' ); ?></option>
-						<?php if ( ! is_wp_error( $branches ) ) : foreach ( $branches as $branch ) : ?>
-							<option value="<?php echo esc_attr( $branch->term_id ); ?>"><?php echo esc_html( $branch->name ); ?></option>
-						<?php endforeach; endif; ?>
+						<?php cgt_render_branch_options( '', 0, 0 ); ?>
 					</select>
 				</label>
 

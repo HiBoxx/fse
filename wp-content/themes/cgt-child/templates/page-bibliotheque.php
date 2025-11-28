@@ -73,6 +73,7 @@ $branches   = get_terms(
 		'order'      => 'ASC',
 	)
 );
+$branch_groups = cgt_get_branch_groups();
 $categories = get_categories(
 	array(
 		'hide_empty' => false,
@@ -128,13 +129,7 @@ $years = array_map( 'absint', $years );
 					</label>
 					<select id="library-branch" name="branche" class="filter-select">
 						<option value=""><?php esc_html_e( 'Toutes les branches', 'cgt' ); ?></option>
-						<?php if ( ! is_wp_error( $branches ) ) : ?>
-							<?php foreach ( $branches as $branch ) : ?>
-								<option value="<?php echo esc_attr( $branch->slug ); ?>" <?php selected( $selected_branch, $branch->slug ); ?>>
-									<?php echo esc_html( $branch->name ); ?>
-								</option>
-							<?php endforeach; ?>
-						<?php endif; ?>
+						<?php cgt_render_branch_options( $selected_branch ); ?>
 					</select>
 				</div>
 
