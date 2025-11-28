@@ -555,6 +555,7 @@ $communiques_tabs = array(
 					<?php
 					// Récupérer les images du slider depuis les options
 					$slider_images = get_option( 'cgt_home_slider_images', array() );
+					$slider_links  = get_option( 'cgt_home_slider_links', array() );
 
 					if ( ! empty( $slider_images ) && is_array( $slider_images ) ) :
 						?>
@@ -564,6 +565,12 @@ $communiques_tabs = array(
 									<?php if ( $image_id ) : ?>
 										<div class="home-slider__slide <?php echo 0 === $index ? 'is-active' : ''; ?>">
 											<?php
+											$link_url = isset( $slider_links[ $index ] ) ? $slider_links[ $index ] : '';
+
+											if ( ! empty( $link_url ) ) {
+												echo '<a href="' . esc_url( $link_url ) . '" target="_blank" rel="noopener noreferrer" class="home-slider__link">';
+											}
+
 											echo wp_get_attachment_image(
 												$image_id,
 												'medium_large',
@@ -573,6 +580,10 @@ $communiques_tabs = array(
 													'loading' => 0 === $index ? 'eager' : 'lazy', // Lazy load sauf première image
 												)
 											);
+
+											if ( ! empty( $link_url ) ) {
+												echo '</a>';
+											}
 											?>
 										</div>
 									<?php endif; ?>
