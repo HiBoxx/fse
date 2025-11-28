@@ -749,7 +749,7 @@ function cgt_contact_form_shortcode() {
 					}
 
 					wp_mail(
-						get_option( 'admin_email' ),
+						'assistante.fsetud@cgt.fr',
 						sprintf( '[CGT] %s', $subject ),
 						sprintf( "Message soumis via le formulaire contact :\n\nNom : %s\nEmail : %s\nTéléphone : %s\n\n%s", $name, $email, $phone ? $phone : __( 'non fourni', 'cgt' ), wp_strip_all_tags( $content ) )
 					);
