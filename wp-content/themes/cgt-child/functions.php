@@ -132,7 +132,15 @@ foreach ( $cgt_inc_files as $cgt_inc_file ) {
  * @return string
  */
 function cgt_child_get_logo_url() {
-	$logo_url = get_theme_mod( 'cgt_logo_url', CGT_CHILD_DEFAULT_LOGO_URL );
+	$logo_url = get_theme_mod( 'cgt_logo_url' );
+
+	if ( empty( $logo_url ) && function_exists( 'cgt_child_get_media_url' ) ) {
+		$logo_url = cgt_child_get_media_url( '2025/10/logo2.png' );
+	}
+
+	if ( empty( $logo_url ) ) {
+		$logo_url = CGT_CHILD_DEFAULT_LOGO_URL;
+	}
 
 	/**
 	 * Filtre l'URL du logo fédéral.
