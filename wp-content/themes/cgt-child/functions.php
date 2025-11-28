@@ -43,6 +43,8 @@ function cgt_get_branch_groups() {
 		array(
 			'taxonomy'   => 'branche',
 			'hide_empty' => false,
+			'orderby'    => 'name',
+			'order'      => 'ASC',
 		)
 	);
 
@@ -75,13 +77,6 @@ function cgt_render_branch_options( $selected_slug = '', $parent = 0, $depth = 0
 	if ( empty( $groups[ $parent ] ) ) {
 		return;
 	}
-
-	usort(
-		$groups[ $parent ],
-		static function ( $a, $b ) {
-			return strcasecmp( $a->name, $b->name );
-		}
-	);
 
 	foreach ( $groups[ $parent ] as $term ) {
 		$prefix = str_repeat( '— ', $depth );
