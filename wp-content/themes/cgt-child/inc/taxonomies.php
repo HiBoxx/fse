@@ -130,6 +130,28 @@ function cgt_add_default_expertises() {
 add_action( 'init', 'cgt_add_default_expertises', 20 );
 
 /**
+ * Add default class/thematique terms
+ */
+function cgt_add_default_thematiques() {
+	if ( ! term_exists( 'AI', 'thematique' ) ) {
+		wp_insert_term( 'AI', 'thematique', array( 'slug' => 'ai' ) );
+	}
+}
+add_action( 'init', 'cgt_add_default_thematiques', 20 );
+
+/**
+ * Remove deprecated branch terms
+ */
+function cgt_remove_deprecated_branches() {
+	// Remove "Recherche" branch if it exists
+	$recherche_term = get_term_by( 'name', 'Recherche', 'branche' );
+	if ( $recherche_term && ! is_wp_error( $recherche_term ) ) {
+		wp_delete_term( $recherche_term->term_id, 'branche' );
+	}
+}
+add_action( 'init', 'cgt_remove_deprecated_branches', 25 );
+
+/**
  * Add ID Brevo field to branche taxonomy
  */
 function cgt_branche_add_form_fields() {
