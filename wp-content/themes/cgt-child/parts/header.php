@@ -58,6 +58,7 @@ if ( ! function_exists( 'cgt_classes_link' ) ) {
 					<h3 class="drawer-section__title" aria-hidden="true"><?php esc_html_e( 'Publications', 'cgt' ); ?></h3>
 					<ul class="drawer-menu">
 						<li><a href="<?php echo cgt_classes_link( 'actualites', $classes_base ); ?>"><?php esc_html_e( 'Actualités', 'cgt' ); ?></a></li>
+						<li><a href="<?php echo cgt_classes_link( 'intelligence-artificielle', $classes_base ); ?>"><?php esc_html_e( 'IA', 'cgt' ); ?></a></li>
 						<li><a href="<?php echo cgt_classes_link( 'le-lien-syndical', $classes_base ); ?>"><?php esc_html_e( 'Le Lien Syndical', 'cgt' ); ?></a></li>
 						<li><a href="<?php echo cgt_classes_link( 'brochures-analyses', $classes_base ); ?>"><?php esc_html_e( 'Brochures & Analyses', 'cgt' ); ?></a></li>
 						<li><a href="<?php echo cgt_classes_link( 'dossiers-thematiques', $classes_base ); ?>"><?php esc_html_e( 'Dossiers thématiques', 'cgt' ); ?></a></li>
