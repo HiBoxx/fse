@@ -35,7 +35,7 @@ get_header();
 		<section class="federation-story">
 			<div class="federation-story__image">
 		<img
-			src="<?php echo esc_url( 'http://217.182.67.130/wp-content/uploads/2025/10/federation.png' ); ?>"
+			src="<?php echo esc_url( 'https://fsetud-cgt.fr/wp-content/uploads/2025/10/federation.png' ); ?>"
 					alt="<?php esc_attr_e( 'Militants de la Fédération CGT des Sociétés d\'Études', 'cgt' ); ?>"
 					loading="lazy"
 				>

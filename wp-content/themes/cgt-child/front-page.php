@@ -85,7 +85,7 @@ $mediatheque_page = get_page_by_path( 'mediatheque', OBJECT, 'page' );
 $mediatheque_link = $mediatheque_page ? get_permalink( $mediatheque_page ) : home_url( '/mediatheque' );
 $home_slider_image = cgt_child_get_media_url( '2025/11/slider2.jpeg' );
 if ( empty( $home_slider_image ) ) {
-	$home_slider_image = 'http://217.182.67.130/wp-content/uploads/2025/11/slider2.jpeg';
+	$home_slider_image = 'https://fsetud-cgt.fr/wp-content/uploads/2025/11/slider2.jpeg';
 }
 ?>
 
@@ -98,7 +98,25 @@ if ( empty( $home_slider_image ) ) {
 				<p class="home-hero__lead"><?php esc_html_e( 'Actualités, analyses et outils pour les salarié·es des sociétés d\'études, d\'ingénierie, de conseil et d\'expertise.', 'cgt' ); ?></p>
 				<div class="home-hero__actions">
 					<a class="btn" href="<?php echo esc_url( home_url( '/contact' ) ); ?>"><?php esc_html_e( 'Rejoindre la CGT', 'cgt' ); ?></a>
-					<a class="btn btn-light" href="<?php echo esc_url( home_url( '/espace-adherent' ) ); ?>"><?php esc_html_e( 'Espace adhérent', 'cgt' ); ?></a>
+					<?php
+					$member_button_text = __( 'Espace adhérent', 'cgt' );
+					if ( is_user_logged_in() ) {
+						$current_user = wp_get_current_user();
+						$first_name = get_user_meta( $current_user->ID, 'first_name', true );
+						$last_name = get_user_meta( $current_user->ID, 'last_name', true );
+
+						if ( ! empty( $first_name ) && ! empty( $last_name ) ) {
+							$member_button_text = $first_name . ' ' . $last_name;
+						} elseif ( ! empty( $first_name ) ) {
+							$member_button_text = $first_name;
+						} elseif ( ! empty( $last_name ) ) {
+							$member_button_text = $last_name;
+						} else {
+							$member_button_text = $current_user->display_name;
+						}
+					}
+					?>
+					<a class="btn btn-light" href="<?php echo esc_url( home_url( '/espace-adherent' ) ); ?>"><?php echo esc_html( $member_button_text ); ?></a>
 				</div>
 				<ul class="home-hero__meta">
 					<li><?php esc_html_e( 'Bureaux d’études | Conseil | Ingénierie | Expertise', 'cgt' ); ?></li>
@@ -482,7 +500,7 @@ $communiques_tabs = array(
 			<div class="home-cta__aside">
 				<figure class="home-cta__media">
 					<img
-						src="<?php echo esc_url( 'http://217.182.67.130/wp-content/uploads/2025/10/adherent-photo.png' ); ?>"
+						src="<?php echo esc_url( 'https://fsetud-cgt.fr/wp-content/uploads/2025/10/adherent-photo.png' ); ?>"
 						alt="<?php esc_attr_e( 'Adhérents de la fédération réunis', 'cgt' ); ?>"
 						loading="lazy"
 					>

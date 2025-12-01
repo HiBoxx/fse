@@ -12,19 +12,19 @@ if ( ! defined( 'CGT_CHILD_VERSION' ) ) {
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_LOGO_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_LOGO_URL', 'http://217.182.67.130/wp-content/uploads/2025/10/logo2.png' );
+	define( 'CGT_CHILD_DEFAULT_LOGO_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/10/logo2.png' );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_FAVICON_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_FAVICON_URL', 'http://217.182.67.130/wp-content/uploads/2025/10/telechargement.png' );
+	define( 'CGT_CHILD_DEFAULT_FAVICON_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/10/telechargement.png' );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_IMAGE_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_IMAGE_URL', 'http://217.182.67.130/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-10_49_55.png' );
+	define( 'CGT_CHILD_DEFAULT_IMAGE_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-10_49_55.png' );
 }
 
 if ( ! defined( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL' ) ) {
-	define( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL', 'http://217.182.67.130/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-11_00_16.png' );
+	define( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-11_00_16.png' );
 }
 
 if ( ! function_exists( 'cgt_child_get_media_url' ) ) {
@@ -985,3 +985,52 @@ function cgt_display_post_branches( $post_id, $before = '', $after = '', $separa
 
 	return $before . implode( $separator, $output ) . $after;
 }
+
+/**
+ * Modifier le texte du menu "Espace adhérent" pour afficher le nom de l'utilisateur connecté
+ *
+ * @param array $items Menu items
+ * @param object $args Menu arguments
+ * @return array Modified menu items
+ */
+function cgt_customize_member_area_menu_item( $items, $args ) {
+	// Ne s'applique que pour le menu principal
+	if ( ! isset( $args->theme_location ) || 'primary' !== $args->theme_location ) {
+		return $items;
+	}
+
+	// Vérifier si l'utilisateur est connecté
+	if ( ! is_user_logged_in() ) {
+		return $items;
+	}
+
+	$current_user = wp_get_current_user();
+
+	// Récupérer le prénom et le nom de l'utilisateur
+	$first_name = get_user_meta( $current_user->ID, 'first_name', true );
+	$last_name = get_user_meta( $current_user->ID, 'last_name', true );
+
+	// Construire le nom à afficher
+	$display_name = '';
+	if ( ! empty( $first_name ) && ! empty( $last_name ) ) {
+		$display_name = $first_name . ' ' . $last_name;
+	} elseif ( ! empty( $first_name ) ) {
+		$display_name = $first_name;
+	} elseif ( ! empty( $last_name ) ) {
+		$display_name = $last_name;
+	} else {
+		$display_name = $current_user->display_name;
+	}
+
+	// Parcourir tous les éléments du menu
+	foreach ( $items as $item ) {
+		// Vérifier si c'est le lien vers "espace-adherent"
+		if ( false !== strpos( $item->url, '/espace-adherent' ) || 'Espace Adhérent' === $item->title || 'Espace adhérent' === $item->title ) {
+			// Remplacer le titre par le nom de l'utilisateur
+			$item->title = esc_html( $display_name );
+		}
+	}
+
+	return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'cgt_customize_member_area_menu_item', 10, 2 );
