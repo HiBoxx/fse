@@ -355,18 +355,18 @@ a:focus {
 }
 
 .nav-toggle {
-	display: none;
+	display: inline-flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 5px;
+	gap: 4px;
 	width: 44px;
 	height: 44px;
 	background: rgba(255, 255, 255, 0.15);
 	border: 1px solid rgba(255, 255, 255, 0.4);
 	border-radius: 50%;
+	color: inherit;
 	cursor: pointer;
-	padding: 8px;
 	transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
@@ -376,13 +376,12 @@ a:focus {
 	background: rgba(255, 255, 255, 0.25);
 }
 
-.nav-toggle__bar {
+.nav-toggle__line {
 	display: block;
-	width: 22px;
+	width: 24px;
 	height: 2px;
 	background: var(--cgt-white);
-	border-radius: 2px;
-	transition: all 0.3s ease;
+	margin-block: 4px;
 }
 
 
@@ -2172,43 +2171,18 @@ button:focus {
 }
 
 @media (max-width: 960px) {
-	/* Afficher le bouton burger sur mobile */
-	.nav-toggle {
-		display: inline-flex;
-		margin-right: 1rem;
-	}
-
-	/* Cacher le menu principal sauf le bouton "Espace client" */
-	.primary-menu > li:not(.menu-item--cta) {
-		display: none;
-	}
-
-	/* Garder le bouton "Espace client" visible sur mobile */
 	.primary-menu {
-		display: flex;
-		gap: 0;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: 0.75rem;
+	}
+
+	.primary-menu a {
+		font-size: 0.95rem;
 	}
 
 	.primary-menu .menu-item--cta > a {
 		padding: 0.4rem 0.8rem;
-		font-size: 0.9rem;
-	}
-
-	/* Adapter le header pour mobile */
-	.header-inner {
-		justify-content: space-between;
-	}
-
-	.header-nav {
-		display: flex;
-		align-items: center;
-		gap: 0;
-	}
-
-	/* Adapter le logo pour mobile */
-	.site-logo img {
-		max-height: 45px;
-		width: auto;
 	}
 }
 .home-grid .card:hover {
