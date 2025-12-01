@@ -21,10 +21,15 @@ if ( ! function_exists( 'cgt_classes_link' ) ) {
 <header class="header-bar" role="banner">
 	<div class="container header-inner">
 		<a class="site-logo site-logo--image" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-			<img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php esc_attr_e( 'FSETUD – Fédération CGT des Sociétés d’Études', 'cgt' ); ?>">
-			<span class="sr-only"><?php esc_html_e( 'Retour à la page d’accueil', 'cgt' ); ?></span>
+			<img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php esc_attr_e( 'FSETUD – Fédération CGT des Sociétés d'Études', 'cgt' ); ?>">
+			<span class="sr-only"><?php esc_html_e( 'Retour à la page d'accueil', 'cgt' ); ?></span>
 		</a>
 		<div class="header-nav">
+			<button class="nav-toggle" type="button" aria-expanded="false" aria-label="<?php esc_attr_e( 'Ouvrir le menu', 'cgt' ); ?>">
+				<span class="nav-toggle__bar"></span>
+				<span class="nav-toggle__bar"></span>
+				<span class="nav-toggle__bar"></span>
+			</button>
 			<?php get_template_part( 'parts/nav-primary' ); ?>
 		</div>
 	</div>
