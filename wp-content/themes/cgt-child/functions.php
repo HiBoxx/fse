@@ -43,7 +43,7 @@ function cgt_get_branch_groups() {
 		array(
 			'taxonomy'   => 'branche',
 			'hide_empty' => false,
-			'orderby'    => 'name',
+			'orderby'    => 'term_id',
 			'order'      => 'ASC',
 		)
 	);
