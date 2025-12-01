@@ -792,10 +792,6 @@ if ( $account_request_feedback ) {
 					<input type="text" name="nom" required autocomplete="family-name">
 				</label>
 				<label class="account-request-form__field">
-					<span><?php esc_html_e( 'N° d’adhérent', 'cgt' ); ?></span>
-					<input type="text" name="numero_adherent" autocomplete="off">
-				</label>
-				<label class="account-request-form__field">
 					<span><?php esc_html_e( 'Email', 'cgt' ); ?> <span class="required">*</span></span>
 					<input type="email" name="email" required autocomplete="email">
 				</label>
