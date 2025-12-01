@@ -1002,6 +1002,11 @@ function cgt_display_post_branches( $post_id, $before = '', $after = '', $separa
  * @return array Modified menu items
  */
 function cgt_customize_member_area_menu_item( $items, $args ) {
+	// Vérifier que $items est bien un tableau
+	if ( ! is_array( $items ) ) {
+		return $items;
+	}
+
 	// Ne s'applique que pour le menu principal
 	if ( ! isset( $args->theme_location ) || 'primary' !== $args->theme_location ) {
 		return $items;
@@ -1013,6 +1018,11 @@ function cgt_customize_member_area_menu_item( $items, $args ) {
 	}
 
 	$current_user = wp_get_current_user();
+
+	// Vérifier que l'utilisateur est valide
+	if ( ! $current_user || ! $current_user->ID ) {
+		return $items;
+	}
 
 	// Récupérer le prénom et le nom de l'utilisateur
 	$first_name = get_user_meta( $current_user->ID, 'first_name', true );
@@ -1032,6 +1042,11 @@ function cgt_customize_member_area_menu_item( $items, $args ) {
 
 	// Parcourir tous les éléments du menu
 	foreach ( $items as $item ) {
+		// Vérifier que $item est un objet valide
+		if ( ! is_object( $item ) || ! isset( $item->url ) || ! isset( $item->title ) ) {
+			continue;
+		}
+
 		// Vérifier si c'est le lien vers "espace-adherent"
 		if ( false !== strpos( $item->url, '/espace-adherent' ) || 'Espace Adhérent' === $item->title || 'Espace adhérent' === $item->title ) {
 			// Remplacer le titre par le nom de l'utilisateur
