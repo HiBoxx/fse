@@ -160,10 +160,18 @@ $is_adresses_utiles = ( 'adresses-utiles' === $selected_class );
 <main id="primary" class="site-main classes-archive">
 	<div class="container">
 		<header class="classes-header">
-			<h1 class="page-title"><?php echo esc_html( $page_title ); ?></h1>
-			<?php if ( ! empty( $subtitle ) ) : ?>
-				<p><?php echo wp_kses_post( $subtitle ); ?></p>
-			<?php endif; ?>
+			<div class="classes-header__hero">
+				<div class="classes-header__icon">
+					<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+						<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+					</svg>
+				</div>
+				<h1 class="page-title"><?php echo esc_html( $page_title ); ?></h1>
+				<?php if ( ! empty( $subtitle ) ) : ?>
+					<p class="classes-header__subtitle"><?php echo wp_kses_post( $subtitle ); ?></p>
+				<?php endif; ?>
+			</div>
 			<?php if ( ! empty( $active_filters ) ) : ?>
 				<div class="classes-active-filters" aria-live="polite">
 					<span class="classes-active-filters__label"><?php esc_html_e( 'Filtres actifs :', 'cgt' ); ?></span>
