@@ -108,14 +108,7 @@ $query = new WP_Query( $args );
 					<span><?php esc_html_e( 'Branche (optionnel)', 'cgt' ); ?></span>
 					<select name="branch">
 						<option value=""><?php esc_html_e( '-- Choisir une branche --', 'cgt' ); ?></option>
-						<?php
-						$branches = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
-						if ( ! is_wp_error( $branches ) ) :
-							foreach ( $branches as $branch ) :
-								printf( '<option value="%1$s">%2$s</option>', esc_attr( $branch->term_id ), esc_html( $branch->name ) );
-							endforeach;
-						endif;
-						?>
+						<?php cgt_render_branch_options(); ?>
 					</select>
 				</label>
 

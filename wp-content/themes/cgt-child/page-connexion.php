@@ -364,6 +364,22 @@ get_header();
         </div>
     </div>
 
+    <!-- Styles spécifiques pour désactiver temporairement la section Cotisation -->
+    <style>
+        .section-disabled-note {
+            margin-bottom: 1rem;
+            padding: 12px 14px;
+            background: #f6f6f6;
+            border: 1px dashed #ccc;
+            border-radius: 6px;
+            color: #555;
+            font-weight: 600;
+        }
+        .section-disabled-fields {
+            opacity: 0.5;
+        }
+    </style>
+
     <!-- MODAL FORMULAIRE D'ADHÉSION -->
     <div id="adhesion-modal" class="adhesion-modal" style="display: none;">
         <div class="modal-overlay" id="modal-overlay"></div>
@@ -580,90 +596,96 @@ get_header();
                                 Cotisation
                             </h3>
 
-                            <div class="form-group">
-                                <label for="cotisation_mensuelle">Montant cotisation mensuelle <span class="required">*</span></label>
-                                <div class="form-input-with-suffix">
-                                    <input type="number" name="cotisation_mensuelle" id="cotisation_mensuelle" class="form-control" required min="0" step="0.01">
-                                    <span class="input-suffix">€</span>
-                                </div>
-                                <small class="form-help">La cotisation est calculée sur 1% du salaire mensuel</small>
+                            <div class="section-disabled-note">
+                                Les paiements en ligne seront bientôt disponibles. Cette section est temporairement désactivée.
                             </div>
-
-                            <div class="form-subsection">
-                                <h4 class="subsection-title">En cas de prélèvement</h4>
-
+                            <fieldset class="section-disabled-fields" disabled aria-disabled="true">
                                 <div class="form-group">
-                                    <label for="prelevement_date">Date du 1er prélèvement</label>
-                                    <div class="date-input-group">
-                                        <input type="text" class="form-control date-day" value="05" readonly>
-                                        <span class="date-separator">/</span>
-                                        <select name="prelevement_mois" id="prelevement_mois" class="form-control date-month">
-                                            <option value="">Mois</option>
-                                            <option value="01">Janvier</option>
-                                            <option value="02">Février</option>
-                                            <option value="03">Mars</option>
-                                            <option value="04">Avril</option>
-                                            <option value="05">Mai</option>
-                                            <option value="06">Juin</option>
-                                            <option value="07">Juillet</option>
-                                            <option value="08">Août</option>
-                                            <option value="09">Septembre</option>
-                                            <option value="10">Octobre</option>
-                                            <option value="11">Novembre</option>
-                                            <option value="12">Décembre</option>
-                                        </select>
-                                        <span class="date-separator">/</span>
-                                        <select name="prelevement_annee" id="prelevement_annee" class="form-control date-year">
-                                            <option value="">Année</option>
-                                            <?php
-                                            $current_year = date('Y');
-                                            for ($i = 0; $i <= 5; $i++) {
-                                                $year = $current_year + $i;
-                                                echo '<option value="' . esc_attr($year) . '">' . esc_html($year) . '</option>';
-                                            }
-                                            ?>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="prelevement_montant">Montant de prélèvement</label>
+                                    <label for="cotisation_mensuelle">Montant cotisation mensuelle</label>
                                     <div class="form-input-with-suffix">
-                                        <input type="text" name="prelevement_montant" id="prelevement_montant" class="form-control" readonly>
+                                        <input type="number" name="cotisation_mensuelle" id="cotisation_mensuelle" class="form-control" min="0" step="0.01">
                                         <span class="input-suffix">€</span>
                                     </div>
-                                    <small class="form-help">Égale à 2 fois le montant de la cotisation mensuelle</small>
-                                </div>
-                            </div>
-
-                            <div class="form-subsection">
-                                <h4 class="subsection-title">Domiciliation bancaire</h4>
-
-                                <div class="form-group">
-                                    <label for="banque_nom">Nom de la banque</label>
-                                    <input type="text" name="banque_nom" id="banque_nom" class="form-control">
+                                    <small class="form-help">La cotisation est calculée sur 1% du salaire mensuel</small>
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="banque_adresse">Adresse postale</label>
-                                    <input type="text" name="banque_adresse" id="banque_adresse" class="form-control">
-                                </div>
+                                <div class="form-subsection">
+                                    <h4 class="subsection-title">En cas de prélèvement</h4>
 
-                                <div class="form-row form-row--gapped">
-                                    <div class="form-group col-4">
-                                        <label for="banque_code_postal">Code postal</label>
-                                        <input type="text" name="banque_code_postal" id="banque_code_postal" class="form-control" pattern="[0-9]{5}">
+                                    <div class="form-group">
+                                        <label for="prelevement_date">Date du 1er prélèvement</label>
+                                        <div class="date-input-group">
+                                            <input type="text" class="form-control date-day" value="05" readonly>
+                                            <span class="date-separator">/</span>
+                                            <select name="prelevement_mois" id="prelevement_mois" class="form-control date-month">
+                                                <option value="">Mois</option>
+                                                <option value="01">Janvier</option>
+                                                <option value="02">Février</option>
+                                                <option value="03">Mars</option>
+                                                <option value="04">Avril</option>
+                                                <option value="05">Mai</option>
+                                                <option value="06">Juin</option>
+                                                <option value="07">Juillet</option>
+                                                <option value="08">Août</option>
+                                                <option value="09">Septembre</option>
+                                                <option value="10">Octobre</option>
+                                                <option value="11">Novembre</option>
+                                                <option value="12">Décembre</option>
+                                            </select>
+                                            <span class="date-separator">/</span>
+                                            <select name="prelevement_annee" id="prelevement_annee" class="form-control date-year">
+                                                <option value="">Année</option>
+                                                <?php
+                                                $current_year = date('Y');
+                                                for ($i = 0; $i <= 5; $i++) {
+                                                    $year = $current_year + $i;
+                                                    echo '<option value="' . esc_attr($year) . '">' . esc_html($year) . '</option>';
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
                                     </div>
+
+                                    <div class="form-group">
+                                        <label for="prelevement_montant">Montant de prélèvement</label>
+                                        <div class="form-input-with-suffix">
+                                            <input type="text" name="prelevement_montant" id="prelevement_montant" class="form-control" readonly>
+                                            <span class="input-suffix">€</span>
+                                        </div>
+                                        <small class="form-help">Égale à 2 fois le montant de la cotisation mensuelle</small>
+                                    </div>
+                                </div>
+
+                                <div class="form-subsection">
+                                    <h4 class="subsection-title">Domiciliation bancaire</h4>
+
+                                    <div class="form-group">
+                                        <label for="banque_nom">Nom de la banque</label>
+                                        <input type="text" name="banque_nom" id="banque_nom" class="form-control">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="banque_adresse">Adresse postale</label>
+                                        <input type="text" name="banque_adresse" id="banque_adresse" class="form-control">
+                                    </div>
+
+                                    <div class="form-row form-row--gapped">
+                                        <div class="form-group col-4">
+                                            <label for="banque_code_postal">Code postal</label>
+                                            <input type="text" name="banque_code_postal" id="banque_code_postal" class="form-control" pattern="[0-9]{5}">
+                                        </div>
                                     <div class="form-group col-8">
                                         <label for="banque_ville">Ville</label>
                                         <input type="text" name="banque_ville" id="banque_ville" class="form-control">
                                     </div>
+                                </div>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="rib">RIB</label>
                                     <input type="text" name="rib" id="rib" class="form-control" placeholder="Relevé d'Identité Bancaire">
                                 </div>
+                            </fieldset>
                             </div>
 
                             <div class="form-subsection">
