@@ -23,6 +23,8 @@ get_header();
 				'value_field'      => 'slug',
 				'selected'         => get_query_var( 'branche' ),
 				'option_none_value'=> '',
+				'orderby'          => 'term_id',
+				'order'            => 'ASC',
 			)
 		);
 

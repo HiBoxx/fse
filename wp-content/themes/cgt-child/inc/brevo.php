@@ -41,6 +41,8 @@ function cgt_brevo_metabox_render( $post ) {
 		array(
 			'taxonomy'   => 'branche',
 			'hide_empty' => false,
+			'orderby'    => 'term_id',
+			'order'      => 'ASC',
 		)
 	);
 

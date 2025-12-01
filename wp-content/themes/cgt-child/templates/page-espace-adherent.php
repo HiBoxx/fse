@@ -106,6 +106,8 @@ $branch_terms    = get_terms(
 	array(
 		'taxonomy'   => 'branche',
 		'hide_empty' => false,
+		'orderby'    => 'term_id',
+		'order'      => 'ASC',
 	)
 );
 

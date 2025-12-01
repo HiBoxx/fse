@@ -56,7 +56,7 @@ $branches       = get_terms(
 	array(
 		'taxonomy'   => 'branche',
 		'hide_empty' => false,
-		'orderby'    => 'name',
+		'orderby'    => 'term_id',
 		'order'      => 'ASC',
 	)
 );
