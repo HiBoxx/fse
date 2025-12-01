@@ -94,6 +94,10 @@ define( 'WP_POST_REVISIONS', 5 );
 define( 'COMPRESS_CSS', true );
 define( 'COMPRESS_SCRIPTS', true );
 
+// Sécurité: Forcer HTTPS pour l'administration
+define( 'FORCE_SSL_ADMIN', true );
+define( 'FORCE_SSL_LOGIN', true );
+
 
 
 /**
@@ -112,7 +116,7 @@ if ( ! defined( 'WP_DEBUG' ) ) {
 	define( 'WP_DEBUG', false );
 }
 
-define( 'WP_ENVIRONMENT_TYPE', 'local' );
+define( 'WP_ENVIRONMENT_TYPE', 'production' );
 
 // Définir WordPress en français
 define( 'WPLANG', 'fr_FR' );

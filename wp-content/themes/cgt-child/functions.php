@@ -1063,3 +1063,9 @@ function cgt_customize_member_area_menu_item( $items, $args ) {
 	}
 }
 add_filter( 'wp_nav_menu_objects', 'cgt_customize_member_area_menu_item', 10, 2 );
+
+/**
+ * Security: Disable XML-RPC
+ * XML-RPC is often targeted by brute force attacks
+ */
+add_filter( 'xmlrpc_enabled', '__return_false' );
