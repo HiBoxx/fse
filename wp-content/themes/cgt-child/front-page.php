@@ -76,6 +76,8 @@ $branches = get_terms(
 		'taxonomy'   => 'branche',
 		'hide_empty' => false,
 		'number'     => 6,
+		'orderby'    => 'term_id',
+		'order'      => 'ASC',
 	)
 );
 
@@ -692,7 +694,7 @@ $communiques_tabs = array(
 					array(
 						'taxonomy'   => 'branche',
 						'hide_empty' => false,
-						'orderby'    => 'name',
+						'orderby'    => 'term_id',
 						'order'      => 'ASC',
 					)
 				);

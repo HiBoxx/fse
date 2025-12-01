@@ -532,7 +532,7 @@ function cgt_render_add_article_page() {
 
 	// Récupérer les catégories et branches
 	$categories = get_categories( array( 'hide_empty' => false ) );
-	$branches   = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
+	$branches   = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false, 'orderby' => 'term_id', 'order' => 'ASC' ) );
 
 	// Afficher la page
 	cgt_render_custom_post_page(
@@ -675,7 +675,7 @@ function cgt_render_add_private_article_page() {
 	}
 
 	$classes  = get_terms( array( 'taxonomy' => 'thematique', 'hide_empty' => false ) );
-	$branches = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
+	$branches = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false, 'orderby' => 'term_id', 'order' => 'ASC' ) );
 
 	if ( is_wp_error( $classes ) ) {
 		$classes = array();
@@ -872,7 +872,7 @@ function cgt_render_add_tract_page() {
 
 	// Récupérer les thématiques et branches
 	$categories = get_terms( array( 'taxonomy' => 'thematique', 'hide_empty' => false ) );
-	$branches   = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
+	$branches   = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false, 'orderby' => 'term_id', 'order' => 'ASC' ) );
 
 	// Afficher la page
 	cgt_render_custom_post_page(
@@ -1028,7 +1028,7 @@ function cgt_render_add_private_tract_page() {
 	}
 
 	$classes  = get_terms( array( 'taxonomy' => 'thematique', 'hide_empty' => false ) );
-	$branches = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false ) );
+	$branches = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false, 'orderby' => 'term_id', 'order' => 'ASC' ) );
 
 	if ( is_wp_error( $classes ) ) {
 		$classes = array();
