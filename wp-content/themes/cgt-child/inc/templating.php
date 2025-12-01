@@ -783,6 +783,9 @@ add_action( 'init', 'cgt_cleanup_legacy_agenda_events', 40 );
  * Ensure primary menu matches the new specification.
  */
 function cgt_sync_primary_menu_once() {
+	// Désactivé temporairement pour diagnostic
+	return;
+
 	$current_version = '20241201';
 
 	if ( get_option( 'cgt_primary_menu_version' ) === $current_version ) {
