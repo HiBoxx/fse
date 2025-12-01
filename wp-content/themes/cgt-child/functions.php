@@ -1002,6 +1002,9 @@ function cgt_display_post_branches( $post_id, $before = '', $after = '', $separa
  * @return array Modified menu items
  */
 function cgt_customize_member_area_menu_item( $items, $args ) {
+	// Désactivé temporairement pour diagnostic
+	return $items;
+
 	// Vérifier que $items est bien un tableau
 	if ( ! is_array( $items ) ) {
 		return $items;
