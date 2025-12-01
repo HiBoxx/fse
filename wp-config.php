@@ -95,8 +95,9 @@ define( 'COMPRESS_CSS', true );
 define( 'COMPRESS_SCRIPTS', true );
 
 // Sécurité: Forcer HTTPS pour l'administration
-define( 'FORCE_SSL_ADMIN', true );
-define( 'FORCE_SSL_LOGIN', true );
+// TEMPORAIREMENT DÉSACTIVÉ - Activer après configuration SSL
+// define( 'FORCE_SSL_ADMIN', true );
+// define( 'FORCE_SSL_LOGIN', true );
 
 
 
