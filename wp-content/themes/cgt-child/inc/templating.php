@@ -783,17 +783,19 @@ add_action( 'init', 'cgt_cleanup_legacy_agenda_events', 40 );
  * Ensure primary menu matches the new specification.
  */
 function cgt_sync_primary_menu_once() {
-	// Désactivé temporairement pour diagnostic
-	return;
-
 	$current_version = '20241201';
 
 	if ( get_option( 'cgt_primary_menu_version' ) === $current_version ) {
 		return;
 	}
 
-	cgt_setup_pages_and_menus();
-	update_option( 'cgt_primary_menu_version', $current_version );
+	try {
+		cgt_setup_pages_and_menus();
+		update_option( 'cgt_primary_menu_version', $current_version );
+	} catch ( Exception $e ) {
+		// Log l'erreur mais ne pas crasher le site
+		error_log( 'CGT Menu Sync Error: ' . $e->getMessage() );
+	}
 }
 add_action( 'init', 'cgt_sync_primary_menu_once', 20 );
 
