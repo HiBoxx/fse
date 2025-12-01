@@ -158,23 +158,42 @@ $is_adresses_utiles = ( 'adresses-utiles' === $selected_class );
 ?>
 
 <main id="primary" class="site-main classes-archive">
-	<div class="container">
-		<header class="classes-header">
-			<h1 class="page-title"><?php echo esc_html( $page_title ); ?></h1>
-			<?php if ( ! empty( $subtitle ) ) : ?>
-				<p><?php echo wp_kses_post( $subtitle ); ?></p>
-			<?php endif; ?>
-			<?php if ( ! empty( $active_filters ) ) : ?>
-				<div class="classes-active-filters" aria-live="polite">
-					<span class="classes-active-filters__label"><?php esc_html_e( 'Filtres actifs :', 'cgt' ); ?></span>
-					<ul class="classes-active-filters__list">
-						<?php foreach ( $active_filters as $label ) : ?>
-							<li><?php echo esc_html( $label ); ?></li>
-						<?php endforeach; ?>
-					</ul>
+	<!-- Hero Section -->
+	<div class="classes-hero">
+		<div class="classes-hero__overlay"></div>
+		<div class="container">
+			<div class="classes-hero__content">
+				<div class="classes-hero__badge">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+						<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+					</svg>
+					<span><?php esc_html_e( 'Ressources', 'cgt' ); ?></span>
 				</div>
-			<?php endif; ?>
-		</header>
+				<h1 class="classes-hero__title"><?php echo esc_html( $page_title ); ?></h1>
+				<?php if ( ! empty( $subtitle ) ) : ?>
+					<p class="classes-hero__subtitle"><?php echo wp_kses_post( $subtitle ); ?></p>
+				<?php endif; ?>
+				<?php if ( ! empty( $active_filters ) ) : ?>
+					<div class="classes-active-filters" aria-live="polite">
+						<span class="classes-active-filters__label">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+							</svg>
+							<?php esc_html_e( 'Filtres actifs', 'cgt' ); ?>
+						</span>
+						<div class="classes-active-filters__list">
+							<?php foreach ( $active_filters as $label ) : ?>
+								<span class="filter-tag"><?php echo esc_html( $label ); ?></span>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				<?php endif; ?>
+			</div>
+		</div>
+	</div>
+
+	<div class="container classes-content">
 
 		<?php if ( $is_adresses_utiles ) : ?>
 			<!-- Custom content for Adresses utiles - Display expert cards -->
@@ -350,64 +369,126 @@ $is_adresses_utiles = ( 'adresses-utiles' === $selected_class );
 				</div>
 			<?php endif; ?>
 		<?php else : ?>
-		<!-- Normal filter form for other classes -->
-		<form class="classes-filters" method="get" action="<?php echo esc_url( $current_url ); ?>">
-			<div class="classes-filters__row">
-				<label for="classes-search">
-					<span class="sr-only"><?php esc_html_e( 'Rechercher un article', 'cgt' ); ?></span>
-				</label>
-				<input
-					type="search"
-					id="classes-search"
-					name="s"
-					placeholder="<?php esc_attr_e( 'Rechercher un article…', 'cgt' ); ?>"
-					value="<?php echo esc_attr( $search_query ); ?>"
-				>
-			</div>
-			<div class="classes-filters__row">
-				<label for="classes-filter-class"><?php esc_html_e( 'Classes', 'cgt' ); ?></label>
-				<select id="classes-filter-class" name="classe">
-					<option value=""><?php esc_html_e( 'Toutes les classes', 'cgt' ); ?></option>
-					<?php if ( ! is_wp_error( $classes_terms ) ) : ?>
-						<?php foreach ( $classes_terms as $term ) : ?>
-							<option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $selected_class, $term->slug ); ?>>
-								<?php echo esc_html( $term->name ); ?>
-							</option>
-						<?php endforeach; ?>
+		<!-- Modern filter form -->
+		<div class="classes-filters-wrapper">
+			<form class="classes-filters" method="get" action="<?php echo esc_url( $current_url ); ?>">
+				<!-- Search Bar -->
+				<div class="classes-search-bar">
+					<svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<circle cx="11" cy="11" r="8"></circle>
+						<path d="m21 21-4.35-4.35"></path>
+					</svg>
+					<input
+						type="search"
+						id="classes-search"
+						name="s"
+						class="classes-search-input"
+						placeholder="<?php esc_attr_e( 'Rechercher un article par titre ou contenu…', 'cgt' ); ?>"
+						value="<?php echo esc_attr( $search_query ); ?>"
+					>
+				</div>
+
+				<!-- Filter Dropdowns -->
+				<div class="classes-filters-grid">
+					<div class="filter-group">
+						<label for="classes-filter-class" class="filter-label">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+								<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+							</svg>
+							<?php esc_html_e( 'Classe', 'cgt' ); ?>
+						</label>
+						<select id="classes-filter-class" name="classe" class="filter-select">
+							<option value=""><?php esc_html_e( 'Toutes les classes', 'cgt' ); ?></option>
+							<?php if ( ! is_wp_error( $classes_terms ) ) : ?>
+								<?php foreach ( $classes_terms as $term ) : ?>
+									<option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $selected_class, $term->slug ); ?>>
+										<?php echo esc_html( $term->name ); ?>
+									</option>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</select>
+					</div>
+
+					<div class="filter-group">
+						<label for="classes-filter-branch" class="filter-label">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+								<polyline points="10 17 15 12 10 7"></polyline>
+								<line x1="15" y1="12" x2="3" y2="12"></line>
+							</svg>
+							<?php esc_html_e( 'Branche', 'cgt' ); ?>
+						</label>
+						<select id="classes-filter-branch" name="branche" class="filter-select">
+							<option value=""><?php esc_html_e( 'Toutes les branches', 'cgt' ); ?></option>
+							<?php cgt_render_branch_options( $selected_branch ); ?>
+						</select>
+					</div>
+
+					<div class="filter-group">
+						<label for="classes-filter-category" class="filter-label">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+							</svg>
+							<?php esc_html_e( 'Catégorie', 'cgt' ); ?>
+						</label>
+						<select id="classes-filter-category" name="categorie" class="filter-select">
+							<option value=""><?php esc_html_e( 'Toutes les catégories', 'cgt' ); ?></option>
+							<?php if ( ! is_wp_error( $category_terms ) ) : ?>
+								<?php foreach ( $category_terms as $term ) : ?>
+									<option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $selected_category, $term->slug ); ?>>
+										<?php echo esc_html( $term->name ); ?>
+									</option>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</select>
+					</div>
+				</div>
+
+				<!-- Action Buttons -->
+				<div class="classes-filters-actions">
+					<button type="submit" class="btn-filter btn-primary">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+						</svg>
+						<?php esc_html_e( 'Appliquer les filtres', 'cgt' ); ?>
+					</button>
+					<?php if ( $selected_class || $selected_branch || $selected_category || $search_query ) : ?>
+						<a class="btn-filter btn-reset" href="<?php echo esc_url( $current_url ); ?>">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<polyline points="1 4 1 10 7 10"></polyline>
+								<path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+							</svg>
+							<?php esc_html_e( 'Réinitialiser', 'cgt' ); ?>
+						</a>
 					<?php endif; ?>
-				</select>
-			</div>
-			<div class="classes-filters__row">
-				<label for="classes-filter-branch"><?php esc_html_e( 'Branches', 'cgt' ); ?></label>
-				<select id="classes-filter-branch" name="branche">
-					<option value=""><?php esc_html_e( 'Toutes les branches', 'cgt' ); ?></option>
-					<?php cgt_render_branch_options( $selected_branch ); ?>
-				</select>
-			</div>
-			<div class="classes-filters__row">
-				<label for="classes-filter-category"><?php esc_html_e( 'Catégories', 'cgt' ); ?></label>
-				<select id="classes-filter-category" name="categorie">
-					<option value=""><?php esc_html_e( 'Toutes les catégories', 'cgt' ); ?></option>
-					<?php if ( ! is_wp_error( $category_terms ) ) : ?>
-						<?php foreach ( $category_terms as $term ) : ?>
-							<option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $selected_category, $term->slug ); ?>>
-								<?php echo esc_html( $term->name ); ?>
-							</option>
-						<?php endforeach; ?>
-					<?php endif; ?>
-				</select>
-			</div>
-			<div class="classes-filters__actions">
-				<button type="submit" class="btn"><?php esc_html_e( 'Filtrer', 'cgt' ); ?></button>
-				<?php if ( $selected_class || $selected_branch || $selected_category || $search_query ) : ?>
-					<a class="btn btn-light" href="<?php echo esc_url( $current_url ); ?>"><?php esc_html_e( 'Réinitialiser', 'cgt' ); ?></a>
-				<?php endif; ?>
-			</div>
-		</form>
+				</div>
+			</form>
+		</div>
 		<?php endif; // End if not adresses-utiles ?>
 
 		<?php if ( ! $is_adresses_utiles && $classes_query->have_posts() ) : ?>
-			<div class="classes-results">
+			<!-- Results Header -->
+			<div class="classes-results-header">
+				<div class="results-count">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+						<polyline points="14 2 14 8 20 8"></polyline>
+					</svg>
+					<span>
+						<?php
+						printf(
+							/* translators: %s: number of results */
+							esc_html( _n( '%s résultat trouvé', '%s résultats trouvés', $classes_query->found_posts, 'cgt' ) ),
+							'<strong>' . number_format_i18n( $classes_query->found_posts ) . '</strong>'
+						);
+						?>
+					</span>
+				</div>
+			</div>
+
+			<!-- Results Grid -->
+			<div class="classes-results-grid">
 				<?php
 				while ( $classes_query->have_posts() ) :
 					$classes_query->the_post();
@@ -417,12 +498,15 @@ $is_adresses_utiles = ( 'adresses-utiles' === $selected_class );
 				?>
 			</div>
 
+			<!-- Pagination -->
 			<?php
 			$pagination = paginate_links(
 				array(
 					'total'   => $classes_query->max_num_pages,
 					'current' => $paged,
 					'type'    => 'list',
+					'prev_text' => '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> ' . __( 'Précédent', 'cgt' ),
+					'next_text' => __( 'Suivant', 'cgt' ) . ' <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>',
 				)
 			);
 
@@ -434,7 +518,24 @@ $is_adresses_utiles = ( 'adresses-utiles' === $selected_class );
 			<?php endif; ?>
 
 		<?php elseif ( ! $is_adresses_utiles ) : ?>
-			<p class="classes-empty"><?php esc_html_e( 'Aucun article ne correspond actuellement à cette sélection.', 'cgt' ); ?></p>
+			<!-- Empty State -->
+			<div class="classes-empty-state">
+				<div class="empty-state-icon">
+					<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+						<circle cx="11" cy="11" r="8"></circle>
+						<path d="m21 21-4.35-4.35"></path>
+					</svg>
+				</div>
+				<h3><?php esc_html_e( 'Aucun résultat trouvé', 'cgt' ); ?></h3>
+				<p><?php esc_html_e( 'Essayez de modifier vos critères de recherche ou de réinitialiser les filtres.', 'cgt' ); ?></p>
+				<a href="<?php echo esc_url( $current_url ); ?>" class="btn-empty-reset">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<polyline points="1 4 1 10 7 10"></polyline>
+						<path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+					</svg>
+					<?php esc_html_e( 'Réinitialiser les filtres', 'cgt' ); ?>
+				</a>
+			</div>
 		<?php endif; ?>
 	</div>
 </main>
