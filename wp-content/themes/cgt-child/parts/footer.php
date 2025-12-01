@@ -8,12 +8,12 @@
 
 <footer class="site-footer">
 	<div class="container footer-grid">
-		<div class="footer-brand">
-			<a class="footer-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
-			<img src="<?php echo esc_url( 'https://fsetud-cgt.fr/wp-content/uploads/2025/10/logo2.png' ); ?>" alt="<?php esc_attr_e( 'FSETUD – Retour à l'accueil', 'cgt' ); ?>">
-			</a>
-			<p class="footer-slogan"><?php esc_html_e( 'Soutenons les salarié·es des sociétés d'études, du conseil et de l'ingénierie.', 'cgt' ); ?></p>
-		</div>
+			<div class="footer-brand">
+				<a class="footer-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+					<img src="<?php echo esc_url( 'https://fsetud-cgt.fr/wp-content/uploads/2025/10/logo2.png' ); ?>" alt="<?php esc_attr_e( 'FSETUD – Retour à l\'accueil', 'cgt' ); ?>">
+				</a>
+				<p class="footer-slogan"><?php esc_html_e( 'Soutenons les salarié·es des sociétés d\'études, du conseil et de l\'ingénierie.', 'cgt' ); ?></p>
+			</div>
 		<div class="footer-links">
 			<h2 class="footer-title"><?php esc_html_e( 'Liens utiles', 'cgt' ); ?></h2>
 			<ul class="footer-list footer-list--compact">

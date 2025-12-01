@@ -328,11 +328,11 @@ function cgt_setup_pages_and_menus() {
 				);
 
 				if ( 'espace-adherent' === $slug ) {
-					$item_args['menu-item-classes'] = array( 'menu-item--cta' );
+					$item_args['menu-item-classes'] = 'menu-item--cta';
 				}
 
 				if ( 'materiels' === $slug ) {
-					$item_args['menu-item-classes'] = array( 'menu-item--drawer' );
+					$item_args['menu-item-classes'] = 'menu-item--drawer';
 				}
 
 				wp_update_nav_menu_item(
@@ -783,7 +783,7 @@ add_action( 'init', 'cgt_cleanup_legacy_agenda_events', 40 );
  * Ensure primary menu matches the new specification.
  */
 function cgt_sync_primary_menu_once() {
-	$current_version = '20241201';
+	$current_version = '20241202';
 
 	if ( get_option( 'cgt_primary_menu_version' ) === $current_version ) {
 		return;
