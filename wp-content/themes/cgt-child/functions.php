@@ -27,71 +27,6 @@ if ( ! defined( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL' ) ) {
 	define( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-11_00_16.png' );
 }
 
-/**
- * Récupère les branches groupées par parent (hiérarchie).
- *
- * @return array
- */
-function cgt_get_branch_groups() {
-	static $groups = null;
-
-	if ( null !== $groups ) {
-		return $groups;
-	}
-
-	$terms = get_terms(
-		array(
-			'taxonomy'   => 'branche',
-			'hide_empty' => false,
-			'orderby'    => 'name',
-			'order'      => 'ASC',
-		)
-	);
-
-	$groups = array();
-	if ( is_wp_error( $terms ) ) {
-		return $groups;
-	}
-
-	foreach ( $terms as $term ) {
-		$parent = (int) $term->parent;
-		if ( ! isset( $groups[ $parent ] ) ) {
-			$groups[ $parent ] = array();
-		}
-		$groups[ $parent ][] = $term;
-	}
-
-	return $groups;
-}
-
-/**
- * Affiche les options <option> des branches avec indentation hiérarchique.
- *
- * @param string $selected_slug Slug sélectionné.
- * @param int    $parent        Parent courant.
- * @param int    $depth         Profondeur (pour indentation).
- */
-function cgt_render_branch_options( $selected_slug = '', $parent = 0, $depth = 0 ) {
-	$groups = cgt_get_branch_groups();
-
-	if ( empty( $groups[ $parent ] ) ) {
-		return;
-	}
-
-	foreach ( $groups[ $parent ] as $term ) {
-		$prefix = str_repeat( '— ', $depth );
-		printf(
-			'<option value="%1$s"%2$s>%3$s%4$s</option>',
-			esc_attr( $term->slug ),
-			selected( $selected_slug, $term->slug, false ),
-			esc_html( $prefix ),
-			esc_html( $term->name )
-		);
-
-		cgt_render_branch_options( $selected_slug, (int) $term->term_id, $depth + 1 );
-	}
-}
-
 if ( ! function_exists( 'cgt_child_get_media_url' ) ) {
 	/**
 	 * Retrieve a media URL by its relative uploads path.
@@ -1058,3 +993,52 @@ function cgt_display_post_branches( $post_id, $before = '', $after = '', $separa
 
 	return $before . implode( $separator, $output ) . $after;
 }
+
+/**
+ * Modifier le texte du menu "Espace adhérent" pour afficher le nom de l'utilisateur connecté
+ *
+ * @param array $items Menu items
+ * @param object $args Menu arguments
+ * @return array Modified menu items
+ */
+function cgt_customize_member_area_menu_item( $items, $args ) {
+	// Ne s'applique que pour le menu principal
+	if ( ! isset( $args->theme_location ) || 'primary' !== $args->theme_location ) {
+		return $items;
+	}
+
+	// Vérifier si l'utilisateur est connecté
+	if ( ! is_user_logged_in() ) {
+		return $items;
+	}
+
+	$current_user = wp_get_current_user();
+
+	// Récupérer le prénom et le nom de l'utilisateur
+	$first_name = get_user_meta( $current_user->ID, 'first_name', true );
+	$last_name = get_user_meta( $current_user->ID, 'last_name', true );
+
+	// Construire le nom à afficher
+	$display_name = '';
+	if ( ! empty( $first_name ) && ! empty( $last_name ) ) {
+		$display_name = $first_name . ' ' . $last_name;
+	} elseif ( ! empty( $first_name ) ) {
+		$display_name = $first_name;
+	} elseif ( ! empty( $last_name ) ) {
+		$display_name = $last_name;
+	} else {
+		$display_name = $current_user->display_name;
+	}
+
+	// Parcourir tous les éléments du menu
+	foreach ( $items as $item ) {
+		// Vérifier si c'est le lien vers "espace-adherent"
+		if ( false !== strpos( $item->url, '/espace-adherent' ) || 'Espace Adhérent' === $item->title || 'Espace adhérent' === $item->title ) {
+			// Remplacer le titre par le nom de l'utilisateur
+			$item->title = esc_html( $display_name );
+		}
+	}
+
+	return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'cgt_customize_member_area_menu_item', 10, 2 );
