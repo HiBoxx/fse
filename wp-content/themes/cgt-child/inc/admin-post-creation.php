@@ -390,6 +390,7 @@ function cgt_render_add_article_page() {
 	$excerpt     = '';
 	$category    = 0;
 	$branche     = 0;
+	$classe      = 0;
 	$keywords    = '';
 	$sources     = '';
 	$featured_id = 0;
@@ -412,6 +413,10 @@ function cgt_render_add_article_page() {
 			// Branche
 			$branche_terms = wp_get_post_terms( $post->ID, 'branche' );
 			$branche       = ! empty( $branche_terms ) ? $branche_terms[0]->term_id : 0;
+
+			// Classe
+			$classe_terms = wp_get_post_terms( $post->ID, 'thematique' );
+			$classe       = ! empty( $classe_terms ) ? $classe_terms[0]->term_id : 0;
 
 			// Mots-clés
 			$tags     = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
@@ -437,6 +442,7 @@ function cgt_render_add_article_page() {
 			$excerpt     = isset( $_POST['cgt_article_excerpt'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_article_excerpt'] ) ) : '';
 			$category    = isset( $_POST['cgt_article_category'] ) ? absint( $_POST['cgt_article_category'] ) : 0;
 			$branche     = isset( $_POST['cgt_article_branche'] ) ? absint( $_POST['cgt_article_branche'] ) : 0;
+			$classe      = isset( $_POST['cgt_article_classe'] ) ? absint( $_POST['cgt_article_classe'] ) : 0;
 			$keywords    = isset( $_POST['cgt_article_keywords'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_article_keywords'] ) ) : '';
 			$sources     = isset( $_POST['cgt_article_sources'] ) ? sanitize_textarea_field( wp_unslash( $_POST['cgt_article_sources'] ) ) : '';
 			$featured_id = isset( $_POST['cgt_article_featured_id'] ) ? absint( $_POST['cgt_article_featured_id'] ) : 0;
@@ -480,6 +486,13 @@ function cgt_render_add_article_page() {
 						wp_set_post_terms( $post_id, array( $branche ), 'branche', false );
 					} else {
 						wp_set_post_terms( $post_id, array(), 'branche', false );
+					}
+
+					// Ajouter la classe
+					if ( $classe ) {
+						wp_set_post_terms( $post_id, array( $classe ), 'thematique', false );
+					} else {
+						wp_set_post_terms( $post_id, array(), 'thematique', false );
 					}
 
 					// Ajouter les mots-clés
@@ -530,16 +543,17 @@ function cgt_render_add_article_page() {
 		}
 	}
 
-	// Récupérer les catégories et branches
+	// Récupérer les catégories, branches et classes
 	$categories = get_categories( array( 'hide_empty' => false ) );
 	$branches   = get_terms( array( 'taxonomy' => 'branche', 'hide_empty' => false, 'orderby' => 'term_id', 'order' => 'ASC' ) );
+	$classes    = get_terms( array( 'taxonomy' => 'thematique', 'hide_empty' => false, 'orderby' => 'term_id', 'order' => 'ASC' ) );
 
 	// Afficher la page
 	cgt_render_custom_post_page(
 		'article',
 		$message,
 		$errors,
-		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'keywords', 'sources', 'featured_id', 'pdf_id', 'categories', 'branches', 'is_edit', 'edit_id' )
+		compact( 'title', 'content', 'excerpt', 'category', 'branche', 'classe', 'keywords', 'sources', 'featured_id', 'pdf_id', 'categories', 'branches', 'classes', 'is_edit', 'edit_id' )
 	);
 }
 
@@ -1114,6 +1128,8 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 	$pdf_id      = isset( $data['pdf_id'] ) ? $data['pdf_id'] : 0;
 	$categories  = isset( $data['categories'] ) ? $data['categories'] : array();
 	$branches    = isset( $data['branches'] ) ? $data['branches'] : array();
+	$classe      = isset( $data['classe'] ) ? $data['classe'] : 0;
+	$classes     = isset( $data['classes'] ) ? $data['classes'] : array();
 	$is_edit     = isset( $data['is_edit'] ) ? $data['is_edit'] : false;
 	$edit_id     = isset( $data['edit_id'] ) ? $data['edit_id'] : 0;
 
@@ -1269,6 +1285,24 @@ function cgt_render_custom_post_page( $type, $message, $errors, $data ) {
 									<?php endforeach; ?>
 								</select>
 							</div>
+
+							<?php if ( ! empty( $classes ) && 'article' === $type ) : ?>
+							<!-- Classes -->
+							<div class="form-group">
+								<label>
+									<?php esc_html_e( 'Classes', 'cgt' ); ?>
+									<span class="hint"><?php esc_html_e( 'Sélectionnez la classe concernée', 'cgt' ); ?></span>
+								</label>
+								<select name="cgt_<?php echo esc_attr( $field_prefix ); ?>_classe" class="form-control">
+									<option value=""><?php esc_html_e( '— Choisir une classe —', 'cgt' ); ?></option>
+									<?php foreach ( $classes as $class_item ) : ?>
+										<option value="<?php echo esc_attr( $class_item->term_id ); ?>" <?php selected( $classe, $class_item->term_id ); ?>>
+											<?php echo esc_html( $class_item->name ); ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+							<?php endif; ?>
 						</div>
 
 						<!-- Mots-clés -->
