@@ -24,18 +24,41 @@ if ( ! file_exists( $xml_file ) ) {
 
 echo "Lecture du fichier XML...\n";
 
-// Charger le XML
+// Charger le XML avec DOMDocument (plus robuste)
 libxml_use_internal_errors( true );
-$xml = simplexml_load_file( $xml_file );
+
+// Lire le contenu et nettoyer
+$xml_content = file_get_contents( $xml_file );
+
+// Remplacer les caractères invalides
+$xml_content = preg_replace( '/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $xml_content );
+
+// Charger avec DOMDocument
+$dom = new DOMDocument();
+$dom->recover            = true;  // Mode de récupération
+$dom->strictErrorChecking = false; // Désactiver les erreurs strictes
+
+$loaded = $dom->loadXML( $xml_content, LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NOENT | LIBXML_NOCDATA );
+
+if ( ! $loaded ) {
+	echo "⚠️  Le XML contient des erreurs mais on va essayer de récupérer les données...\n";
+}
+
+// Convertir en SimpleXML pour faciliter la navigation
+$xml = simplexml_import_dom( $dom );
 
 if ( $xml === false ) {
-	echo "Erreur lors du chargement du XML:\n";
-	foreach ( libxml_get_errors() as $error ) {
-		echo "  - {$error->message}";
-	}
+	echo "❌ Impossible de parser le XML.\n";
 	libxml_clear_errors();
 	die();
 }
+
+// Afficher les avertissements mais continuer
+$errors = libxml_get_errors();
+if ( ! empty( $errors ) ) {
+	echo "⚠️  " . count( $errors ) . " avertissements trouvés (ignorés)\n";
+}
+libxml_clear_errors();
 
 // Enregistrer les namespaces WordPress
 $namespaces = $xml->getNamespaces( true );
@@ -47,112 +70,131 @@ echo "Extraction des articles...\n";
 
 $articles = array();
 $count    = 0;
+$errors   = 0;
 
 foreach ( $xml->channel->item as $item ) {
-	// Récupérer le type de post
-	$post_type = (string) $item->children( $wp_ns )->post_type;
+	try {
+		// Récupérer le type de post
+		$post_type = (string) $item->children( $wp_ns )->post_type;
 
-	// Ignorer les pages, attachments, etc. - ne garder que les posts
-	if ( $post_type !== 'post' ) {
-		continue;
-	}
-
-	// Récupérer le statut
-	$status = (string) $item->children( $wp_ns )->status;
-
-	// Ne garder que les articles publiés
-	if ( $status !== 'publish' ) {
-		continue;
-	}
-
-	$count++;
-
-	// ID de l'article
-	$post_id = (int) $item->children( $wp_ns )->post_id;
-
-	// Titre
-	$title = (string) $item->title;
-
-	// Date
-	$date_pub = (string) $item->children( $wp_ns )->post_date;
-	$date     = date( 'Y-m-d', strtotime( $date_pub ) );
-	$year     = date( 'Y', strtotime( $date_pub ) );
-
-	// Contenu
-	$content = (string) $item->children( $content_ns )->encoded;
-	$content = strip_tags( $content ); // Retirer les balises HTML pour la recherche
-
-	// Extrait
-	$excerpt = (string) $item->children( $wp_ns )->post_excerpt;
-	if ( empty( $excerpt ) ) {
-		$excerpt = mb_substr( $content, 0, 300 ) . '...';
-	}
-
-	// Catégories
-	$categories = array();
-	$tags       = array();
-	$branches   = array();
-
-	foreach ( $item->category as $cat ) {
-		$domain   = (string) $cat['domain'];
-		$nicename = (string) $cat['nicename'];
-		$name     = (string) $cat;
-
-		if ( $domain === 'category' ) {
-			$categories[] = array(
-				'slug' => $nicename,
-				'name' => $name,
-			);
-		} elseif ( $domain === 'post_tag' ) {
-			$tags[] = array(
-				'slug' => $nicename,
-				'name' => $name,
-			);
-		} elseif ( $domain === 'branche' ) {
-			$branches[] = array(
-				'slug' => $nicename,
-				'name' => $name,
-			);
+		// Ignorer les pages, attachments, etc. - ne garder que les posts
+		if ( $post_type !== 'post' ) {
+			continue;
 		}
-	}
 
-	// Lien PDF (chercher dans les postmeta)
-	$pdf_url = '';
-	foreach ( $item->children( $wp_ns )->postmeta as $meta ) {
-		$meta_key   = (string) $meta->meta_key;
-		$meta_value = (string) $meta->meta_value;
+		// Récupérer le statut
+		$status = (string) $item->children( $wp_ns )->status;
 
-		// Chercher les meta keys qui pourraient contenir un PDF
-		if ( strpos( $meta_key, 'pdf' ) !== false || strpos( $meta_key, 'file' ) !== false ) {
-			if ( strpos( $meta_value, '.pdf' ) !== false ) {
-				$pdf_url = $meta_value;
-				break;
+		// Ne garder que les articles publiés
+		if ( $status !== 'publish' ) {
+			continue;
+		}
+
+		$count++;
+
+		// ID de l'article
+		$post_id = (int) $item->children( $wp_ns )->post_id;
+
+		// Titre
+		$title = (string) $item->title;
+		if ( empty( $title ) ) {
+			$title = "Article sans titre (ID: {$post_id})";
+		}
+
+		// Date
+		$date_pub = (string) $item->children( $wp_ns )->post_date;
+		if ( ! empty( $date_pub ) && strtotime( $date_pub ) ) {
+			$date = date( 'Y-m-d', strtotime( $date_pub ) );
+			$year = date( 'Y', strtotime( $date_pub ) );
+		} else {
+			$date = date( 'Y-m-d' );
+			$year = date( 'Y' );
+		}
+
+		// Contenu
+		$content = (string) $item->children( $content_ns )->encoded;
+		$content = strip_tags( $content ); // Retirer les balises HTML pour la recherche
+		$content = preg_replace( '/\s+/', ' ', $content ); // Normaliser les espaces
+
+		// Extrait
+		$excerpt = (string) $item->children( $wp_ns )->post_excerpt;
+		if ( empty( $excerpt ) && ! empty( $content ) ) {
+			$excerpt = mb_substr( $content, 0, 300 ) . '...';
+		}
+
+		// Catégories
+		$categories = array();
+		$tags       = array();
+		$branches   = array();
+
+		foreach ( $item->category as $cat ) {
+			$domain   = (string) $cat['domain'];
+			$nicename = (string) $cat['nicename'];
+			$name     = (string) $cat;
+
+			if ( $domain === 'category' ) {
+				$categories[] = array(
+					'slug' => $nicename,
+					'name' => $name,
+				);
+			} elseif ( $domain === 'post_tag' ) {
+				$tags[] = array(
+					'slug' => $nicename,
+					'name' => $name,
+				);
+			} elseif ( $domain === 'branche' ) {
+				$branches[] = array(
+					'slug' => $nicename,
+					'name' => $name,
+				);
 			}
 		}
-	}
 
-	// Construire l'objet article
-	$article = array(
-		'id'         => $post_id,
-		'title'      => $title,
-		'date'       => $date,
-		'year'       => $year,
-		'excerpt'    => $excerpt,
-		'content'    => $content,
-		'categories' => $categories,
-		'tags'       => $tags,
-		'branches'   => $branches,
-		'pdf_url'    => $pdf_url,
-	);
+		// Lien PDF (chercher dans les postmeta)
+		$pdf_url = '';
+		foreach ( $item->children( $wp_ns )->postmeta as $meta ) {
+			$meta_key   = (string) $meta->meta_key;
+			$meta_value = (string) $meta->meta_value;
 
-	$articles[] = $article;
+			// Chercher les meta keys qui pourraient contenir un PDF
+			if ( strpos( $meta_key, 'pdf' ) !== false || strpos( $meta_key, 'file' ) !== false ) {
+				if ( strpos( $meta_value, '.pdf' ) !== false ) {
+					$pdf_url = $meta_value;
+					break;
+				}
+			}
+		}
 
-	if ( $count % 100 === 0 ) {
-		echo "  {$count} articles traités...\n";
+		// Construire l'objet article
+		$article = array(
+			'id'         => $post_id,
+			'title'      => $title,
+			'date'       => $date,
+			'year'       => $year,
+			'excerpt'    => $excerpt,
+			'content'    => $content,
+			'categories' => $categories,
+			'tags'       => $tags,
+			'branches'   => $branches,
+			'pdf_url'    => $pdf_url,
+		);
+
+		$articles[] = $article;
+
+		if ( $count % 100 === 0 ) {
+			echo "  {$count} articles traités...\n";
+		}
+	} catch ( Exception $e ) {
+		$errors++;
+		// Continuer même en cas d'erreur
+		continue;
 	}
 }
 
 echo "Total: {$count} articles extraits\n";
+if ( $errors > 0 ) {
+	echo "⚠️  {$errors} articles ignorés (erreurs de parsing)\n";
+}
 
 // Trier par date décroissante
 usort( $articles, function( $a, $b ) {
