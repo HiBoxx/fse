@@ -1,0 +1,632 @@
+/**
+ * CGT Bibliothèque PDF - Admin Styles
+ * Design moderne et responsive
+ */
+
+:root {
+	--cgt-primary: #e30613;
+	--cgt-primary-dark: #b8050f;
+	--cgt-primary-light: #ff1a2a;
+	--color-success: #10b981;
+	--color-info: #3b82f6;
+	--color-warning: #f59e0b;
+	--color-gray-50: #f9fafb;
+	--color-gray-100: #f3f4f6;
+	--color-gray-200: #e5e7eb;
+	--color-gray-300: #d1d5db;
+	--color-gray-600: #4b5563;
+	--color-gray-700: #374151;
+	--color-gray-900: #111827;
+	--radius: 12px;
+	--radius-sm: 8px;
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+	--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	--transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================
+   Header Section
+   ========================= */
+
+.cgt-library-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 2rem;
+	padding-bottom: 1.5rem;
+	border-bottom: 2px solid var(--color-gray-200);
+}
+
+.cgt-library-header h1 {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	font-size: 1.875rem;
+	font-weight: 700;
+	color: var(--color-gray-900);
+	margin: 0;
+}
+
+.cgt-library-header .icon {
+	font-size: 2rem;
+	line-height: 1;
+}
+
+.cgt-library-header .page-title-action {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--cgt-primary);
+	color: white;
+	padding: 0.75rem 1.5rem;
+	border-radius: var(--radius-sm);
+	text-decoration: none;
+	font-weight: 600;
+	transition: var(--transition);
+	box-shadow: var(--shadow);
+}
+
+.cgt-library-header .page-title-action:hover {
+	background: var(--cgt-primary-dark);
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lg);
+}
+
+.cgt-library-header .page-title-action::before {
+	content: '➕';
+	font-size: 1rem;
+}
+
+/* =========================
+   Success Notice
+   ========================= */
+
+.cgt-library-notice {
+	background: var(--color-success);
+	color: white;
+	padding: 1rem 1.5rem;
+	border-radius: var(--radius-sm);
+	margin-bottom: 1.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	box-shadow: var(--shadow);
+	animation: slideDown 0.3s ease-out;
+}
+
+.cgt-library-notice::before {
+	content: '✓';
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* =========================
+   Layout Grid
+   ========================= */
+
+.cgt-library-wrapper {
+	display: grid;
+	grid-template-columns: 280px 1fr;
+	gap: 2rem;
+	align-items: start;
+}
+
+@media (max-width: 1024px) {
+	.cgt-library-wrapper {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* =========================
+   Sidebar
+   ========================= */
+
+.cgt-library-sidebar {
+	background: white;
+	border-radius: var(--radius);
+	padding: 1.5rem;
+	box-shadow: var(--shadow);
+	position: sticky;
+	top: 32px;
+}
+
+.cgt-library-sidebar h2 {
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: var(--color-gray-900);
+	margin: 0 0 1rem 0;
+	padding-bottom: 0.75rem;
+	border-bottom: 2px solid var(--color-gray-200);
+}
+
+.cgt-library-sidebar ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cgt-library-sidebar li {
+	margin: 0.25rem 0;
+}
+
+.cgt-library-sidebar a {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.625rem 0.875rem;
+	color: var(--color-gray-700);
+	text-decoration: none;
+	border-radius: var(--radius-sm);
+	transition: var(--transition);
+	font-weight: 500;
+}
+
+.cgt-library-sidebar a:hover {
+	background: var(--color-gray-100);
+	color: var(--cgt-primary);
+}
+
+.cgt-library-sidebar a.current {
+	background: var(--cgt-primary);
+	color: white;
+	font-weight: 600;
+}
+
+.cgt-library-sidebar .count {
+	background: var(--color-gray-200);
+	color: var(--color-gray-700);
+	padding: 0.125rem 0.5rem;
+	border-radius: 12px;
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+.cgt-library-sidebar a.current .count {
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
+}
+
+/* =========================
+   Filters Bar
+   ========================= */
+
+.cgt-library-filters {
+	background: white;
+	padding: 1.25rem 1.5rem;
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	margin-bottom: 1.5rem;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.cgt-library-filters label {
+	font-weight: 600;
+	color: var(--color-gray-700);
+	font-size: 0.875rem;
+}
+
+.cgt-library-filters select {
+	padding: 0.5rem 2rem 0.5rem 0.75rem;
+	border: 2px solid var(--color-gray-300);
+	border-radius: var(--radius-sm);
+	font-size: 0.875rem;
+	color: var(--color-gray-700);
+	background: white;
+	transition: var(--transition);
+	cursor: pointer;
+}
+
+.cgt-library-filters select:hover {
+	border-color: var(--cgt-primary);
+}
+
+.cgt-library-filters select:focus {
+	outline: none;
+	border-color: var(--cgt-primary);
+	box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.1);
+}
+
+.cgt-library-filters .button {
+	padding: 0.5rem 1.25rem;
+	background: var(--cgt-primary);
+	color: white;
+	border: none;
+	border-radius: var(--radius-sm);
+	font-weight: 600;
+	cursor: pointer;
+	transition: var(--transition);
+}
+
+.cgt-library-filters .button:hover {
+	background: var(--cgt-primary-dark);
+	transform: translateY(-1px);
+}
+
+/* =========================
+   Cards Grid
+   ========================= */
+
+.cgt-library-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+	gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+	.cgt-library-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+.cgt-pdf-card {
+	background: white;
+	border-radius: var(--radius);
+	padding: 1.5rem;
+	box-shadow: var(--shadow);
+	transition: var(--transition);
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	position: relative;
+	overflow: hidden;
+}
+
+.cgt-pdf-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 4px;
+	background: linear-gradient(90deg, var(--cgt-primary), var(--cgt-primary-light));
+}
+
+.cgt-pdf-card:hover {
+	transform: translateY(-4px);
+	box-shadow: var(--shadow-lg);
+}
+
+/* Card Header */
+.cgt-pdf-card-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.cgt-pdf-icon {
+	width: 48px;
+	height: 48px;
+	background: linear-gradient(135deg, var(--cgt-primary), var(--cgt-primary-light));
+	border-radius: var(--radius-sm);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	flex-shrink: 0;
+	box-shadow: var(--shadow);
+}
+
+.cgt-pdf-card-title {
+	flex: 1;
+}
+
+.cgt-pdf-card-title h3 {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: var(--color-gray-900);
+	line-height: 1.4;
+}
+
+.cgt-pdf-card-title h3 a {
+	color: inherit;
+	text-decoration: none;
+	transition: var(--transition);
+}
+
+.cgt-pdf-card-title h3 a:hover {
+	color: var(--cgt-primary);
+}
+
+/* Card Categories */
+.cgt-pdf-categories {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.cgt-pdf-category-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25rem 0.75rem;
+	background: var(--color-gray-100);
+	color: var(--color-gray-700);
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	transition: var(--transition);
+}
+
+.cgt-pdf-category-badge:hover {
+	background: var(--color-gray-200);
+}
+
+.cgt-pdf-category-badge.empty {
+	background: var(--color-warning);
+	color: white;
+}
+
+/* Card File Info */
+.cgt-pdf-file-info {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem;
+	background: var(--color-gray-50);
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--color-gray-200);
+}
+
+.cgt-pdf-file-info .icon {
+	font-size: 1.25rem;
+}
+
+.cgt-pdf-file-info a {
+	color: var(--color-info);
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 0.875rem;
+	transition: var(--transition);
+}
+
+.cgt-pdf-file-info a:hover {
+	color: var(--cgt-primary);
+	text-decoration: underline;
+}
+
+.cgt-pdf-file-info.no-file {
+	color: var(--color-gray-600);
+	font-style: italic;
+	justify-content: center;
+}
+
+/* Card Source */
+.cgt-pdf-source {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.75rem;
+	background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+	border-left: 3px solid var(--color-success);
+	border-radius: var(--radius-sm);
+}
+
+.cgt-pdf-source-label {
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: var(--color-success);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+}
+
+.cgt-pdf-source-info {
+	font-size: 0.875rem;
+	color: var(--color-gray-700);
+	line-height: 1.5;
+}
+
+.cgt-pdf-source-info strong {
+	color: var(--color-gray-900);
+}
+
+.cgt-pdf-source-info a {
+	color: var(--color-info);
+	text-decoration: none;
+	font-weight: 600;
+	transition: var(--transition);
+}
+
+.cgt-pdf-source-info a:hover {
+	color: var(--cgt-primary);
+	text-decoration: underline;
+}
+
+/* Card Actions */
+.cgt-pdf-actions {
+	display: flex;
+	gap: 0.5rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--color-gray-200);
+}
+
+.cgt-pdf-actions .button {
+	flex: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0.625rem 1rem;
+	border-radius: var(--radius-sm);
+	font-size: 0.875rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: var(--transition);
+	cursor: pointer;
+}
+
+.cgt-pdf-actions .button-primary {
+	background: var(--color-info);
+	color: white;
+	border: none;
+}
+
+.cgt-pdf-actions .button-primary:hover {
+	background: #2563eb;
+	transform: translateY(-1px);
+}
+
+.cgt-pdf-actions .button-delete {
+	background: transparent;
+	color: #dc2626;
+	border: 2px solid #dc2626;
+}
+
+.cgt-pdf-actions .button-delete:hover {
+	background: #dc2626;
+	color: white;
+	transform: translateY(-1px);
+}
+
+/* =========================
+   Empty State
+   ========================= */
+
+.cgt-library-empty {
+	grid-column: 1 / -1;
+	text-align: center;
+	padding: 4rem 2rem;
+	background: white;
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+}
+
+.cgt-library-empty .icon {
+	font-size: 4rem;
+	margin-bottom: 1rem;
+	opacity: 0.5;
+}
+
+.cgt-library-empty h3 {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--color-gray-900);
+	margin: 0 0 0.5rem 0;
+}
+
+.cgt-library-empty p {
+	color: var(--color-gray-600);
+	margin: 0 0 1.5rem 0;
+}
+
+.cgt-library-empty .button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--cgt-primary);
+	color: white;
+	padding: 0.75rem 1.5rem;
+	border-radius: var(--radius-sm);
+	text-decoration: none;
+	font-weight: 600;
+	transition: var(--transition);
+}
+
+.cgt-library-empty .button:hover {
+	background: var(--cgt-primary-dark);
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lg);
+}
+
+/* =========================
+   Loading State
+   ========================= */
+
+.cgt-library-loading {
+	grid-column: 1 / -1;
+	text-align: center;
+	padding: 3rem;
+}
+
+.cgt-library-loading .spinner {
+	width: 48px;
+	height: 48px;
+	border: 4px solid var(--color-gray-200);
+	border-top-color: var(--cgt-primary);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 1024px) {
+	.cgt-library-sidebar {
+		position: static;
+	}
+}
+
+@media (max-width: 768px) {
+	.cgt-library-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 1rem;
+	}
+
+	.cgt-library-header h1 {
+		font-size: 1.5rem;
+	}
+
+	.cgt-library-filters {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.cgt-library-filters select,
+	.cgt-library-filters .button {
+		width: 100%;
+	}
+}
+
+/* =========================
+   Accessibility
+   ========================= */
+
+.cgt-pdf-card:focus-within {
+	outline: 3px solid rgba(227, 6, 19, 0.3);
+	outline-offset: 2px;
+}
+
+.cgt-copy-btn:focus,
+.cgt-pdf-actions .button:focus {
+	outline: 3px solid rgba(227, 6, 19, 0.3);
+	outline-offset: 2px;
+}
+
+/* Screen reader only */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}

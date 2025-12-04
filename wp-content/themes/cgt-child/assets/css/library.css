@@ -1,0 +1,516 @@
+/**
+ * Styles pour la page Médiathèque/Bibliothèque
+ * Design moderne respectant la charte CGT
+ */
+
+/* ==========================================================================
+   Hero Section
+   ========================================================================== */
+
+.library-hero {
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
+	color: white;
+	padding: 60px 0;
+	margin-bottom: 40px;
+	position: relative;
+	overflow: hidden;
+}
+
+.library-hero::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-image:
+		radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+		radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+	pointer-events: none;
+}
+
+.library-hero__content {
+	position: relative;
+	z-index: 1;
+	max-width: 800px;
+}
+
+.library-hero__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: rgba(255, 255, 255, 0.2);
+	backdrop-filter: blur(10px);
+	padding: 8px 16px;
+	border-radius: 50px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	margin-bottom: 24px;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.library-hero__badge svg {
+	flex-shrink: 0;
+}
+
+.library-hero__title {
+	font-size: 2.5rem;
+	line-height: 1.2;
+	margin: 0 0 16px;
+	font-weight: 700;
+}
+
+.library-hero__description {
+	font-size: 1.125rem;
+	line-height: 1.6;
+	margin: 0;
+	opacity: 0.95;
+}
+
+/* ==========================================================================
+   Container
+   ========================================================================== */
+
+.library-container {
+	padding: 40px 0;
+}
+
+/* ==========================================================================
+   Filters Section
+   ========================================================================== */
+
+.library-filters-wrapper {
+	background: white;
+	border-radius: 16px;
+	padding: 32px;
+	margin-bottom: 40px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	border: 1px solid #e5e7eb;
+}
+
+.library-filters-header {
+	margin-bottom: 24px;
+}
+
+.library-filters-header h2 {
+	font-size: 1.5rem;
+	margin: 0 0 8px;
+	color: #1a1a1a;
+}
+
+.library-filters-header p {
+	margin: 0;
+	color: #6b7280;
+	font-size: 0.9375rem;
+}
+
+.library-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	align-items: flex-end;
+}
+
+.filter-group {
+	flex: 1;
+	min-width: 200px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.filter-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #374151;
+}
+
+.filter-label svg {
+	color: #ce1010;
+	flex-shrink: 0;
+}
+
+.filter-select {
+	width: 100%;
+	padding: 12px 16px;
+	border: 1px solid #d1d5db;
+	border-radius: 8px;
+	font-size: 0.9375rem;
+	background: white;
+	color: #1a1a1a;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+	border-color: #ce1010;
+}
+
+.filter-select:focus {
+	outline: none;
+	border-color: #ce1010;
+	box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
+}
+
+.filter-submit {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.filter-reset {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Results Info
+   ========================================================================== */
+
+.library-results-info {
+	margin-bottom: 24px;
+	padding: 16px 24px;
+	background: #f9fafb;
+	border-left: 4px solid #ce1010;
+	border-radius: 8px;
+}
+
+.library-results-info p {
+	margin: 0;
+	font-size: 0.9375rem;
+	color: #374151;
+}
+
+.library-results-info strong {
+	color: #ce1010;
+	font-weight: 700;
+}
+
+/* ==========================================================================
+   Library List
+   ========================================================================== */
+
+.library-list {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 48px;
+	background: white;
+	border-radius: 16px;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+}
+
+/* ==========================================================================
+   Library List Item
+   ========================================================================== */
+
+.library-list-item {
+	border-bottom: 1px solid #e5e7eb;
+	transition: background-color 0.2s ease;
+}
+
+.library-list-item:last-child {
+	border-bottom: none;
+}
+
+.library-list-item:hover {
+	background-color: #f9fafb;
+}
+
+.library-list-item__link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 20px 24px;
+	text-decoration: none;
+	color: inherit;
+	transition: padding-left 0.2s ease;
+}
+
+.library-list-item:hover .library-list-item__link {
+	padding-left: 28px;
+}
+
+.library-list-item__link:focus {
+	outline: 2px solid #ce1010;
+	outline-offset: -2px;
+}
+
+.library-list-item__main {
+	flex: 1;
+	min-width: 0;
+}
+
+.library-list-item__title {
+	font-size: 1rem;
+	line-height: 1.5;
+	margin: 0 0 8px;
+	color: #1a1a1a;
+	font-weight: 600;
+	transition: color 0.2s ease;
+}
+
+.library-list-item:hover .library-list-item__title {
+	color: #ce1010;
+}
+
+.library-list-item__meta {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	font-size: 0.875rem;
+	color: #6b7280;
+}
+
+.library-list-item__date {
+	font-weight: 500;
+}
+
+.library-list-item__separator {
+	color: #d1d5db;
+}
+
+.library-list-item__type {
+	font-weight: 500;
+	color: #374151;
+}
+
+.library-list-item__branch {
+	display: inline-flex;
+	padding: 2px 8px;
+	background: #fef2f2;
+	border-radius: 4px;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: #991b1b;
+}
+
+.library-list-item__more {
+	display: inline-flex;
+	padding: 2px 8px;
+	background: #f3f4f6;
+	border-radius: 4px;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: #6b7280;
+}
+
+.library-list-item__arrow {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #9ca3af;
+	transition: all 0.2s ease;
+}
+
+.library-list-item:hover .library-list-item__arrow {
+	color: #ce1010;
+	transform: translateX(4px);
+}
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+
+.library-empty {
+	text-align: center;
+	padding: 80px 20px;
+	background: white;
+	border-radius: 16px;
+	border: 2px dashed #e5e7eb;
+}
+
+.library-empty__icon {
+	margin: 0 auto 24px;
+	width: 80px;
+	height: 80px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #f9fafb;
+	border-radius: 50%;
+	color: #9ca3af;
+}
+
+.library-empty h3 {
+	font-size: 1.25rem;
+	margin: 0 0 12px;
+	color: #1a1a1a;
+}
+
+.library-empty p {
+	font-size: 0.9375rem;
+	color: #6b7280;
+	margin: 0 0 24px;
+	max-width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* ==========================================================================
+   Pagination
+   ========================================================================== */
+
+.library-pagination {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.library-pagination .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	height: 44px;
+	padding: 0 16px;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	background: white;
+	color: #374151;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 0.9375rem;
+	transition: all 0.2s ease;
+}
+
+.library-pagination .page-numbers:hover {
+	border-color: #ce1010;
+	color: #ce1010;
+	background: #fef2f2;
+}
+
+.library-pagination .page-numbers.current {
+	background: #ce1010;
+	color: white;
+	border-color: #ce1010;
+	pointer-events: none;
+}
+
+.library-pagination .page-numbers.dots {
+	border: none;
+	background: transparent;
+	pointer-events: none;
+}
+
+.library-pagination .page-numbers svg {
+	width: 18px;
+	height: 18px;
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+	.library-hero {
+		padding: 40px 0;
+	}
+
+	.library-hero__title {
+		font-size: 2rem;
+	}
+
+	.library-hero__description {
+		font-size: 1rem;
+	}
+
+	.library-filters-wrapper {
+		padding: 24px;
+	}
+
+	.library-filters {
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.filter-group {
+		min-width: 100%;
+	}
+
+	.filter-submit,
+	.filter-reset {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.library-list-item__link {
+		padding: 16px 20px;
+	}
+
+	.library-list-item:hover .library-list-item__link {
+		padding-left: 24px;
+	}
+
+	.library-list-item__title {
+		font-size: 0.9375rem;
+	}
+
+	.library-list-item__meta {
+		font-size: 0.8125rem;
+	}
+
+	.library-results-info {
+		padding: 12px 16px;
+	}
+}
+
+@media (max-width: 480px) {
+	.library-hero__title {
+		font-size: 1.75rem;
+	}
+
+	.library-hero__badge {
+		font-size: 0.8125rem;
+		padding: 6px 12px;
+	}
+
+	.library-filters-wrapper {
+		padding: 20px;
+	}
+
+	.library-list-item__link {
+		padding: 12px 16px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.library-list-item:hover .library-list-item__link {
+		padding-left: 20px;
+	}
+
+	.library-list-item__title {
+		font-size: 0.875rem;
+	}
+
+	.library-list-item__meta {
+		font-size: 0.75rem;
+	}
+
+	.library-list-item__arrow {
+		align-self: center;
+	}
+
+	.library-pagination .page-numbers {
+		min-width: 40px;
+		height: 40px;
+		padding: 0 12px;
+		font-size: 0.875rem;
+	}
+}
