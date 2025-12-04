@@ -91,11 +91,12 @@ get_header();
 					<p class="archives-description">
 						Retrouvez toutes les publications de la FSETUD-CGT depuis sa création : communiqués, dossiers, tracts et analyses thématiques.
 					</p>
-					<div class="archives-stats">
-						<span class="stat-chip stat-chip--primary">
-							<strong><?php echo number_format( $total_articles, 0, ',', ' ' ); ?></strong> articles disponibles
-						</span>
-					</div>
+				</div>
+
+				<div class="archives-stats">
+					<span class="stat-chip stat-chip--primary">
+						<strong><?php echo number_format( $total_articles, 0, ',', ' ' ); ?></strong> articles disponibles
+					</span>
 				</div>
 
 				<div class="archives-hero__search">
