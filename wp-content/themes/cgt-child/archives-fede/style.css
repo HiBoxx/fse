@@ -54,14 +54,18 @@
 
 .archives-hero__content {
 	position: relative;
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	display: flex;
+	flex-direction: column;
 	gap: 2rem;
-	padding: 2rem 1.5rem;
+	padding: 2.5rem 2rem;
 	background: var(--panel);
 	border: 1px solid rgba(227, 232, 239, 0.6);
 	border-radius: 16px;
 	box-shadow: var(--shadow);
+}
+
+.archives-hero__header {
+	text-align: center;
 }
 
 .archives-kicker {
@@ -112,10 +116,26 @@
 	border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
+.stat-chip--primary {
+	padding: 0.75rem 1.5rem;
+	background: linear-gradient(135deg, var(--cgt-red) 0%, var(--cgt-red-dark) 100%);
+	color: var(--white);
+	border: none;
+	box-shadow: 0 10px 30px rgba(209, 19, 19, 0.25);
+	font-size: 1.05rem;
+	letter-spacing: 0.01em;
+}
+
+.stat-chip--primary strong {
+	font-weight: 800;
+	font-size: 1.35rem;
+	margin-right: 0.25rem;
+}
+
 .archives-hero__search {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
+	max-width: 700px;
+	margin: 0 auto;
+	width: 100%;
 }
 
 .search-label {
