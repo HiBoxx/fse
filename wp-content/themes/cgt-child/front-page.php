@@ -159,11 +159,11 @@ if ( empty( $home_slider_image ) ) {
 					</a>
 				</li>
 				<li>
-					<a href="<?php echo esc_url( get_post_type_archive_link( 'tracts' ) ); ?>" class="home-nav__card home-nav__card--tracts">
-						<span class="home-nav__icon" aria-hidden="true">📄</span>
+					<a href="<?php echo esc_url( home_url( '/archives-fede/' ) ); ?>" class="home-nav__card home-nav__card--archives">
+						<span class="home-nav__icon" aria-hidden="true">📜</span>
 						<span>
-							<strong><?php esc_html_e( 'Tracts', 'cgt' ); ?></strong>
-							<small><?php esc_html_e( 'Documents prêts à diffuser', 'cgt' ); ?></small>
+							<strong><?php esc_html_e( 'Archives', 'cgt' ); ?></strong>
+							<small><?php esc_html_e( 'Archives de la fédération depuis sa création', 'cgt' ); ?></small>
 						</span>
 					</a>
 				</li>
