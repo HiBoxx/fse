@@ -159,7 +159,7 @@ if ( empty( $home_slider_image ) ) {
 					</a>
 				</li>
 				<li>
-					<a href="<?php echo esc_url( home_url( '/archives-fede/' ) ); ?>" class="home-nav__card home-nav__card--archives">
+					<a href="<?php echo esc_url( get_stylesheet_directory_uri() . '/archives-fede/index.php' ); ?>" class="home-nav__card home-nav__card--archives">
 						<span class="home-nav__icon" aria-hidden="true">📜</span>
 						<span>
 							<strong><?php esc_html_e( 'Archives', 'cgt' ); ?></strong>
