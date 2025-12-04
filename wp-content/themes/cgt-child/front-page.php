@@ -96,7 +96,7 @@ if ( empty( $home_slider_image ) ) {
 		<div class="container home-hero__inner">
 			<div class="home-hero__content">
 				<p class="home-hero__eyebrow"><?php esc_html_e( 'Fédération CGT des Sociétés d\'Études', 'cgt' ); ?></p>
-				<h1 class="home-hero__title"><?php esc_html_e( 'Organisons la solidarité dans les bureaux d\'études, le conseil et l\'expertise et de la prévoyance', 'cgt' ); ?></h1>
+				<h1 class="home-hero__title"><?php esc_html_e( 'Organisons la solidarité dans les bureaux d\'études, le conseil et l\'expertise et de la Prévention', 'cgt' ); ?></h1>
 				<p class="home-hero__lead"><?php esc_html_e( 'Actualités, analyses et outils pour les salarié·es des sociétés d\'études, d\'ingénierie, de conseil et d\'expertise.', 'cgt' ); ?></p>
 				<div class="home-hero__actions">
 					<a class="btn" href="<?php echo esc_url( home_url( '/contact' ) ); ?>"><?php esc_html_e( 'Rejoindre la CGT', 'cgt' ); ?></a>
