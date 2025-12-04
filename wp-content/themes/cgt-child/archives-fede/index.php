@@ -85,21 +85,21 @@ get_header();
 	<div class="archives-hero">
 		<div class="container archives-container">
 			<div class="archives-hero__content">
-				<div>
-					<p class="archives-kicker">Mémoire syndicale</p>
+				<div class="archives-hero__header">
+					<p class="archives-kicker">📜 Mémoire syndicale</p>
 					<h1 class="archives-title">Archives de la Fédération</h1>
 					<p class="archives-description">
 						Retrouvez toutes les publications de la FSETUD-CGT depuis sa création : communiqués, dossiers, tracts et analyses thématiques.
 					</p>
 					<div class="archives-stats">
-						<span class="stat-chip">📄 <?php echo number_format( $total_articles, 0, ',', ' ' ); ?> articles</span>
-						<span class="stat-chip">🏷️ <?php echo $total_categories; ?> catégories</span>
-						<span class="stat-chip">🌿 <?php echo $total_branches; ?> branches</span>
-						<span class="stat-chip">🔖 <?php echo $total_tags; ?> étiquettes</span>
+						<span class="stat-chip stat-chip--primary">
+							<strong><?php echo number_format( $total_articles, 0, ',', ' ' ); ?></strong> articles disponibles
+						</span>
 					</div>
 				</div>
+
 				<div class="archives-hero__search">
-					<label class="search-label" for="search-input">Rechercher dans les archives</label>
+					<label class="search-label" for="search-input">🔍 Rechercher dans les archives</label>
 					<div class="search-box">
 						<input
 							type="text"
