@@ -1,0 +1,98 @@
+{
+  "generated_at": "2025-12-04 10:00:00",
+  "total": 3,
+  "articles": [
+    {
+      "id": 1234,
+      "title": "Accord sur les salaires dans les sociétés d'études",
+      "date": "2023-06-15",
+      "year": "2023",
+      "excerpt": "La CGT a obtenu des avancées significatives lors des négociations annuelles obligatoires. Les augmentations salariales concernent l'ensemble des salariés des sociétés d'études...",
+      "content": "La CGT a obtenu des avancées significatives lors des négociations annuelles obligatoires. Les augmentations salariales concernent l'ensemble des salariés des sociétés d'études. Ce résultat est le fruit d'une mobilisation collective et d'un rapport de force favorable. Les mesures entreront en vigueur dès le mois prochain.",
+      "categories": [
+        {
+          "slug": "actualites",
+          "name": "Actualités"
+        }
+      ],
+      "tags": [
+        {
+          "slug": "salaires",
+          "name": "Salaires"
+        },
+        {
+          "slug": "negociations",
+          "name": "Négociations"
+        }
+      ],
+      "branches": [
+        {
+          "slug": "syntec",
+          "name": "SYNTEC"
+        }
+      ],
+      "pdf_url": "https://ancien-site.example.com/wp-content/uploads/2023/06/accord-salaires.pdf"
+    },
+    {
+      "id": 1235,
+      "title": "Réforme des retraites : la CGT mobilisée",
+      "date": "2023-03-20",
+      "year": "2023",
+      "excerpt": "Face au projet de réforme des retraites, la fédération CGT des sociétés d'études appelle l'ensemble des salariés à se mobiliser...",
+      "content": "Face au projet de réforme des retraites, la fédération CGT des sociétés d'études appelle l'ensemble des salariés à se mobiliser. Cette réforme injuste et brutale va impacter durablement les conditions de vie des travailleurs. La CGT propose des alternatives viables basées sur la solidarité intergénérationnelle.",
+      "categories": [
+        {
+          "slug": "communiques",
+          "name": "Communiqués"
+        }
+      ],
+      "tags": [
+        {
+          "slug": "retraites",
+          "name": "Retraites"
+        },
+        {
+          "slug": "mobilisation",
+          "name": "Mobilisation"
+        }
+      ],
+      "branches": [],
+      "pdf_url": ""
+    },
+    {
+      "id": 1236,
+      "title": "Congrès fédéral 2022 : les résolutions adoptées",
+      "date": "2022-11-10",
+      "year": "2022",
+      "excerpt": "Le congrès fédéral s'est tenu les 9 et 10 novembre 2022 à Paris. Les délégués ont adopté plusieurs résolutions importantes pour l'avenir de la fédération...",
+      "content": "Le congrès fédéral s'est tenu les 9 et 10 novembre 2022 à Paris. Les délégués ont adopté plusieurs résolutions importantes pour l'avenir de la fédération. Parmi les priorités : le renforcement de l'implantation syndicale dans les PME, la défense des conventions collectives, et l'accompagnement des jeunes syndiqués.",
+      "categories": [
+        {
+          "slug": "vie-federale",
+          "name": "Vie fédérale"
+        }
+      ],
+      "tags": [
+        {
+          "slug": "congres",
+          "name": "Congrès"
+        },
+        {
+          "slug": "resolutions",
+          "name": "Résolutions"
+        }
+      ],
+      "branches": [
+        {
+          "slug": "ingenierie",
+          "name": "Ingénierie"
+        },
+        {
+          "slug": "syntec",
+          "name": "SYNTEC"
+        }
+      ],
+      "pdf_url": "https://ancien-site.example.com/wp-content/uploads/2022/11/resolutions-congres-2022.pdf"
+    }
+  ]
+}
