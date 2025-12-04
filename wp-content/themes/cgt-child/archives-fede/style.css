@@ -101,6 +101,8 @@
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.5rem;
+	justify-content: center;
+	margin: 0 0 1.5rem;
 }
 
 .stat-chip {
@@ -336,6 +338,9 @@
 	font-size: 1.25rem;
 	font-weight: 700;
 	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .archive-item-title a {
@@ -362,6 +367,11 @@
 	color: var(--text-gray);
 	line-height: 1.6;
 	margin-bottom: 0.75rem;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .archive-item-branches {

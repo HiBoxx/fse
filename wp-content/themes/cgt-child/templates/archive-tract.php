@@ -138,6 +138,27 @@ $branch_singles = array(
 			</form>
 		</div>
 
+		<?php if ( $current_branch || is_tax( 'thematique' ) ) : ?>
+			<div class="tracts-archives-notice">
+				<div class="tracts-archives-notice__icon">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<circle cx="12" cy="12" r="10"></circle>
+						<line x1="12" y1="16" x2="12" y2="12"></line>
+						<line x1="12" y1="8" x2="12.01" y2="8"></line>
+					</svg>
+				</div>
+				<div class="tracts-archives-notice__content">
+					<p><?php esc_html_e( 'Si vous ne trouvez pas votre article ici, vous pouvez le rechercher dans les archives complètes de la fédération.', 'cgt' ); ?></p>
+					<a href="<?php echo esc_url( get_stylesheet_directory_uri() . '/archives-fede/index.php' ); ?>" class="btn btn-compact">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+						</svg>
+						<?php esc_html_e( 'Rechercher dans les archives', 'cgt' ); ?>
+					</a>
+				</div>
+			</div>
+		<?php endif; ?>
+
 		<!-- Tracts Grid -->
 		<?php if ( have_posts() ) : ?>
 			<div class="tracts-grid">
