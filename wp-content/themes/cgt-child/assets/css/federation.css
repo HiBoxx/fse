@@ -1,0 +1,646 @@
+/**
+ * Styles pour la page Fédération
+ * Design moderne respectant la charte CGT
+ */
+
+/* ==========================================================================
+   Hero Section
+   ========================================================================== */
+
+.federation-hero {
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
+	color: white;
+	padding: 60px 0;
+	margin-bottom: 60px;
+	position: relative;
+	overflow: hidden;
+}
+
+.federation-hero::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-image:
+		radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+		radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+	pointer-events: none;
+}
+
+.federation-hero__content {
+	position: relative;
+	z-index: 1;
+	max-width: 800px;
+}
+
+.federation-hero__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: rgba(255, 255, 255, 0.2);
+	backdrop-filter: blur(10px);
+	padding: 8px 16px;
+	border-radius: 50px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	margin-bottom: 24px;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.federation-hero__badge svg {
+	flex-shrink: 0;
+}
+
+.federation-hero__title {
+	font-size: 2.5rem;
+	line-height: 1.2;
+	margin: 0 0 16px;
+	font-weight: 700;
+}
+
+.federation-hero__description {
+	font-size: 1.125rem;
+	line-height: 1.6;
+	margin: 0;
+	opacity: 0.95;
+}
+
+/* ==========================================================================
+   Container
+   ========================================================================== */
+
+.federation-container {
+	padding: 0 0 60px;
+}
+
+/* ==========================================================================
+   Story Section
+   ========================================================================== */
+
+.federation-story {
+	display: grid;
+	grid-template-columns: 400px 1fr;
+	gap: 48px;
+	align-items: center;
+	margin-bottom: 60px;
+	background: white;
+	border-radius: 16px;
+	padding: 40px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	border: 1px solid #e5e7eb;
+}
+
+.federation-story__image {
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.federation-story__image img {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+.federation-story__header {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.federation-story__icon {
+	width: 48px;
+	height: 48px;
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	flex-shrink: 0;
+}
+
+.federation-story__title {
+	font-size: 1.75rem;
+	margin: 0;
+	color: #1a1a1a;
+	font-weight: 700;
+}
+
+.federation-story__content p {
+	font-size: 1rem;
+	line-height: 1.7;
+	color: #374151;
+	margin: 0 0 16px;
+}
+
+.federation-story__content p:last-child {
+	margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Stats Section
+   ========================================================================== */
+
+.federation-stats {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 24px;
+	margin-bottom: 60px;
+}
+
+.federation-stat-card {
+	background: white;
+	border-radius: 16px;
+	padding: 32px 24px;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 20px;
+	transition: all 0.3s ease;
+}
+
+.federation-stat-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 12px 24px rgba(200, 16, 46, 0.15);
+	border-color: #ce1010;
+}
+
+.federation-stat-card__icon {
+	width: 64px;
+	height: 64px;
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
+	border-radius: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	transition: transform 0.3s ease;
+}
+
+.federation-stat-card:hover .federation-stat-card__icon {
+	transform: scale(1.1) rotate(5deg);
+}
+
+.federation-stat-card__content {
+	flex: 1;
+}
+
+.federation-stat-card__value {
+	font-size: 2.5rem;
+	font-weight: 700;
+	color: #ce1010;
+	margin: 0 0 8px;
+	line-height: 1;
+}
+
+.federation-stat-card__label {
+	font-size: 0.9375rem;
+	color: #6b7280;
+	font-weight: 600;
+}
+
+/* ==========================================================================
+   Branches Section
+   ========================================================================== */
+
+.federation-branches-section {
+	margin-bottom: 60px;
+}
+
+.federation-branches-section__header {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 40px;
+	padding-bottom: 24px;
+	border-bottom: 2px solid #e5e7eb;
+}
+
+.federation-branches-section__icon {
+	width: 48px;
+	height: 48px;
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	flex-shrink: 0;
+}
+
+.federation-branches-section__title {
+	font-size: 1.75rem;
+	margin: 0 0 8px;
+	color: #1a1a1a;
+	font-weight: 700;
+}
+
+.federation-branches-section__subtitle {
+	font-size: 1rem;
+	color: #6b7280;
+	margin: 0;
+}
+
+.federation-branches-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 24px;
+}
+
+.federation-branch-card {
+	background: white;
+	border-radius: 16px;
+	padding: 32px;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s ease;
+	position: relative;
+	overflow: hidden;
+}
+
+.federation-branch-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: linear-gradient(90deg, #ce1010 0%, #a30f0f 100%);
+	transform: scaleX(0);
+	transform-origin: left;
+	transition: transform 0.3s ease;
+}
+
+.federation-branch-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 12px 24px rgba(200, 16, 46, 0.15);
+	border-color: #ce1010;
+}
+
+.federation-branch-card:hover::before {
+	transform: scaleX(1);
+}
+
+.federation-branch-card__header {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-bottom: 20px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid #f3f4f6;
+}
+
+.federation-branch-card__icon {
+	width: 48px;
+	height: 48px;
+	background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+	border: 2px solid #fecaca;
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #ce1010;
+	flex-shrink: 0;
+}
+
+.federation-branch-card__title {
+	font-size: 1.125rem;
+	margin: 0;
+	color: #1a1a1a;
+	font-weight: 700;
+}
+
+.federation-branch-card__list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.federation-branch-card__list li {
+	padding-left: 24px;
+	position: relative;
+	font-size: 0.9375rem;
+	color: #374151;
+	line-height: 1.5;
+}
+
+.federation-branch-card__list li::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 8px;
+	width: 6px;
+	height: 6px;
+	background: #ce1010;
+	border-radius: 50%;
+}
+
+/* ==========================================================================
+   Actions Section
+   ========================================================================== */
+
+.federation-actions-section {
+	margin-bottom: 60px;
+}
+
+.federation-actions-section__header {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 40px;
+	padding-bottom: 24px;
+	border-bottom: 2px solid #e5e7eb;
+}
+
+.federation-actions-section__icon {
+	width: 48px;
+	height: 48px;
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	flex-shrink: 0;
+}
+
+.federation-actions-section__title {
+	font-size: 1.75rem;
+	margin: 0 0 8px;
+	color: #1a1a1a;
+	font-weight: 700;
+}
+
+.federation-actions-section__subtitle {
+	font-size: 1rem;
+	color: #6b7280;
+	margin: 0;
+}
+
+.federation-actions-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 24px;
+}
+
+.federation-action-card {
+	background: white;
+	border-radius: 16px;
+	padding: 32px;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s ease;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.federation-action-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 12px 24px rgba(200, 16, 46, 0.15);
+	border-color: #ce1010;
+}
+
+.federation-action-card__icon {
+	width: 56px;
+	height: 56px;
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
+	border-radius: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	transition: transform 0.3s ease;
+}
+
+.federation-action-card:hover .federation-action-card__icon {
+	transform: scale(1.1) rotate(5deg);
+}
+
+.federation-action-card__title {
+	font-size: 1.125rem;
+	margin: 0;
+	color: #1a1a1a;
+	font-weight: 700;
+}
+
+.federation-action-card__desc {
+	font-size: 0.9375rem;
+	color: #6b7280;
+	margin: 0;
+	line-height: 1.6;
+}
+
+/* ==========================================================================
+   CTA Section
+   ========================================================================== */
+
+.federation-cta-section {
+	background: linear-gradient(135deg, #ce1010 0%, #a30f0f 100%);
+	padding: 80px 0;
+	position: relative;
+	overflow: hidden;
+}
+
+.federation-cta-section::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-image:
+		radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+		radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+	pointer-events: none;
+}
+
+.federation-cta {
+	position: relative;
+	z-index: 1;
+	text-align: center;
+	max-width: 800px;
+	margin: 0 auto;
+	color: white;
+}
+
+.federation-cta__title {
+	font-size: 2.25rem;
+	font-weight: 700;
+	margin: 0 0 16px;
+	line-height: 1.2;
+}
+
+.federation-cta__desc {
+	font-size: 1.125rem;
+	line-height: 1.7;
+	margin: 0 0 32px;
+	opacity: 0.95;
+}
+
+.federation-cta__actions {
+	display: flex;
+	gap: 16px;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.btn-white {
+	background: white;
+	color: #ce1010;
+	border: 2px solid white;
+}
+
+.btn-white:hover {
+	background: transparent;
+	color: white;
+}
+
+.btn-outline-white {
+	background: transparent;
+	color: white;
+	border: 2px solid white;
+}
+
+.btn-outline-white:hover {
+	background: white;
+	color: #ce1010;
+}
+
+.federation-cta__actions .btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.federation-cta__actions .btn svg {
+	flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+	.federation-story {
+		grid-template-columns: 1fr;
+		gap: 32px;
+	}
+
+	.federation-story__image {
+		max-width: 500px;
+		margin: 0 auto;
+	}
+
+	.federation-branches-grid,
+	.federation-actions-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 768px) {
+	.federation-hero {
+		padding: 40px 0;
+	}
+
+	.federation-hero__title {
+		font-size: 2rem;
+	}
+
+	.federation-hero__description {
+		font-size: 1rem;
+	}
+
+	.federation-story {
+		padding: 24px;
+	}
+
+	.federation-stats {
+		grid-template-columns: 1fr;
+	}
+
+	.federation-branch-card,
+	.federation-action-card {
+		padding: 24px;
+	}
+
+	.federation-cta-section {
+		padding: 60px 0;
+	}
+
+	.federation-cta__title {
+		font-size: 1.75rem;
+	}
+
+	.federation-cta__desc {
+		font-size: 1rem;
+	}
+
+	.federation-cta__actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.federation-cta__actions .btn {
+		justify-content: center;
+	}
+}
+
+@media (max-width: 480px) {
+	.federation-hero__title {
+		font-size: 1.75rem;
+	}
+
+	.federation-hero__badge {
+		font-size: 0.8125rem;
+		padding: 6px 12px;
+	}
+
+	.federation-container {
+		padding: 0 0 40px;
+	}
+
+	.federation-story {
+		padding: 20px;
+		gap: 24px;
+	}
+
+	.federation-story__title {
+		font-size: 1.5rem;
+	}
+
+	.federation-stat-card {
+		padding: 24px 20px;
+	}
+
+	.federation-stat-card__value {
+		font-size: 2rem;
+	}
+
+	.federation-branch-card,
+	.federation-action-card {
+		padding: 20px;
+	}
+
+	.federation-branches-section__header,
+	.federation-actions-section__header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.federation-cta-section {
+		padding: 40px 0;
+	}
+
+	.federation-cta__title {
+		font-size: 1.5rem;
+	}
+}

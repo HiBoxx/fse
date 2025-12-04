@@ -1,0 +1,433 @@
+/**
+ * Carnet d'adresse - Expert Cards Page
+ *
+ * @package CGT_Child
+ */
+
+:root {
+	--cgt-red: #e30613;
+	--cgt-red-dark: #b8050f;
+	--gray-50: #f9fafb;
+	--gray-100: #f3f4f6;
+	--gray-200: #e5e7eb;
+	--gray-300: #d1d5db;
+	--gray-400: #9ca3af;
+	--gray-500: #6b7280;
+	--gray-600: #4b5563;
+	--gray-700: #374151;
+	--gray-800: #1f2937;
+	--gray-900: #111827;
+	--radius-sm: 0.375rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+	--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+	--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+	--transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================================
+   HERO SECTION
+   ================================ */
+.carnet-hero {
+	background: linear-gradient(135deg, var(--cgt-red) 0%, var(--cgt-red-dark) 100%);
+	padding: 3.5rem 0 4rem;
+	position: relative;
+	overflow: hidden;
+}
+
+.carnet-hero::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background:
+		linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+		linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+		linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.03) 75%),
+		linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.03) 75%);
+	background-size: 40px 40px;
+	background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+	opacity: 0.3;
+}
+
+.carnet-hero__content {
+	position: relative;
+	z-index: 1;
+	max-width: 720px;
+	margin: 0 auto;
+	text-align: center;
+	color: white;
+}
+
+.carnet-hero__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 1rem;
+	background: rgba(255, 255, 255, 0.15);
+	backdrop-filter: blur(10px);
+	border-radius: 9999px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	margin-bottom: 1.5rem;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.carnet-hero__title {
+	font-size: 2.75rem;
+	font-weight: 800;
+	margin: 0 0 1rem;
+	line-height: 1.1;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.carnet-hero__description {
+	font-size: 1.125rem;
+	line-height: 1.75;
+	opacity: 0.95;
+	max-width: 600px;
+	margin: 0 auto;
+}
+
+/* ================================
+   CONTAINER
+   ================================ */
+.carnet-container {
+	padding: 3rem 1.5rem;
+	max-width: 1400px;
+	margin: 0 auto;
+}
+
+/* ================================
+   FILTRES
+   ================================ */
+.carnet-filters {
+	background: white;
+	border-radius: var(--radius-lg);
+	padding: 1.5rem;
+	margin-bottom: 2.5rem;
+	box-shadow: var(--shadow-md);
+	border: 1px solid var(--gray-200);
+}
+
+.carnet-filters__header {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 1.25rem;
+	font-weight: 600;
+	font-size: 1rem;
+	color: var(--gray-700);
+}
+
+.carnet-filters__header svg {
+	color: var(--cgt-red);
+}
+
+.carnet-filters__buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.filter-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.625rem 1.25rem;
+	background: var(--gray-50);
+	border: 2px solid var(--gray-200);
+	border-radius: var(--radius-md);
+	font-size: 0.938rem;
+	font-weight: 600;
+	color: var(--gray-700);
+	cursor: pointer;
+	transition: all var(--transition);
+}
+
+.filter-btn:hover {
+	background: var(--gray-100);
+	border-color: var(--gray-300);
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-sm);
+}
+
+.filter-btn.active {
+	background: var(--cgt-red);
+	border-color: var(--cgt-red);
+	color: white;
+	box-shadow: var(--shadow-md);
+}
+
+.filter-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.5rem;
+	height: 1.5rem;
+	padding: 0 0.375rem;
+	background: rgba(0, 0, 0, 0.1);
+	border-radius: 9999px;
+	font-size: 0.813rem;
+	font-weight: 700;
+}
+
+.filter-btn.active .filter-count {
+	background: rgba(255, 255, 255, 0.25);
+}
+
+/* ================================
+   GRILLE DES EXPERTS
+   ================================ */
+.experts-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+	gap: 2rem;
+}
+
+/* ================================
+   CARTE EXPERT
+   ================================ */
+.expert-card {
+	background: white;
+	border-radius: var(--radius-lg);
+	padding: 1.75rem;
+	box-shadow: var(--shadow-md);
+	border: 1px solid var(--gray-200);
+	transition: all var(--transition);
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.expert-card:hover {
+	transform: translateY(-4px);
+	box-shadow: var(--shadow-xl);
+	border-color: var(--cgt-red);
+}
+
+/* Header */
+.expert-card__header {
+	display: flex;
+	align-items: flex-start;
+	gap: 1.25rem;
+}
+
+.expert-card__photo {
+	flex-shrink: 0;
+	width: 80px;
+	height: 80px;
+	border-radius: var(--radius-lg);
+	overflow: hidden;
+	background: var(--gray-100);
+}
+
+.expert-card__photo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.expert-photo-placeholder {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, var(--gray-200) 0%, var(--gray-300) 100%);
+	color: var(--gray-500);
+}
+
+.expert-card__info {
+	flex: 1;
+	min-width: 0;
+}
+
+.expert-card__name {
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--gray-900);
+	margin: 0 0 0.625rem;
+	line-height: 1.3;
+}
+
+.expert-card__expertise {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.expertise-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25rem 0.75rem;
+	background: rgba(227, 6, 19, 0.1);
+	color: var(--cgt-red);
+	border-radius: 9999px;
+	font-size: 0.813rem;
+	font-weight: 600;
+	border: 1px solid rgba(227, 6, 19, 0.2);
+}
+
+/* Description */
+.expert-card__description {
+	color: var(--gray-600);
+	font-size: 0.938rem;
+	line-height: 1.6;
+}
+
+/* Contact */
+.expert-card__contact {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--gray-200);
+}
+
+.contact-item {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	font-size: 0.938rem;
+	color: var(--gray-700);
+}
+
+.contact-item svg {
+	flex-shrink: 0;
+	color: var(--cgt-red);
+}
+
+.contact-item a {
+	color: var(--gray-700);
+	text-decoration: none;
+	transition: color var(--transition);
+}
+
+.contact-item a:hover {
+	color: var(--cgt-red);
+	text-decoration: underline;
+}
+
+/* ================================
+   EMPTY STATE
+   ================================ */
+.experts-empty {
+	text-align: center;
+	padding: 4rem 2rem;
+	background: white;
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-md);
+	border: 2px dashed var(--gray-300);
+}
+
+.experts-empty__icon {
+	margin: 0 auto 1.5rem;
+	color: var(--gray-400);
+}
+
+.experts-empty h3 {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--gray-900);
+	margin: 0 0 0.75rem;
+}
+
+.experts-empty p {
+	font-size: 1rem;
+	color: var(--gray-600);
+	margin: 0;
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+.expert-card {
+	animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 1024px) {
+	.experts-grid {
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 1.5rem;
+	}
+}
+
+@media (max-width: 768px) {
+	.carnet-hero {
+		padding: 2.5rem 0 3rem;
+	}
+
+	.carnet-hero__title {
+		font-size: 2rem;
+	}
+
+	.carnet-hero__description {
+		font-size: 1rem;
+	}
+
+	.carnet-container {
+		padding: 2rem 1rem;
+	}
+
+	.experts-grid {
+		grid-template-columns: 1fr;
+		gap: 1.25rem;
+	}
+
+	.expert-card {
+		padding: 1.5rem;
+	}
+
+	.carnet-filters__buttons {
+		gap: 0.5rem;
+	}
+
+	.filter-btn {
+		font-size: 0.875rem;
+		padding: 0.5rem 1rem;
+	}
+}
+
+@media (max-width: 640px) {
+	.expert-card__header {
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+	}
+
+	.expert-card__photo {
+		width: 100px;
+		height: 100px;
+	}
+
+	.expert-card__name {
+		font-size: 1.125rem;
+	}
+
+	.carnet-filters {
+		padding: 1.25rem;
+	}
+
+	.carnet-filters__buttons {
+		justify-content: center;
+	}
+}

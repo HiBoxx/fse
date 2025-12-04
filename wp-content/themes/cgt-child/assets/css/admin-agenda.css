@@ -1,0 +1,278 @@
+/**
+ * Interface moderne pour la création / édition des événements CGT.
+ */
+
+body.post-type-cgt_agenda {
+	background: linear-gradient(180deg, #f3f4f6 0%, #ffffff 45%);
+}
+
+body.post-type-cgt_agenda #wpbody-content {
+	padding-top: 24px;
+}
+
+body.post-type-cgt_agenda #poststuff {
+	max-width: 1040px;
+	margin: 0 auto 48px;
+	background: transparent;
+}
+
+body.post-type-cgt_agenda #post-body-content {
+	margin-right: 0;
+}
+
+.cgt-agenda-hero {
+	background: linear-gradient(120deg, #d00000 0%, #a80c0c 85%);
+	padding: 32px;
+	border-radius: 24px;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 28px;
+	box-shadow: 0 22px 45px rgba(208, 0, 0, 0.25);
+}
+
+.cgt-agenda-hero h1 {
+	font-size: 2.2rem;
+	margin: 0;
+	letter-spacing: -0.01em;
+}
+
+.cgt-agenda-hero p {
+	margin: 8px 0 0;
+	font-size: 1rem;
+	color: rgba(255, 255, 255, 0.8);
+}
+
+.cgt-agenda-hero .hero-icon {
+	font-size: 3rem;
+	line-height: 1;
+}
+
+/* Title field */
+body.post-type-cgt_agenda .edit-post-status,
+body.post-type-cgt_agenda .inline-edit-col-right {
+	display: none;
+}
+
+body.post-type-cgt_agenda #titlediv {
+	background: #fff;
+	border-radius: 20px;
+	padding: 24px 28px;
+	box-shadow: 0 18px 40px rgba(17, 24, 39, 0.07);
+	border: 1px solid rgba(226, 232, 240, 0.8);
+	margin-bottom: 24px;
+}
+
+body.post-type-cgt_agenda #titlediv #title {
+	border: 0;
+	box-shadow: none;
+	background: transparent;
+	font-size: 1.75rem;
+	font-weight: 600;
+}
+
+body.post-type-cgt_agenda #titlediv #title:focus {
+	outline: none;
+	box-shadow: none;
+}
+
+/* Meta box container */
+#cgt-agenda-details {
+	border: 0;
+	background: #fff;
+	border-radius: 20px;
+	box-shadow: 0 18px 40px rgba(17, 24, 39, 0.07);
+	padding: 0;
+}
+
+#cgt-agenda-details .postbox-header {
+	display: none;
+}
+
+.cgt-agenda-meta {
+	padding: 32px 32px 18px;
+	display: grid;
+	gap: 24px;
+}
+
+.cgt-agenda-meta__field {
+	display: grid;
+	gap: 12px;
+}
+
+.cgt-agenda-meta__field--half {
+	max-width: 420px;
+}
+
+.cgt-agenda-meta__label {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #1f2937;
+	letter-spacing: 0.01em;
+}
+
+.cgt-agenda-meta__input,
+.cgt-agenda-meta__textarea {
+	border-radius: 14px;
+	border: 1px solid rgba(148, 163, 184, 0.45);
+	padding: 14px 16px;
+	font-size: 1rem;
+	line-height: 1.4;
+	background: #f8fafc;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.cgt-agenda-meta__input:focus,
+.cgt-agenda-meta__textarea:focus {
+	outline: none;
+	border-color: #d00000;
+	background: #fff;
+	box-shadow: 0 0 0 3px rgba(208, 0, 0, 0.15);
+}
+
+.cgt-agenda-meta__textarea {
+	min-height: 140px;
+	resize: vertical;
+}
+
+.cgt-agenda-meta__hint {
+	font-size: 0.85rem;
+	color: #64748b;
+	margin: 0;
+}
+
+.cgt-agenda-meta__upload {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+}
+
+.cgt-agenda-upload__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+.cgt-agenda-upload__button {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: #ffffff;
+	border: 1px solid rgba(208, 0, 0, 0.8);
+	color: #d00000;
+	padding: 10px 18px;
+	border-radius: 999px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.cgt-agenda-upload__button:hover,
+.cgt-agenda-upload__button:focus {
+	color: #fff;
+	background: #d00000;
+	box-shadow: 0 16px 32px rgba(208, 0, 0, 0.2);
+}
+
+.cgt-agenda-upload__current {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 14px;
+	border-radius: 999px;
+	background: rgba(15, 23, 42, 0.08);
+	color: #1f2937;
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.cgt-agenda-upload__current:hover {
+	background: rgba(15, 23, 42, 0.14);
+	color: #0f172a;
+}
+
+.cgt-agenda-meta__checkbox {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.9rem;
+	color: #475569;
+}
+
+.cgt-agenda-meta__checkbox input[type="checkbox"] {
+	width: 18px;
+	height: 18px;
+	border-radius: 6px;
+	border: 1px solid rgba(148, 163, 184, 0.6);
+}
+
+/* Publish box styling */
+body.post-type-cgt_agenda #submitdiv {
+	border-radius: 20px;
+	box-shadow: 0 18px 40px rgba(17, 24, 39, 0.07);
+	border: 0;
+	background: #fff;
+}
+
+body.post-type-cgt_agenda #submitdiv .handle-actions,
+body.post-type-cgt_agenda #submitdiv .hndle {
+	display: none;
+}
+
+body.post-type-cgt_agenda #submitdiv .misc-pub-section:not(.misc-pub-post-status) {
+	display: none;
+}
+
+body.post-type-cgt_agenda #major-publishing-actions {
+	padding: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+body.post-type-cgt_agenda #delete-action {
+	order: 2;
+}
+
+body.post-type-cgt_agenda #delete-action .submitdelete {
+	color: #ef4444;
+	font-weight: 600;
+}
+
+body.post-type-cgt_agenda #publishing-action .button-primary {
+	background: #d00000;
+	border-color: #d00000;
+	box-shadow: 0 10px 24px rgba(208, 0, 0, 0.3);
+	font-weight: 600;
+	padding: 0.65rem 1.8rem;
+	border-radius: 999px;
+}
+
+body.post-type-cgt_agenda #publishing-action .button-primary:hover {
+	background: #b30000;
+	border-color: #b30000;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+	body.post-type-cgt_agenda #poststuff {
+		padding: 0 16px;
+	}
+
+	.cgt-agenda-hero {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 18px;
+	}
+
+	.cgt-agenda-meta__field--half {
+		max-width: none;
+	}
+}
