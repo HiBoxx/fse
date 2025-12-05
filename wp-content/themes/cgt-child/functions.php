@@ -27,6 +27,10 @@ if ( ! defined( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL' ) ) {
 	define( 'CGT_CHILD_DEFAULT_TRACT_IMAGE_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/11/ChatGPT-Image-4-nov.-2025-11_00_16.png' );
 }
 
+if ( ! defined( 'CGT_CHILD_DEFAULT_ARTICLE_IMAGE_URL' ) ) {
+	define( 'CGT_CHILD_DEFAULT_ARTICLE_IMAGE_URL', 'https://fsetud-cgt.fr/wp-content/uploads/2025/12/article.png' );
+}
+
 /**
  * Récupère les branches groupées par parent (ordre alphabétique).
  *
@@ -293,6 +297,24 @@ function cgt_child_get_default_tract_image_url() {
 }
 
 /**
+ * Retourne l'URL de l'image de remplacement pour les articles.
+ *
+ * @return string
+ */
+function cgt_child_get_default_article_image_url() {
+	$default_image = get_theme_mod( 'cgt_default_article_image_url', CGT_CHILD_DEFAULT_ARTICLE_IMAGE_URL );
+
+	/**
+	 * Filtre l'URL de l'image de remplacement pour les articles.
+	 *
+	 * @param string $default_image URL de l'image.
+	 */
+	$default_image = apply_filters( 'cgt_child_default_article_image_url', $default_image );
+
+	return esc_url_raw( $default_image );
+}
+
+/**
  * Récupère le HTML de l'image mise en avant ou de l'image de remplacement.
  *
  * @param int         $post_id Post ID.
@@ -308,9 +330,14 @@ function cgt_child_get_post_thumbnail_html( $post_id = 0, $size = 'medium', $att
 	}
 
 	$post_type = get_post_type( $post_id );
-	$fallback  = ( 'tracts' === $post_type )
-		? cgt_child_get_default_tract_image_url()
-		: cgt_child_get_default_image_url();
+
+	if ( 'tracts' === $post_type ) {
+		$fallback = cgt_child_get_default_tract_image_url();
+	} elseif ( 'post' === $post_type ) {
+		$fallback = cgt_child_get_default_article_image_url();
+	} else {
+		$fallback = cgt_child_get_default_image_url();
+	}
 
 	if ( empty( $fallback ) ) {
 		return '';
