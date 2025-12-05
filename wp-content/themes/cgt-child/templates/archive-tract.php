@@ -201,26 +201,7 @@ $branch_singles = array(
 
 								<?php
 								$branches = wp_get_post_terms( get_the_ID(), 'branche' );
-
-								// Si un filtre de branche est actif, n'afficher que cette branche
-								if ( $current_branch && ! empty( $branches ) && ! is_wp_error( $branches ) ) {
-									$filtered_branch = null;
-									foreach ( $branches as $branch ) {
-										if ( $branch->slug === $current_branch ) {
-											$filtered_branch = $branch;
-											break;
-										}
-									}
-
-									if ( $filtered_branch ) :
-										?>
-										<div class="tract-card__branches">
-											<span class="tract-card__branch-tag"><?php echo esc_html( $filtered_branch->name ); ?></span>
-										</div>
-										<?php
-									endif;
-								} elseif ( ! empty( $branches ) && ! is_wp_error( $branches ) ) :
-									// Sans filtre, afficher les branches sans hiérarchie
+								if ( ! empty( $branches ) && ! is_wp_error( $branches ) ) :
 									?>
 									<div class="tract-card__branches">
 										<?php foreach ( array_slice( $branches, 0, 2 ) as $branch ) : ?>

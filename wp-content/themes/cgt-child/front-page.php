@@ -440,7 +440,7 @@ $communiques_tabs = array(
 											?>
 											<div class="tract-card__branches">
 												<?php foreach ( array_slice( $branches, 0, 2 ) as $branch ) : ?>
-													<span class="tract-card__branch-tag"><?php echo esc_html( cgt_get_branch_hierarchy( $branch ) ); ?></span>
+													<span class="tract-card__branch-tag"><?php echo esc_html( $branch->name ); ?></span>
 												<?php endforeach; ?>
 												<?php if ( count( $branches ) > 2 ) : ?>
 													<span class="tract-card__branch-tag tract-card__branch-tag--more">+<?php echo esc_html( count( $branches ) - 2 ); ?></span>
