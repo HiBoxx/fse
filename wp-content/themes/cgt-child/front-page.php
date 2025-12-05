@@ -261,8 +261,8 @@ $communiques_tabs = array(
 	<section class="home-section">
 		<div class="container">
 			<header class="home-section__header">
-				<h2><?php esc_html_e( 'Communiqués récents', 'cgt' ); ?></h2>
-				<p class="section-subtitle-smaller"><?php esc_html_e( 'Filtrez nos prises de position par thématique.', 'cgt' ); ?></p>
+				<h2><?php esc_html_e( 'Nos prises de position', 'cgt' ); ?></h2>
+				<p class="section-subtitle-smaller"><?php esc_html_e( 'Actualités, analyses et revendications de la fédération par thématique', 'cgt' ); ?></p>
 			</header>
 
 			<div class="home-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Catégories de communiqués', 'cgt' ); ?>">
@@ -369,8 +369,8 @@ $communiques_tabs = array(
 	<section class="home-section home-section--shade">
 		<div class="container">
 			<header class="home-section__header">
-				<h2><?php esc_html_e( 'Tracts', 'cgt' ); ?></h2>
-				<p class="section-subtitle-smaller"><?php esc_html_e( 'Retrouvez les tracts récents prêts à diffuser.', 'cgt' ); ?></p>
+				<h2><?php esc_html_e( 'Tracts et mobilisation', 'cgt' ); ?></h2>
+				<p class="section-subtitle-smaller"><?php esc_html_e( 'Documents militants à télécharger et diffuser dans votre entreprise', 'cgt' ); ?></p>
 			</header>
 
 			<?php if ( $latest_resources->have_posts() ) : ?>
