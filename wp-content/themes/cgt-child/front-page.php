@@ -85,9 +85,9 @@ $actualites_page = get_page_by_path( 'actualites', OBJECT, 'page' );
 $actualites_link = $actualites_page ? get_permalink( $actualites_page ) : get_post_type_archive_link( 'post' );
 $mediatheque_page = get_page_by_path( 'mediatheque', OBJECT, 'page' );
 $mediatheque_link = $mediatheque_page ? get_permalink( $mediatheque_page ) : home_url( '/mediatheque' );
-$home_slider_image = cgt_child_get_media_url( '2025/11/slider2.jpeg' );
+$home_slider_image = cgt_child_get_media_url( '2026/02/slidercgt.png' );
 if ( empty( $home_slider_image ) ) {
-	$home_slider_image = 'https://fsetud-cgt.fr/wp-content/uploads/2025/11/slider2.jpeg';
+	$home_slider_image = 'https://fsetud-cgt.fr/wp-content/uploads/2026/02/slidercgt.png';
 }
 ?>
 
@@ -179,6 +179,51 @@ if ( empty( $home_slider_image ) ) {
 			</ul>
 		</div>
 	</section>
+
+	<?php
+	$active_petitions = new WP_Query(
+		array(
+			'post_type'      => 'cgt_petition',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		)
+	);
+
+	if ( $active_petitions->have_posts() ) :
+		global $wpdb;
+	?>
+	<div class="petition-ticker" role="region" aria-label="<?php esc_attr_e( 'Pétitions en cours', 'cgt' ); ?>">
+		<div class="petition-ticker__label">
+			<span aria-hidden="true">✊</span>
+			<?php esc_html_e( 'Pétitions', 'cgt' ); ?>
+		</div>
+		<div class="petition-ticker__track-wrapper">
+			<ul class="petition-ticker__track">
+				<?php while ( $active_petitions->have_posts() ) : $active_petitions->the_post();
+					$p_id    = get_the_ID();
+					$count   = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . $wpdb->prefix . 'cgt_petition_signatures WHERE petition_id = %d', $p_id ) );
+					$target  = (int) get_post_meta( $p_id, '_cgt_petition_target', true );
+				?>
+				<li class="petition-ticker__item">
+					<a href="<?php echo esc_url( get_permalink( $p_id ) ); ?>" class="petition-ticker__link">
+						<span class="petition-ticker__title"><?php the_title(); ?></span>
+						<span class="petition-ticker__signatures">
+							<strong><?php echo number_format_i18n( $count ); ?></strong>
+							<?php if ( $target ) : ?>
+								/ <?php echo number_format_i18n( $target ); ?>
+							<?php endif; ?>
+							<?php esc_html_e( 'signatures', 'cgt' ); ?>
+						</span>
+						<span class="petition-ticker__cta"><?php esc_html_e( 'Signer →', 'cgt' ); ?></span>
+					</a>
+				</li>
+				<?php endwhile; wp_reset_postdata(); ?>
+			</ul>
+		</div>
+	</div>
+	<?php endif; ?>
 
 	<div class="agenda-modal" id="agendaModal" aria-hidden="true" hidden>
 		<div class="agenda-modal__overlay" data-close-agenda></div>

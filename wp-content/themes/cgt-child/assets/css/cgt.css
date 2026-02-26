@@ -2929,3 +2929,140 @@ button:focus {
 		width: 100%;
 	}
 }
+
+/* ── Bande pétitions ── */
+.petition-ticker {
+	display: flex;
+	align-items: stretch;
+	background: #f3f4f6;
+	color: #111827;
+	overflow: hidden;
+	min-height: 44px;
+	border-top: 1px solid #e5e7eb;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+.petition-ticker__label {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	background: var(--cgt-red);
+	color: #fff;
+	font-size: 0.75rem;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	padding: 0 1.1rem;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.petition-ticker__track-wrapper {
+	flex: 1;
+	overflow: hidden;
+	position: relative;
+}
+
+.petition-ticker__track {
+	display: flex;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	gap: 0;
+}
+
+/* Si une seule pétition : pas d'animation, centré */
+.petition-ticker__track:has(> li:only-child) {
+	justify-content: center;
+}
+
+/* Plusieurs pétitions : défilement en boucle */
+.petition-ticker__track:has(> li:not(:only-child)) {
+	animation: ticker-scroll 18s linear infinite;
+	width: max-content;
+}
+
+.petition-ticker__track:has(> li:not(:only-child)):hover {
+	animation-play-state: paused;
+}
+
+@keyframes ticker-scroll {
+	0%   { transform: translateX(0); }
+	100% { transform: translateX(-50%); }
+}
+
+.petition-ticker__item {
+	flex-shrink: 0;
+}
+
+.petition-ticker__link {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0 1.5rem;
+	height: 44px;
+	text-decoration: none;
+	color: #111827;
+	border-right: 1px solid #e5e7eb;
+	transition: background 0.2s ease;
+	white-space: nowrap;
+}
+
+.petition-ticker__link:hover {
+	background: rgba(0,0,0,0.04);
+}
+
+.petition-ticker__title {
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+.petition-ticker__signatures {
+	font-size: 0.78rem;
+	color: #6b7280;
+	background: #e5e7eb;
+	padding: 0.15rem 0.6rem;
+	border-radius: 999px;
+}
+
+.petition-ticker__signatures strong {
+	color: #111827;
+}
+
+.petition-ticker__cta {
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: var(--cgt-red);
+	background: rgba(208,0,0,0.15);
+	padding: 0.2rem 0.6rem;
+	border-radius: 4px;
+	transition: background 0.2s ease;
+}
+
+.petition-ticker__link:hover .petition-ticker__cta {
+	background: var(--cgt-red);
+	color: #fff;
+}
+
+@media (max-width: 768px) {
+	.petition-ticker__label {
+		padding: 0 0.75rem;
+		font-size: 0.7rem;
+	}
+
+	.petition-ticker__link {
+		padding: 0 1rem;
+		gap: 0.5rem;
+	}
+
+	.petition-ticker__title {
+		font-size: 0.8rem;
+		max-width: 160px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.petition-ticker__signatures {
+		display: none;
+	}
+}

@@ -1,20 +1,155 @@
 <?php
 /**
- * Brevo admin helpers (front-end only, sans intégration API).
+ * Brevo – envoi réel de campagnes email (bulletins uniquement).
  *
  * @package CGT_Child
  */
 
 defined( 'ABSPATH' ) || exit;
 
+// ─────────────────────────────────────────────
+// Helpers API Brevo
+// ─────────────────────────────────────────────
+
 /**
- * Ajout de la metabox Brevo sur les articles (bulletins uniquement).
+ * Retourne les headers communs pour l'API Brevo.
  */
+function cgt_brevo_headers() {
+	return array(
+		'api-key'      => defined( 'CGT_BREVO_API_KEY' ) ? CGT_BREVO_API_KEY : '',
+		'Content-Type' => 'application/json',
+		'accept'       => 'application/json',
+	);
+}
+
+/**
+ * Récupère les listes de diffusion depuis Brevo (avec cache 5 min).
+ *
+ * @return array|WP_Error
+ */
+function cgt_brevo_get_lists() {
+	$cached = get_transient( 'cgt_brevo_lists' );
+	if ( false !== $cached ) {
+		return $cached;
+	}
+
+	$response = wp_remote_get(
+		'https://api.brevo.com/v3/contacts/lists?limit=50&offset=0',
+		array(
+			'headers' => cgt_brevo_headers(),
+			'timeout' => 15,
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		return $response;
+	}
+
+	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+	$code = wp_remote_retrieve_response_code( $response );
+
+	if ( 200 !== $code ) {
+		return new WP_Error( 'brevo_api', isset( $body['message'] ) ? $body['message'] : __( 'Erreur API Brevo', 'cgt' ) );
+	}
+
+	$lists = isset( $body['lists'] ) ? $body['lists'] : array();
+	set_transient( 'cgt_brevo_lists', $lists, 5 * MINUTE_IN_SECONDS );
+
+	return $lists;
+}
+
+/**
+ * Envoie une campagne email via l'API Brevo.
+ *
+ * @param int   $post_id   ID de l'article bulletin.
+ * @param int   $list_id   ID de la liste Brevo.
+ * @param string $list_name Nom de la liste (pour le log).
+ * @return array|WP_Error
+ */
+function cgt_brevo_send_campaign( $post_id, $list_id, $list_name ) {
+	$post      = get_post( $post_id );
+	$title     = get_the_title( $post_id );
+	$permalink = get_permalink( $post_id );
+	$excerpt   = wp_trim_words( get_the_excerpt( $post ), 30, '...' );
+	$thumbnail = get_the_post_thumbnail_url( $post_id, 'large' );
+
+	// Contenu HTML de la campagne
+	$img_html = $thumbnail
+		? '<img src="' . esc_url( $thumbnail ) . '" alt="" style="max-width:100%;height:auto;display:block;margin:0 auto 20px;">'
+		: '';
+
+	$html_content = '<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">'
+		. '<h1 style="color:#d11313;">' . esc_html( $title ) . '</h1>'
+		. $img_html
+		. '<p style="font-size:16px;line-height:1.6;">' . esc_html( $excerpt ) . '</p>'
+		. '<p><a href="' . esc_url( $permalink ) . '" style="background:#d11313;color:#fff;padding:12px 24px;text-decoration:none;border-radius:4px;display:inline-block;">Lire le bulletin complet</a></p>'
+		. '<hr style="margin-top:40px;border:none;border-top:1px solid #eee;">'
+		. '<p style="font-size:12px;color:#888;">Fédération CGT des Sociétés d\'Études</p>'
+		. '</body></html>';
+
+	$sender_name  = get_option( 'cgt_brevo_sender_name', get_bloginfo( 'name' ) );
+	$sender_email = get_option( 'cgt_brevo_sender_email', 'fsetud@cgt.fr' );
+
+	$payload = array(
+		'name'         => 'Bulletin – ' . $title . ' – ' . current_time( 'd/m/Y' ),
+		'subject'      => $title,
+		'sender'       => array(
+			'name'  => $sender_name,
+			'email' => $sender_email,
+		),
+		'recipients'   => array(
+			'listIds' => array( (int) $list_id ),
+		),
+		'htmlContent'  => $html_content,
+		'scheduledAt'  => null,
+	);
+
+	$response = wp_remote_post(
+		'https://api.brevo.com/v3/emailCampaigns',
+		array(
+			'headers' => cgt_brevo_headers(),
+			'body'    => wp_json_encode( $payload ),
+			'timeout' => 20,
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		return $response;
+	}
+
+	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+	$code = wp_remote_retrieve_response_code( $response );
+
+	if ( ! in_array( $code, array( 200, 201 ), true ) ) {
+		return new WP_Error( 'brevo_api', isset( $body['message'] ) ? $body['message'] : __( 'Erreur lors de la création de la campagne.', 'cgt' ) );
+	}
+
+	$campaign_id = isset( $body['id'] ) ? $body['id'] : 0;
+
+	// Envoyer immédiatement la campagne
+	if ( $campaign_id ) {
+		wp_remote_post(
+			'https://api.brevo.com/v3/emailCampaigns/' . $campaign_id . '/sendNow',
+			array(
+				'headers' => cgt_brevo_headers(),
+				'timeout' => 20,
+			)
+		);
+	}
+
+	return array(
+		'campaign_id' => $campaign_id,
+		'list_name'   => $list_name,
+	);
+}
+
+// ─────────────────────────────────────────────
+// Metabox sur les articles bulletins
+// ─────────────────────────────────────────────
+
 add_action( 'add_meta_boxes', 'cgt_brevo_register_metabox' );
 function cgt_brevo_register_metabox() {
 	global $post;
-
-	// Vérifier si l'article a la catégorie "bulletins"
 	if ( $post && has_category( 'bulletins', $post ) ) {
 		add_meta_box(
 			'cgt-brevo-metabox',
@@ -27,64 +162,65 @@ function cgt_brevo_register_metabox() {
 	}
 }
 
-/**
- * Rendu de la metabox Brevo.
- */
 function cgt_brevo_metabox_render( $post ) {
 	if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 		return;
 	}
 
-	$last_branch = get_post_meta( $post->ID, '_cgt_brevo_last_branch', true );
-	$last_date   = get_post_meta( $post->ID, '_cgt_brevo_last_sent', true );
-	$branches    = get_terms(
-		array(
-			'taxonomy'   => 'branche',
-			'hide_empty' => false,
-			'orderby'    => 'term_id',
-			'order'      => 'ASC',
-		)
-	);
+	$last_list = get_post_meta( $post->ID, '_cgt_brevo_last_list', true );
+	$last_date = get_post_meta( $post->ID, '_cgt_brevo_last_sent', true );
+	$lists     = cgt_brevo_get_lists();
 
 	echo '<div class="cgt-brevo-metabox">';
-	echo '<p>' . esc_html__( 'Enregistrez ici l\'envoi de cet article à une branche via Brevo (simulation de front-end).', 'cgt' ) . '</p>';
 
 	if ( $last_date ) {
 		printf(
-			'<p><strong>%s</strong><br><span class="cgt-brevo-meta">%s</span></p>',
-			esc_html__( 'Dernier envoi enregistré :', 'cgt' ),
-			esc_html( sprintf( '%s — %s', $last_date, $last_branch ? $last_branch : __( 'branche non renseignée', 'cgt' ) ) )
+			'<p><strong>%s</strong><br><span style="color:#555;font-size:12px;">%s — %s</span></p>',
+			esc_html__( 'Dernier envoi :', 'cgt' ),
+			esc_html( $last_date ),
+			esc_html( $last_list ? $last_list : __( 'liste non renseignée', 'cgt' ) )
 		);
 	}
 
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-	wp_nonce_field( 'cgt_brevo_mark_send', 'cgt_brevo_nonce' );
-	echo '<input type="hidden" name="action" value="cgt_brevo_mark_send">';
+	wp_nonce_field( 'cgt_brevo_send', 'cgt_brevo_nonce' );
+	echo '<input type="hidden" name="action" value="cgt_brevo_send">';
 	echo '<input type="hidden" name="post_id" value="' . esc_attr( $post->ID ) . '">';
 
-	if ( ! is_wp_error( $branches ) && $branches ) {
-		echo '<p><label for="cgt_brevo_branch">' . esc_html__( 'Branche', 'cgt' ) . '</label><br>';
-		echo '<select id="cgt_brevo_branch" name="cgt_brevo_branch" class="widefat">';
-		echo '<option value="">' . esc_html__( 'Sélectionner une branche', 'cgt' ) . '</option>';
-		foreach ( $branches as $branch ) {
+	if ( is_wp_error( $lists ) ) {
+		echo '<p style="color:#d11313;">' . esc_html( $lists->get_error_message() ) . '</p>';
+	} elseif ( ! empty( $lists ) ) {
+		echo '<p><label for="cgt_brevo_list_id"><strong>' . esc_html__( 'Liste de diffusion', 'cgt' ) . '</strong></label><br>';
+		echo '<select id="cgt_brevo_list_id" name="cgt_brevo_list_id" class="widefat" style="margin-top:4px;">';
+		echo '<option value="">' . esc_html__( '— Choisir une liste —', 'cgt' ) . '</option>';
+		foreach ( $lists as $list ) {
 			printf(
-				'<option value="%1$s" %3$s>%2$s</option>',
-				esc_attr( $branch->slug ),
-				esc_html( $branch->name ),
-				selected( $last_branch, $branch->slug, false )
+				'<option value="%d" data-name="%s">%s (%d contacts)</option>',
+				esc_attr( $list['id'] ),
+				esc_attr( $list['name'] ),
+				esc_html( $list['name'] ),
+				(int) ( isset( $list['uniqueSubscribers'] ) ? $list['uniqueSubscribers'] : 0 )
 			);
 		}
 		echo '</select></p>';
 	} else {
-		echo '<p>' . esc_html__( 'Aucune branche définie pour le moment.', 'cgt' ) . '</p>';
+		echo '<p>' . esc_html__( 'Aucune liste trouvée dans Brevo.', 'cgt' ) . '</p>';
 	}
 
-	echo '<p><button type="submit" class="button button-primary" style="width:100%">' . esc_html__( 'Enregistrer l\'envoi Brevo', 'cgt' ) . '</button></p>';
+	echo '<p><button type="submit" class="button button-primary" style="width:100%">';
+	echo esc_html__( 'Envoyer le bulletin', 'cgt' );
+	echo '</button></p>';
+
 	$log = get_post_meta( $post->ID, '_cgt_brevo_log', true );
 	if ( ! empty( $log ) && is_array( $log ) ) {
-		echo '<details class="cgt-brevo-log"><summary>' . esc_html__( 'Historique des envois', 'cgt' ) . '</summary><ul>';
+		echo '<details style="margin-top:8px;"><summary style="cursor:pointer;font-size:12px;">' . esc_html__( 'Historique des envois', 'cgt' ) . '</summary><ul style="font-size:11px;margin:4px 0 0;padding-left:16px;">';
 		foreach ( array_reverse( $log ) as $entry ) {
-			printf( '<li>%s — %s</li>', esc_html( $entry['date'] ), esc_html( $entry['branch'] ) );
+			printf(
+				'<li>%s — %s %s</li>',
+				esc_html( $entry['date'] ),
+				esc_html( $entry['list'] ),
+				! empty( $entry['campaign_id'] ) ? '<span style="color:#46b450;">(#' . esc_html( $entry['campaign_id'] ) . ')</span>' : '<span style="color:#d11313;">(erreur)</span>'
+			);
 		}
 		echo '</ul></details>';
 	}
@@ -92,44 +228,56 @@ function cgt_brevo_metabox_render( $post ) {
 	echo '</form></div>';
 }
 
-/**
- * Traitement de la soumission depuis la metabox.
- */
-add_action( 'admin_post_cgt_brevo_mark_send', 'cgt_brevo_mark_send_handler' );
-function cgt_brevo_mark_send_handler() {
+// ─────────────────────────────────────────────
+// Handler envoi depuis la metabox
+// ─────────────────────────────────────────────
+
+add_action( 'admin_post_cgt_brevo_send', 'cgt_brevo_send_handler' );
+function cgt_brevo_send_handler() {
 	if ( ! current_user_can( 'edit_posts' ) ) {
 		wp_die( esc_html__( 'Accès refusé.', 'cgt' ) );
 	}
 
-	$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+	check_admin_referer( 'cgt_brevo_send', 'cgt_brevo_nonce' );
+
+	$post_id  = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+	$list_id  = isset( $_POST['cgt_brevo_list_id'] ) ? absint( $_POST['cgt_brevo_list_id'] ) : 0;
+	$list_name = isset( $_POST['cgt_brevo_list_name'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_brevo_list_name'] ) ) : '';
+
 	if ( ! $post_id || 'post' !== get_post_type( $post_id ) ) {
 		wp_die( esc_html__( 'Article introuvable.', 'cgt' ) );
 	}
+	if ( ! $list_id ) {
+		wp_safe_redirect( add_query_arg( array( 'brevo' => 'no_list', 'post' => $post_id ), admin_url( 'post.php?action=edit' ) ) );
+		exit;
+	}
 
-	check_admin_referer( 'cgt_brevo_mark_send', 'cgt_brevo_nonce' );
-
-	$branch = isset( $_POST['cgt_brevo_branch'] ) ? sanitize_text_field( wp_unslash( $_POST['cgt_brevo_branch'] ) ) : '';
-
-	update_post_meta( $post_id, '_cgt_brevo_last_branch', $branch );
+	$result    = cgt_brevo_send_campaign( $post_id, $list_id, $list_name );
 	$timestamp = current_time( 'mysql' );
-	update_post_meta( $post_id, '_cgt_brevo_last_sent', $timestamp );
+
+	if ( is_wp_error( $result ) ) {
+		$log_entry = array( 'date' => $timestamp, 'list' => $list_name, 'campaign_id' => null, 'error' => $result->get_error_message() );
+		$status    = 'error';
+	} else {
+		$log_entry = array( 'date' => $timestamp, 'list' => $list_name, 'campaign_id' => $result['campaign_id'] );
+		$status    = 'sent';
+		update_post_meta( $post_id, '_cgt_brevo_last_list', $list_name );
+		update_post_meta( $post_id, '_cgt_brevo_last_sent', $timestamp );
+	}
 
 	$log   = get_post_meta( $post_id, '_cgt_brevo_log', true );
 	$log   = is_array( $log ) ? $log : array();
-	$log[] = array(
-		'date'   => $timestamp,
-		'branch' => $branch,
-	);
+	$log[] = $log_entry;
 	update_post_meta( $post_id, '_cgt_brevo_log', $log );
 
-	$redirect = add_query_arg( array( 'brevo' => 'sent', 'post' => $post_id ), admin_url( 'post.php?action=edit' ) );
-	wp_safe_redirect( $redirect );
+	wp_safe_redirect( add_query_arg( array( 'brevo' => $status, 'post' => $post_id ), admin_url( 'post.php?action=edit' ) ) );
 	exit;
 }
 
-/**
- * Tableau de bord Brevo (liste des articles).
- */
+// ─────────────────────────────────────────────
+// Tableau de bord Brevo (bulletins uniquement)
+// ─────────────────────────────────────────────
+
 add_action( 'admin_menu', 'cgt_register_brevo_dashboard' );
 function cgt_register_brevo_dashboard() {
 	add_submenu_page(
@@ -147,91 +295,154 @@ function cgt_render_brevo_dashboard() {
 		wp_die( esc_html__( 'Accès refusé', 'cgt' ) );
 	}
 
-	if ( isset( $_GET['brevo'] ) && 'sent' === sanitize_key( wp_unslash( $_GET['brevo'] ) ) ) {
-		printf( '<div class="notice notice-success"><p>%s</p></div>', esc_html__( 'Envoi enregistré.', 'cgt' ) );
+	// Notices
+	if ( isset( $_GET['brevo'] ) ) {
+		$status = sanitize_key( wp_unslash( $_GET['brevo'] ) );
+		if ( 'sent' === $status ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Campagne envoyée avec succès via Brevo !', 'cgt' ) . '</p></div>';
+		} elseif ( 'error' === $status ) {
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Erreur lors de l\'envoi. Vérifiez l\'historique de l\'article.', 'cgt' ) . '</p></div>';
+		} elseif ( 'no_list' === $status ) {
+			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'Veuillez sélectionner une liste de diffusion.', 'cgt' ) . '</p></div>';
+		}
 	}
 
+	// Récupérer uniquement les bulletins
 	$query = new WP_Query(
 		array(
 			'post_type'      => 'post',
-			'post_status'    => array( 'publish' ),
-			'posts_per_page' => 20,
+			'post_status'    => 'publish',
+			'posts_per_page' => 30,
 			'orderby'        => 'date',
 			'order'          => 'DESC',
-		)
-	);
-	$branches = get_terms(
-		array(
-			'taxonomy'   => 'branche',
-			'hide_empty' => false,
+			'tax_query'      => array(
+				array(
+					'taxonomy' => 'category',
+					'field'    => 'slug',
+					'terms'    => 'bulletins',
+				),
+			),
 		)
 	);
 
+	// Récupérer les listes Brevo
+	$lists = cgt_brevo_get_lists();
+
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Envois Brevo', 'cgt' ); ?></h1>
-		<p><?php esc_html_e( 'Enregistrez manuellement les envois d’articles vers les branches Brevo (simulation).', 'cgt' ); ?></p>
+		<h1><?php esc_html_e( 'Envois Brevo — Bulletins', 'cgt' ); ?></h1>
+		<p><?php esc_html_e( 'Envoyez les bulletins directement vers vos listes de diffusion Brevo.', 'cgt' ); ?></p>
+
+		<?php if ( is_wp_error( $lists ) ) : ?>
+			<div class="notice notice-error">
+				<p><strong><?php esc_html_e( 'Erreur API Brevo :', 'cgt' ); ?></strong> <?php echo esc_html( $lists->get_error_message() ); ?></p>
+			</div>
+		<?php endif; ?>
+
 		<table class="widefat fixed striped">
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'Article', 'cgt' ); ?></th>
-					<th style="width:120px"><?php esc_html_e( 'Date', 'cgt' ); ?></th>
-					<th><?php esc_html_e( 'Dernier envoi', 'cgt' ); ?></th>
-					<th><?php esc_html_e( 'Action', 'cgt' ); ?></th>
+					<th style="width:35%"><?php esc_html_e( 'Bulletin', 'cgt' ); ?></th>
+					<th style="width:100px"><?php esc_html_e( 'Date', 'cgt' ); ?></th>
+					<th style="width:20%"><?php esc_html_e( 'Dernier envoi', 'cgt' ); ?></th>
+					<th><?php esc_html_e( 'Envoyer vers une liste', 'cgt' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
 			<?php if ( $query->have_posts() ) : ?>
 				<?php while ( $query->have_posts() ) : $query->the_post();
-					$post_id    = get_the_ID();
-					$last_branch = get_post_meta( $post_id, '_cgt_brevo_last_branch', true );
-					$last_sent   = get_post_meta( $post_id, '_cgt_brevo_last_sent', true );
-					$log         = get_post_meta( $post_id, '_cgt_brevo_log', true );
+					$post_id   = get_the_ID();
+					$last_list = get_post_meta( $post_id, '_cgt_brevo_last_list', true );
+					$last_sent = get_post_meta( $post_id, '_cgt_brevo_last_sent', true );
+					$log       = get_post_meta( $post_id, '_cgt_brevo_log', true );
 					?>
 					<tr>
-						<td><a href="<?php echo esc_url( get_edit_post_link( $post_id ) ); ?>"><?php the_title(); ?></a></td>
+						<td>
+							<a href="<?php echo esc_url( get_edit_post_link( $post_id ) ); ?>">
+								<strong><?php the_title(); ?></strong>
+							</a>
+						</td>
 						<td style="white-space:nowrap;"><?php echo esc_html( get_the_date() ); ?></td>
 						<td>
-							<?php
-							if ( $last_sent ) {
-								printf( '%s — %s', esc_html( $last_sent ), esc_html( $last_branch ) );
-							} else {
-								esc_html_e( 'Jamais envoyé', 'cgt' );
-							}
-							?>
+							<?php if ( $last_sent ) : ?>
+								<span style="color:#46b450;">&#10003;</span>
+								<span style="font-size:12px;"><?php echo esc_html( $last_sent ); ?></span><br>
+								<span style="font-size:11px;color:#555;"><?php echo esc_html( $last_list ); ?></span>
+							<?php else : ?>
+								<span style="color:#999;font-size:12px;"><?php esc_html_e( 'Pas encore envoyé', 'cgt' ); ?></span>
+							<?php endif; ?>
 							<?php if ( ! empty( $log ) && is_array( $log ) ) : ?>
-								<details>
-									<summary><?php esc_html_e( 'Historique', 'cgt' ); ?></summary>
-									<ul>
+								<details style="margin-top:4px;">
+									<summary style="font-size:11px;cursor:pointer;"><?php esc_html_e( 'Historique', 'cgt' ); ?></summary>
+									<ul style="font-size:11px;margin:2px 0;padding-left:14px;">
 										<?php foreach ( array_reverse( $log ) as $entry ) : ?>
-											<li><?php echo esc_html( $entry['date'] . ' — ' . $entry['branch'] ); ?></li>
+											<li>
+												<?php echo esc_html( $entry['date'] . ' — ' . $entry['list'] ); ?>
+												<?php if ( ! empty( $entry['campaign_id'] ) ) : ?>
+													<span style="color:#46b450;">(#<?php echo esc_html( $entry['campaign_id'] ); ?>)</span>
+												<?php else : ?>
+													<span style="color:#d11313;">(<?php echo esc_html( isset( $entry['error'] ) ? $entry['error'] : 'erreur' ); ?>)</span>
+												<?php endif; ?>
+											</li>
 										<?php endforeach; ?>
 									</ul>
 								</details>
 							<?php endif; ?>
 						</td>
 						<td>
-							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-								<?php wp_nonce_field( 'cgt_brevo_mark_send', 'cgt_brevo_nonce' ); ?>
-								<input type="hidden" name="action" value="cgt_brevo_mark_send">
-								<input type="hidden" name="post_id" value="<?php echo esc_attr( $post_id ); ?>">
-								<select name="cgt_brevo_branch">
-									<option value="">— <?php esc_html_e( 'Branche', 'cgt' ); ?> —</option>
-									<?php if ( ! is_wp_error( $branches ) ) : foreach ( $branches as $branch ) : ?>
-										<option value="<?php echo esc_attr( $branch->slug ); ?>"><?php echo esc_html( $branch->name ); ?></option>
-									<?php endforeach; endif; ?>
-								</select>
+							<?php if ( ! is_wp_error( $lists ) && ! empty( $lists ) ) : ?>
+								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+									<?php wp_nonce_field( 'cgt_brevo_send', 'cgt_brevo_nonce' ); ?>
+									<input type="hidden" name="action" value="cgt_brevo_send">
+									<input type="hidden" name="post_id" value="<?php echo esc_attr( $post_id ); ?>">
+									<select name="cgt_brevo_list_id" style="flex:1;min-width:160px;" onchange="this.form.querySelector('[name=cgt_brevo_list_name]').value = this.options[this.selectedIndex].dataset.name">
+										<option value=""><?php esc_html_e( '— Liste —', 'cgt' ); ?></option>
+										<?php foreach ( $lists as $list ) : ?>
+											<option value="<?php echo esc_attr( $list['id'] ); ?>" data-name="<?php echo esc_attr( $list['name'] ); ?>">
+												<?php echo esc_html( $list['name'] ); ?> (<?php echo (int) ( isset( $list['uniqueSubscribers'] ) ? $list['uniqueSubscribers'] : 0 ); ?>)
+											</option>
+										<?php endforeach; ?>
+									</select>
+									<input type="hidden" name="cgt_brevo_list_name" value="">
 									<button type="submit" class="button button-primary"><?php esc_html_e( 'Envoyer', 'cgt' ); ?></button>
-							</form>
+								</form>
+							<?php else : ?>
+								<span style="color:#999;font-size:12px;"><?php esc_html_e( 'Listes indisponibles', 'cgt' ); ?></span>
+							<?php endif; ?>
 						</td>
 					</tr>
 				<?php endwhile; ?>
 			<?php else : ?>
-				<tr><td colspan="4"><?php esc_html_e( 'Aucun article trouvé.', 'cgt' ); ?></td></tr>
+				<tr><td colspan="4" style="text-align:center;padding:20px;">
+					<?php esc_html_e( 'Aucun bulletin publié pour le moment.', 'cgt' ); ?>
+				</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>
+
+		<h2 style="margin-top:30px;"><?php esc_html_e( 'Paramètres expéditeur', 'cgt' ); ?></h2>
+		<form method="post" action="options.php">
+			<?php settings_fields( 'cgt_brevo_settings' ); ?>
+			<table class="form-table">
+				<tr>
+					<th><?php esc_html_e( 'Nom expéditeur', 'cgt' ); ?></th>
+					<td><input type="text" name="cgt_brevo_sender_name" class="regular-text" value="<?php echo esc_attr( get_option( 'cgt_brevo_sender_name', get_bloginfo( 'name' ) ) ); ?>"></td>
+				</tr>
+				<tr>
+					<th><?php esc_html_e( 'Email expéditeur', 'cgt' ); ?></th>
+					<td><input type="email" name="cgt_brevo_sender_email" class="regular-text" value="<?php echo esc_attr( get_option( 'cgt_brevo_sender_email', 'fsetud@cgt.fr' ) ); ?>"></td>
+				</tr>
+			</table>
+			<?php submit_button( __( 'Enregistrer', 'cgt' ) ); ?>
+		</form>
 	</div>
 	<?php
 	wp_reset_postdata();
+}
+
+// Enregistrer les options expéditeur
+add_action( 'admin_init', 'cgt_brevo_register_settings' );
+function cgt_brevo_register_settings() {
+	register_setting( 'cgt_brevo_settings', 'cgt_brevo_sender_name', 'sanitize_text_field' );
+	register_setting( 'cgt_brevo_settings', 'cgt_brevo_sender_email', 'sanitize_email' );
 }
